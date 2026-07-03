@@ -60,15 +60,15 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/ipeaGIT/geobr/blob/master/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/ipea/geobr/blob/master/DESCRIPTION)
 
 Pereira R, Barbosa R (2026). *geobr: Download Official Spatial Data Sets
-of Brazil*. R package version 2.0.1, <https://ipeagit.github.io/geobr/>.
+of Brazil*. R package version 2.0.1, <https://ipea.github.io/geobr/>.
 
     @Manual{,
       title = {geobr: Download Official Spatial Data Sets of Brazil},
       author = {Rafael H. M. Pereira and Rogério Jerônimo Barbosa},
       year = {2026},
       note = {R package version 2.0.1},
-      url = {https://ipeagit.github.io/geobr/},
+      url = {https://ipea.github.io/geobr/},
     }

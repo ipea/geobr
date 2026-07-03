@@ -43,7 +43,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/ipeaGIT/geobr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/ipea/geobr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
@@ -68,16 +68,16 @@
       <h1>Introductio to geobr (R)</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ipeaGIT/geobr/blob/master/vignettes/intro_to_geobr.Rmd" class="external-link"><code>vignettes/intro_to_geobr.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ipea/geobr/blob/master/vignettes/intro_to_geobr.Rmd" class="external-link"><code>vignettes/intro_to_geobr.Rmd</code></a></small>
       <div class="d-none name"><code>intro_to_geobr.Rmd</code></div>
     </div>
 
     
     
-<p>The <a href="https://github.com/ipeaGIT/geobr" class="external-link"><strong>geobr</strong></a>
-package provides quick and easy access to official spatial data sets of
-Brazil. The package offers a wide range of spatial data sets available
-at various geographic scales and for various years with harmonized
+<p>The <a href="https://github.com/ipea/geobr" class="external-link"><strong>geobr</strong></a> package
+provides quick and easy access to official spatial data sets of Brazil.
+The package offers a wide range of spatial data sets available at
+various geographic scales and for various years with harmonized
 attributes, projection and fixed topology. All <strong>geobr</strong>
 functions follow a simple and consistent syntax that allows users to
 seamlessly download data and work with it either in memory using sf or
@@ -94,10 +94,10 @@ version to use the latest features.</p>
 <span></span>
 <span><span class="co"># Development version</span></span>
 <span><span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/remove.packages.html" class="external-link">remove.packages</a></span><span class="op">(</span><span class="st">'geobr'</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"ipeaGIT/geobr"</span>, subdir <span class="op">=</span> <span class="st">"r-package"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"ipea/geobr"</span>, subdir <span class="op">=</span> <span class="st">"r-package"</span><span class="op">)</span></span></code></pre></div>
 <p>Now let’s load the libraries we’ll use in this vignette.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ipeagit.github.io/geobr/">geobr</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ipea.github.io/geobr/" class="external-link">geobr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>

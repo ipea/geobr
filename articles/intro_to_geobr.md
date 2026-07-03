@@ -1,6 +1,6 @@
 # Introductio to geobr (R)
 
-The [**geobr**](https://github.com/ipeaGIT/geobr) package provides quick
+The [**geobr**](https://github.com/ipea/geobr) package provides quick
 and easy access to official spatial data sets of Brazil. The package
 offers a wide range of spatial data sets available at various geographic
 scales and for various years with harmonized attributes, projection and
@@ -21,7 +21,7 @@ install.packages("geobr")
 
 # Development version
 utils::remove.packages('geobr')
-devtools::install_github("ipeaGIT/geobr", subdir = "r-package")
+devtools::install_github("ipea/geobr", subdir = "r-package")
 ```
 
 Now let’s load the libraries we’ll use in this vignette.

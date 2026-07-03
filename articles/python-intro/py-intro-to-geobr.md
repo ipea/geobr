@@ -1,11 +1,13 @@
 # Intro to geobr (Python)
 
-The [**geobr**](https://github.com/ipeaGIT/geobr) package provides quick
-and easy access to official spatial data sets of Brazil. The syntax of
-all **geobr** functions operate on a simple logic that allows users to
-easily download a wide variety of data sets with updated geometries and
-harmonized attributes and geographic projections across geographies and
-years. This vignette presents a quick intro to **geobr**.
+The [**geobr**](https://github.com/ipea/geobr) package provides quick
+and easy access to official spatial data sets of Brazil. The package
+offers a wide range of spatial data sets available at various geographic
+scales and for various years with harmonized attributes, projection and
+fixed topology. All **geobr** functions follow a simple and consistent
+syntax that allows users to seamlessly download data and work with it
+either in memory using GeoPandas or out of memory using DuckDB and
+Arrow. This vignette presents a quick intro to **geobr**.
 
 ## Installation
 
@@ -27,132 +29,24 @@ import pandas as pd
 
 ### Available data sets
 
-The geobr package covers 27 spatial data sets, including a variety of
-political-administrative and statistical areas used in Brazil. You can
-view what data sets are available using the
+The geobr package currently covers 30 spatial data sets, including a
+variety of political-administrative and statistical areas used in
+Brazil. You can view what data sets are available using the
 [`list_geobr()`](https://ipeagit.github.io/geobr/reference/list_geobr.md)
 function.
 
 ``` python
-# Available data sets
-geobr.list_geobr()
+# Available data sets and years
+geobr.list_geobr().head()
 ```
 
-    Function: read_country
-    Geographies available: Country
-    Years available: 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-    Source: IBGE
-    ------------------------------
-    Function: read_region
-    Geographies available: Region
-    Years available: 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-    Source: IBGE
-    ------------------------------
-    Function: read_state
-    Geographies available: States
-    Years available: 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-    Source: IBGE
-    ------------------------------
-    Function: read_meso_region
-    Geographies available: Meso region
-    Years available: 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-    Source: IBGE
-    ------------------------------
-    Function: read_micro_region
-    Geographies available: Micro region
-    Years available: 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-    Source: IBGE
-    ------------------------------
-    Function: read_intermediate_region
-    Geographies available: Intermediate region
-    Years available: 2017, 2019
-    Source: IBGE
-    ------------------------------
-    Function: read_immediate_region
-    Geographies available: Immediate region
-    Years available: 2017, 2019
-    Source: IBGE
-    ------------------------------
-    Function: read_weighting_area
-    Geographies available: Census weighting area (área de ponderação)
-    Years available: 2010
-    Source: IBGE
-    ------------------------------
-    Function: read_census_tract
-    Geographies available: Census tract (setor censitário)
-    Years available: 2000, 2010
-    Source: IBGE
-    ------------------------------
-    Function: read_municipal_seat
-    Geographies available: Municipality seats (sedes municipais)
-    Years available: 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2010
-    Source: IBGE
-    ------------------------------
-    Function: read_statistical_grid
-    Geographies available: Statistical Grid of 200 x 200 meters
-    Years available: 2010
-    Source: IBGE
-    ------------------------------
-    Function: read_metro_area
-    Geographies available: Metropolitan areas
-    Years available: 1970, 2001, 2002, 2003, 2005, 2010, 2013, 2014, 2015, 2016, 2017, 2018
-    Source: IBGE
-    ------------------------------
-    Function: read_urban_area
-    Geographies available: Urban footprints
-    Years available: 2005, 2015
-    Source: IBGE
-    ------------------------------
-    Function: read_amazon
-    Geographies available: Brazil's Legal Amazon
-    Years available: 2012
-    Source: MMA
-    ------------------------------
-    Function: read_biomes
-    Geographies available: Biomes
-    Years available: 2004, 2019
-    Source: IBGE
-    ------------------------------
-    Function: read_conservation_units
-    Geographies available: Environmental Conservation Units
-    Years available: 201909
-    Source: MMA
-    ------------------------------
-    Function: read_disaster_risk_area
-    Geographies available: Disaster risk areas
-    Years available: 2010
-    Source: CEMADEN and IBGE
-    ------------------------------
-    Function: read_indigenous_land
-    Geographies available: Indigenous lands
-    Years available: 201907
-    Source: FUNAI
-    ------------------------------
-    Function: read_semiarid
-    Geographies available: Semi Arid region
-    Years available: 2005, 2017
-    Source: IBGE
-    ------------------------------
-    Function: read_health_facilities
-    Geographies available: Health facilities
-    Years available: 2015
-    Source: CNES, DataSUS
-    ------------------------------
-    Function: read_health_region
-    Geographies available: Health regions
-    Years available: 1991, 1994, 1997, 2001, 2005, 2013
-    Source: DataSUS
-    ------------------------------
-    Function: read_neighborhood
-    Geographies available: Neighborhood limits
-    Years available: 2010
-    Source: IBGE
-    ------------------------------
-    Function: read_schools (dev)
-    Geographies available: Schools
-    Years available: 2020
-    Source: INEP
-    ------------------------------
+|  | Function | geography | source | alias | years_available |
+|---:|:---|:---|:---|:---|:---|
+| 0 | read_country | Country | IBGE | country | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
+| 1 | read_region | Region | IBGE | regions | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
+| 2 | read_state | States | IBGE | states | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
+| 3 | read_meso_region | Meso region | IBGE | mesoregions | 2000, 2001, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 |
+| 4 | read_micro_region | Micro region | IBGE | microregions | 2000, 2001, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 |
 
 ## Download spatial data as `GeoDataFrames`
 
@@ -239,6 +133,38 @@ ax.axis("off")
 
 ![](py-intro-to-geobr_files/1.intro-to-geobr_18_1.png)
 
+## Lazy evaluation with DuckDB and Arrow
+
+By default, all functions in geobr use `output = "gpd"` and return a
+GeoPandas’ `geodataframe` object loaded into memory. In some cases,
+however, it may be preferable to process data out of memory for faster
+and more memory-efficient computation, particularly when working with
+large spatial data sets.
+
+To support these workflows, users can set `output = "duckdb"` to return
+a lazy `DuckDBPyRelation` object. It uses the official DuckDB Spatial
+extansion to enable a “GEOMETRY” data type. This allows data to be
+analyzed with DuckDB, enabling efficient out-of-memory spatial
+operations. Users can also leverage a DuckDB power-user API with
+auto-resolving `query()`, as shown in this
+[example](https://ipeagit.github.io/geobr/articles/python-intro/......%5Cpython-package%5Cexamples%5Cduckdb_demo.ipynb).
+
+Alternatively, users can set `output = "arrow"` to return an Arrow
+dataset, which can be integrated with the Arrow ecosystem for scalable
+analytical workflows. Note that PyArrow lacks a special geometry data
+type and does not natively process geographic coordinates without extra
+tools. Geobr returns the `geometry` column stored as Well-Known Binary
+(WKB) byte arrays and the user can use the GeoArrow library for
+optimized spatial operations.
+
+``` python
+# return duckdb DuckDBPyRelation
+muni_duck = geobr.read_municipality(year = 2022, output = "duckdb")
+
+# return arrow table
+muni_arrow = geobr.read_municipality(year = 2022, output = "arrow")
+```
+
 ## Thematic maps
 
 The next step is to combine data from ***geobr*** package with other
@@ -256,7 +182,7 @@ our key column to join these two databases.
 
 ``` python
 # Read DataFrame with life expectancy data
-data_url = "https://raw.githubusercontent.com/ipeaGIT/geobr/master/r-package/inst/extdata/br_states_lifexpect2017.csv"
+data_url = "https://raw.githubusercontent.com/ipea/geobr/master/r-package/inst/extdata/br_states_lifexpect2017.csv"
 
 df = pd.read_csv(data_url, index_col=0)
 

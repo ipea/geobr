@@ -10,17 +10,17 @@ attributes, projection and fixed topology.
 Please check the vignettes for more on the package usage:
 
 - Introduction to geobr (R) on the
-  [website](https://ipeagit.github.io/geobr/articles/intro_to_geobr.html).
+  [website](https://ipea.github.io/geobr/articles/intro_to_geobr.html).
 
 ## See also
 
 Useful links:
 
-- <https://ipeagit.github.io/geobr/>
+- <https://ipea.github.io/geobr/>
 
-- <https://github.com/ipeaGIT/geobr>
+- <https://github.com/ipea/geobr>
 
-- Report bugs at <https://github.com/ipeaGIT/geobr/issues>
+- Report bugs at <https://github.com/ipea/geobr/issues>
 
 ## Author
 

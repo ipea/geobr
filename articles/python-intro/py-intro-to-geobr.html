@@ -43,7 +43,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/ipeaGIT/geobr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/ipea/geobr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
@@ -68,19 +68,21 @@
       <h1>Intro to geobr (Python)</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ipeaGIT/geobr/blob/master/vignettes/python-intro/py-intro-to-geobr.Rmd" class="external-link"><code>vignettes/python-intro/py-intro-to-geobr.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ipea/geobr/blob/master/vignettes/python-intro/py-intro-to-geobr.Rmd" class="external-link"><code>vignettes/python-intro/py-intro-to-geobr.Rmd</code></a></small>
       <div class="d-none name"><code>py-intro-to-geobr.Rmd</code></div>
     </div>
 
     
     
-<p>The <a href="https://github.com/ipeaGIT/geobr" class="external-link"><strong>geobr</strong></a>
-package provides quick and easy access to official spatial data sets of
-Brazil. The syntax of all <strong>geobr</strong> functions operate on a
-simple logic that allows users to easily download a wide variety of data
-sets with updated geometries and harmonized attributes and geographic
-projections across geographies and years. This vignette presents a quick
-intro to <strong>geobr</strong>.</p>
+<p>The <a href="https://github.com/ipea/geobr" class="external-link"><strong>geobr</strong></a> package
+provides quick and easy access to official spatial data sets of Brazil.
+The package offers a wide range of spatial data sets available at
+various geographic scales and for various years with harmonized
+attributes, projection and fixed topology. All <strong>geobr</strong>
+functions follow a simple and consistent syntax that allows users to
+seamlessly download data and work with it either in memory using
+GeoPandas or out of memory using DuckDB and Arrow. This vignette
+presents a quick intro to <strong>geobr</strong>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -99,127 +101,80 @@ intro to <strong>geobr</strong>.</p>
 <div class="section level3">
 <h3 id="available-data-sets">Available data sets<a class="anchor" aria-label="anchor" href="#available-data-sets"></a>
 </h3>
-<p>The geobr package covers 27 spatial data sets, including a variety of
-political-administrative and statistical areas used in Brazil. You can
-view what data sets are available using the <code><a href="../../reference/list_geobr.html">list_geobr()</a></code>
-function.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Available data sets</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>geobr.list_geobr()</span></code></pre></div>
-<pre><code>Function: read_country
-Geographies available: Country
-Years available: 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-Source: IBGE
-------------------------------
-Function: read_region
-Geographies available: Region
-Years available: 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-Source: IBGE
-------------------------------
-Function: read_state
-Geographies available: States
-Years available: 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-Source: IBGE
-------------------------------
-Function: read_meso_region
-Geographies available: Meso region
-Years available: 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-Source: IBGE
-------------------------------
-Function: read_micro_region
-Geographies available: Micro region
-Years available: 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-Source: IBGE
-------------------------------
-Function: read_intermediate_region
-Geographies available: Intermediate region
-Years available: 2017, 2019
-Source: IBGE
-------------------------------
-Function: read_immediate_region
-Geographies available: Immediate region
-Years available: 2017, 2019
-Source: IBGE
-------------------------------
-Function: read_weighting_area
-Geographies available: Census weighting area (área de ponderação)
-Years available: 2010
-Source: IBGE
-------------------------------
-Function: read_census_tract
-Geographies available: Census tract (setor censitário)
-Years available: 2000, 2010
-Source: IBGE
-------------------------------
-Function: read_municipal_seat
-Geographies available: Municipality seats (sedes municipais)
-Years available: 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2010
-Source: IBGE
-------------------------------
-Function: read_statistical_grid
-Geographies available: Statistical Grid of 200 x 200 meters
-Years available: 2010
-Source: IBGE
-------------------------------
-Function: read_metro_area
-Geographies available: Metropolitan areas
-Years available: 1970, 2001, 2002, 2003, 2005, 2010, 2013, 2014, 2015, 2016, 2017, 2018
-Source: IBGE
-------------------------------
-Function: read_urban_area
-Geographies available: Urban footprints
-Years available: 2005, 2015
-Source: IBGE
-------------------------------
-Function: read_amazon
-Geographies available: Brazil's Legal Amazon
-Years available: 2012
-Source: MMA
-------------------------------
-Function: read_biomes
-Geographies available: Biomes
-Years available: 2004, 2019
-Source: IBGE
-------------------------------
-Function: read_conservation_units
-Geographies available: Environmental Conservation Units
-Years available: 201909
-Source: MMA
-------------------------------
-Function: read_disaster_risk_area
-Geographies available: Disaster risk areas
-Years available: 2010
-Source: CEMADEN and IBGE
-------------------------------
-Function: read_indigenous_land
-Geographies available: Indigenous lands
-Years available: 201907
-Source: FUNAI
-------------------------------
-Function: read_semiarid
-Geographies available: Semi Arid region
-Years available: 2005, 2017
-Source: IBGE
-------------------------------
-Function: read_health_facilities
-Geographies available: Health facilities
-Years available: 2015
-Source: CNES, DataSUS
-------------------------------
-Function: read_health_region
-Geographies available: Health regions
-Years available: 1991, 1994, 1997, 2001, 2005, 2013
-Source: DataSUS
-------------------------------
-Function: read_neighborhood
-Geographies available: Neighborhood limits
-Years available: 2010
-Source: IBGE
-------------------------------
-Function: read_schools (dev)
-Geographies available: Schools
-Years available: 2020
-Source: INEP
-------------------------------</code></pre>
+<p>The geobr package currently covers 30 spatial data sets, including a
+variety of political-administrative and statistical areas used in
+Brazil. You can view what data sets are available using the
+<code><a href="../../reference/list_geobr.html">list_geobr()</a></code> function.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Available data sets and years</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>geobr.list_geobr().head()</span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="1%">
+<col width="8%">
+<col width="6%">
+<col width="4%">
+<col width="6%">
+<col width="72%">
+</colgroup>
+<thead><tr class="header">
+<th align="right"></th>
+<th align="left">Function</th>
+<th align="left">geography</th>
+<th align="left">source</th>
+<th align="left">alias</th>
+<th align="left">years_available</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="left">read_country</td>
+<td align="left">Country</td>
+<td align="left">IBGE</td>
+<td align="left">country</td>
+<td align="left">1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970,
+1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+2020, 2021, 2022, 2023, 2024, 2025</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="left">read_region</td>
+<td align="left">Region</td>
+<td align="left">IBGE</td>
+<td align="left">regions</td>
+<td align="left">1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970,
+1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+2020, 2021, 2022, 2023, 2024, 2025</td>
+</tr>
+<tr class="odd">
+<td align="right">2</td>
+<td align="left">read_state</td>
+<td align="left">States</td>
+<td align="left">IBGE</td>
+<td align="left">states</td>
+<td align="left">1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970,
+1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+2020, 2021, 2022, 2023, 2024, 2025</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="left">read_meso_region</td>
+<td align="left">Meso region</td>
+<td align="left">IBGE</td>
+<td align="left">mesoregions</td>
+<td align="left">2000, 2001, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+2020, 2021, 2022</td>
+</tr>
+<tr class="odd">
+<td align="right">4</td>
+<td align="left">read_micro_region</td>
+<td align="left">Micro region</td>
+<td align="left">IBGE</td>
+<td align="left">microregions</td>
+<td align="left">2000, 2001, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+2020, 2021, 2022</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section level2">
@@ -229,19 +184,19 @@ Source: INEP
 so the code to download the data becomes intuitive for the user. Here
 are a few examples.</p>
 <p>Download a specific geographic area at a given year</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># State of Sergige</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>state <span class="op">=</span> geobr.read_state(code_state<span class="op">=</span><span class="st">"SE"</span>, year<span class="op">=</span><span class="dv">2018</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co"># Municipality of Sao Paulo</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>muni <span class="op">=</span> geobr.read_municipality(code_muni<span class="op">=</span><span class="dv">3550308</span>, year<span class="op">=</span><span class="dv">2010</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># State of Sergige</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>state <span class="op">=</span> geobr.read_state(code_state<span class="op">=</span><span class="st">"SE"</span>, year<span class="op">=</span><span class="dv">2018</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># Municipality of Sao Paulo</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>muni <span class="op">=</span> geobr.read_municipality(code_muni<span class="op">=</span><span class="dv">3550308</span>, year<span class="op">=</span><span class="dv">2010</span>)</span></code></pre></div>
 <p>Download all geographic areas within a state at a given year</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># All municipalities in the state of Alagoas</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>muni <span class="op">=</span> geobr.read_municipality(code_muni<span class="op">=</span><span class="st">"AL"</span>, year<span class="op">=</span><span class="dv">2007</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># All census tracts in the state of Rio de Janeiro</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>cntr <span class="op">=</span> geobr.read_census_tract(code_tract<span class="op">=</span><span class="st">"RJ"</span>, year<span class="op">=</span><span class="dv">2010</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># All municipalities in the state of Alagoas</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>muni <span class="op">=</span> geobr.read_municipality(code_muni<span class="op">=</span><span class="st">"AL"</span>, year<span class="op">=</span><span class="dv">2007</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># All census tracts in the state of Rio de Janeiro</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>cntr <span class="op">=</span> geobr.read_census_tract(code_tract<span class="op">=</span><span class="st">"RJ"</span>, year<span class="op">=</span><span class="dv">2010</span>)</span></code></pre></div>
 <p>If the parameter <code>code_</code> is not passed to the function,
 geobr returns the data for the whole country by default.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>states <span class="op">=</span> geobr.read_state(year<span class="op">=</span><span class="dv">2019</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>states <span class="op">=</span> geobr.read_state(year<span class="op">=</span><span class="dv">2019</span>)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="important-note-about-data-resolution">Important note about data resolution<a class="anchor" aria-label="anchor" href="#important-note-about-data-resolution"></a>
@@ -259,31 +214,59 @@ and plotting the data.</p>
 </h2>
 <p>Once you’ve downloaded the data, it is really simple to plot maps
 using <code>matplotlib</code>.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Plot all Brazilian states</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">15</span>), dpi<span class="op">=</span><span class="dv">300</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>states.plot(facecolor<span class="op">=</span><span class="st">"#2D3E50"</span>, edgecolor<span class="op">=</span><span class="st">"#FEBF57"</span>, ax<span class="op">=</span>ax)</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>ax.set_title(<span class="st">"States"</span>, fontsize<span class="op">=</span><span class="dv">20</span>)</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>ax.axis(<span class="st">"off"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Plot all Brazilian states</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">15</span>), dpi<span class="op">=</span><span class="dv">300</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>states.plot(facecolor<span class="op">=</span><span class="st">"#2D3E50"</span>, edgecolor<span class="op">=</span><span class="st">"#FEBF57"</span>, ax<span class="op">=</span>ax)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>ax.set_title(<span class="st">"States"</span>, fontsize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>ax.axis(<span class="st">"off"</span>)</span></code></pre></div>
 <pre><code>(-76.24758052685, -26.590708254149995, -35.70232894755864, 7.22299203073151)</code></pre>
 <p><img src="py-intro-to-geobr_files/1.intro-to-geobr_15_1.png"></p>
 <p>Plot all the municipalities of a particular state, such as Rio de
 Janeiro:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Download all municipalities of Rio</span></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>all_muni <span class="op">=</span> geobr.read_municipality(code_muni<span class="op">=</span><span class="st">"RJ"</span>, year<span class="op">=</span><span class="dv">2010</span>)</span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># plot</span></span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">15</span>), dpi<span class="op">=</span><span class="dv">300</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>all_muni.plot(facecolor<span class="op">=</span><span class="st">"#2D3E50"</span>, edgecolor<span class="op">=</span><span class="st">"#FEBF57"</span>, ax<span class="op">=</span>ax)</span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>ax.set_title(<span class="st">"Municipalities of Rio de Janeiro, 2000"</span>, fontsize<span class="op">=</span><span class="dv">20</span>)</span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>ax.axis(<span class="st">"off"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Download all municipalities of Rio</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>all_muni <span class="op">=</span> geobr.read_municipality(code_muni<span class="op">=</span><span class="st">"RJ"</span>, year<span class="op">=</span><span class="dv">2010</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">15</span>), dpi<span class="op">=</span><span class="dv">300</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>all_muni.plot(facecolor<span class="op">=</span><span class="st">"#2D3E50"</span>, edgecolor<span class="op">=</span><span class="st">"#FEBF57"</span>, ax<span class="op">=</span>ax)</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>ax.set_title(<span class="st">"Municipalities of Rio de Janeiro, 2000"</span>, fontsize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>ax.axis(<span class="st">"off"</span>)</span></code></pre></div>
 <pre><code>(-45.08586065211478,
  -40.7619784166046,
  -23.499218287945578,
  -20.632919136978526)</code></pre>
 <p><img src="py-intro-to-geobr_files/1.intro-to-geobr_18_1.png"></p>
+</div>
+<div class="section level2">
+<h2 id="lazy-evaluation-with-duckdb-and-arrow">Lazy evaluation with DuckDB and Arrow<a class="anchor" aria-label="anchor" href="#lazy-evaluation-with-duckdb-and-arrow"></a>
+</h2>
+<p>By default, all functions in geobr use <code>output = "gpd"</code>
+and return a GeoPandas’ <code>geodataframe</code> object loaded into
+memory. In some cases, however, it may be preferable to process data out
+of memory for faster and more memory-efficient computation, particularly
+when working with large spatial data sets.</p>
+<p>To support these workflows, users can set
+<code>output = "duckdb"</code> to return a lazy
+<code>DuckDBPyRelation</code> object. It uses the official DuckDB
+Spatial extansion to enable a “GEOMETRY” data type. This allows data to
+be analyzed with DuckDB, enabling efficient out-of-memory spatial
+operations. Users can also leverage a DuckDB power-user API with
+auto-resolving <code>query()</code>, as shown in this <a href="......%5Cpython-package%5Cexamples%5Cduckdb_demo.ipynb">example</a>.</p>
+<p>Alternatively, users can set <code>output = "arrow"</code> to return
+an Arrow dataset, which can be integrated with the Arrow ecosystem for
+scalable analytical workflows. Note that PyArrow lacks a special
+geometry data type and does not natively process geographic coordinates
+without extra tools. Geobr returns the <code>geometry</code> column
+stored as Well-Known Binary (WKB) byte arrays and the user can use the
+GeoArrow library for optimized spatial operations.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># return duckdb DuckDBPyRelation</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>muni_duck <span class="op">=</span> geobr.read_municipality(year <span class="op">=</span> <span class="dv">2022</span>, output <span class="op">=</span> <span class="st">"duckdb"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># return arrow table</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>muni_arrow <span class="op">=</span> geobr.read_municipality(year <span class="op">=</span> <span class="dv">2022</span>, output <span class="op">=</span> <span class="st">"arrow"</span>)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="thematic-maps">Thematic maps<a class="anchor" aria-label="anchor" href="#thematic-maps"></a>
@@ -301,7 +284,7 @@ Expectancy and merge it to our spatial database. The two-digit
 abbreviation of state name is our key column to join these two
 databases.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Read DataFrame with life expectancy data</span></span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>data_url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/ipeaGIT/geobr/master/r-package/inst/extdata/br_states_lifexpect2017.csv"</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>data_url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/ipea/geobr/master/r-package/inst/extdata/br_states_lifexpect2017.csv"</span></span>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a></span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(data_url, index_col<span class="op">=</span><span class="dv">0</span>)</span>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a></span>

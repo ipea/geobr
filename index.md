@@ -1,6 +1,6 @@
 # geobr: Download Official Spatial Data Sets of Brazil
 
-![logo](https://github.com/ipeaGIT/geobr/blob/master/r-package/man/figures/geobr_logo_b.png?raw=true)![logo](https://github.com/ipeaGIT/geobr/blob/master/r-package/man/figures/geobr_logo_y.png?raw=true)
+![logo](https://github.com/ipea/geobr/blob/master/r-package/man/figures/geobr_logo_b.png?raw=true)![logo](https://github.com/ipea/geobr/blob/master/r-package/man/figures/geobr_logo_y.png?raw=true)
 
 geobr is a computational package to download official spatial data sets
 of Brazil. The package covers a wide range of spatial data sets,
@@ -23,7 +23,7 @@ install.packages("geobr")
 
 # or use the development version with latest features
 utils::remove.packages('geobr')
-remotes::install_github("ipeaGIT/geobr", subdir = "r-package")
+remotes::install_github("ipea/geobr", subdir = "r-package")
 ```
 
 obs. If you use **Linux**, you need to install a couple dependencies
@@ -31,6 +31,16 @@ before installing the libraries `sf` and `geobr`. [More info
 here](https://github.com/r-spatial/sf#linux).
 
 ## Installation Python
+
+[uv](https://docs.astral.sh/uv/) is the recommended installer. From your
+project directory (run `uv init` first if you don’t have a
+`pyproject.toml` yet):
+
+``` bash
+uv add geobr
+```
+
+Alternatively, with pip:
 
 ``` bash
 pip install geobr
@@ -44,7 +54,7 @@ conda activate geo_env
 conda config --env --add channels conda-forge  
 conda config --env --set channel_priority strict  
 conda install python=3 geopandas  
-pip install geobr
+uv add geobr
 ```
 
 # Basic Usage
@@ -89,8 +99,40 @@ mun = read_municipality(code_muni="RJ", year=2010)
 mun = read_municipality(code_muni="all", year=2018)
 ```
 
-More examples
-[here](https://github.com/ipeaGIT/geobr/tree/master/python-package/examples)
+Since v1.0.0, the Python package uses a GeoParquet pipeline. For DuckDB
+workflows, use `query()` to load and analyze snapshots directly in SQL.
+
+## Python, DuckDB SQL and spatial analysis
+
+Run SQL across geobr snapshots. Missing views are downloaded
+automatically on first use.
+
+``` python
+from geobr import query, to_geopandas
+
+# Filter a snapshot (auto-downloads states_2020 on first use)
+query("""
+    SELECT name_state, abbrev_state
+    FROM states_2020
+    WHERE abbrev_state = 'RJ'
+""").df()
+
+# Spatial join across datasets
+query("""
+    SELECT count(*) AS schools_in_amazon
+    FROM schools_2020 s
+    JOIN biomes_2019 b ON ST_Within(s.geometry, b.geometry)
+    WHERE b.name_biome ILIKE '%Amaz%'
+""").df()
+
+# Round-trip to GeoPandas for plotting
+gdf = to_geopandas("states_2020")
+```
+
+More examples in
+[python-package/examples](https://github.com/ipea/geobr/tree/master/python-package/examples),
+including
+[duckdb_demo.ipynb](https://github.com/ipea/geobr/blob/master/python-package/examples/duckdb_demo.ipynb).
 
 # Available datasets:
 
@@ -106,7 +148,7 @@ You can check all the data sets available with
 | read_country | Country | IBGE | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
 | read_disaster_risk_area | Disaster risk areas | CEMADEN and IBGE | 2010 |
 | read_favelas | Favelas and urban communities | IBGE | 2022 |
-| read_health_facilities | Health facilities | CNES, DataSUS | 201704, 201707, 201710, 201801, 201804, 201807, 201810, 201901, 201904, 201907, 201910, 202001, 202004, 202007, 202010, 202101, 202104, 202107, 202110, 202201, 202204, 202207, 202210, 202301, 202304, 202307, 202310, 202401, 202404, 202407, 202410, 202501, 202504, 202507, 202510, 202601 |
+| read_health_facilities | Health facilities | CNES, DataSUS | 201704, 201707, 201710, 201801, 201804, 201807, 201810, 201901, 201904, 201907, 201910, 202001, 202004, 202007, 202010, 202101, 202104, 202107, 202110, 202201, 202204, 202207, 202210, 202301, 202304, 202307, 202310, 202401, 202404, 202407, 202410, 202501, 202504, 202507, 202510, 202601, 202604 |
 | read_health_region | Health regions and macro regions | DataSUS | 1991, 1994, 1997, 2001, 2005, 2013, 2023, 2024, 2025 |
 | read_immediate_region | Immediate region | IBGE | 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
 | read_indigenous_land | Indigenous lands | FUNAI | 2016, 2017, 2018, 2019, 2022, 2024, 2025 |
@@ -126,7 +168,7 @@ You can check all the data sets available with
 | read_schools | Schools | INEP | 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
 | read_semiarid | Semi Arid region | IBGE | 2005, 2017, 2021, 2022 |
 | read_state | States | IBGE | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
-| read_statistical_grid | Statistical Grid (gridded population) | IBGE | 2010 |
+| read_statistical_grid | Statistical Grid (gridded population) | IBGE | 2010, 2022 |
 | read_urban_area | Urban footprints | IBGE | 2005, 2015, 2019 |
 | read_weighting_area | Census weighting area (área de ponderação) | IBGE | 2010 |
 
@@ -154,7 +196,7 @@ documentation for details).
 
 If you would like to contribute to geobr and add new functions or data
 sets, please check this
-[guide](https://github.com/ipeaGIT/geobr/blob/master/CONTRIBUTING.md) to
+[guide](https://github.com/ipea/geobr/blob/master/CONTRIBUTING.md) to
 propose your contribution.
 
 ------------------------------------------------------------------------
@@ -182,7 +224,7 @@ contributions to the community, including for example:
 
 - Africa: [afrimapr](https://afrimapr.github.io/afrimapr.website/)
 - Argentina: [geoAr](https://github.com/PoliticaArgentina/geoAr)
-- Brazil: [geobr](https://ipeagit.github.io/geobr/)
+- Brazil: [geobr](https://ipea.github.io/geobr/)
 - Canada:
   [cancensus](https://mountainmath.github.io/cancensus/index.html)
 - Chile: [chilemapas](https://pacha.dev/chilemapas/)
@@ -199,13 +241,14 @@ contributions to the community, including for example:
 
 ------------------------------------------------------------------------
 
-# Credits ![ipea](https://github.com/ipeaGIT/geobr/blob/master/r-package/man/figures/ipea_logo.png?raw=true)
+# Credits ![ipea](https://github.com/ipea/geobr/blob/master/r-package/man/figures/ipea_logo.png?raw=true)
 
 Original shapefiles are created by official government institutions. The
 **geobr** package is developed by a team at the Institute for Applied
-Economic Research (Ipea), Brazil. If you want to cite this package, you
+Economic Research (Ipea), Brazil. The package received support from
+Instituto Todos pela Saúde (ITpS). If you want to cite this package, you
 can cite it as:
 
 - Pereira, R.H.M.; Barbosa, R.J.; et. all (2026) **geobr: Download
   Official Spatial Data Sets of Brazil**. v2.0.0 GitHub repository -
-  <https://github.com/ipeaGIT/geobr>.
+  <https://github.com/ipea/geobr>.
