@@ -159,7 +159,7 @@ working with large spatial data sets.
 
 To support these workflows, users can set `output = "duckdb"` to return a lazy
 `DuckDBPyRelation` object. It uses the official DuckDB Spatial extansion to enable a "GEOMETRY" data type.
-This allows data to be analyzed with DuckDB, enabling efficient out-of-memory spatial operations. Users can also leverage a DuckDB power-user API with auto-resolving `query()`, as shown in this [example](..\..\..\python-package\examples\duckdb_demo.ipynb).
+This allows data to be analyzed with DuckDB, enabling efficient out-of-memory spatial operations. Users can also leverage a DuckDB power-user API with auto-resolving `query()`, as shown in this [example](https://github.com/ipea/geobr/blob/master/python-package/examples/duckdb_demo.ipynb).
 
 
 Alternatively, users can set `output = "arrow"` to return an Arrow dataset, which 
