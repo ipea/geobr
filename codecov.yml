@@ -29,5 +29,9 @@ coverage:
 flags:
   r:
     carryforward: true
+    paths:
+        - r-package/
   python:
     carryforward: true
+    paths:
+        - python-package/
