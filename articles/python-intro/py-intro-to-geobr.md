@@ -147,7 +147,7 @@ extansion to enable a “GEOMETRY” data type. This allows data to be
 analyzed with DuckDB, enabling efficient out-of-memory spatial
 operations. Users can also leverage a DuckDB power-user API with
 auto-resolving `query()`, as shown in this
-[example](https://ipeagit.github.io/geobr/articles/python-intro/......%5Cpython-package%5Cexamples%5Cduckdb_demo.ipynb).
+[example](https://github.com/ipea/geobr/blob/master/python-package/examples/duckdb_demo.ipynb).
 
 Alternatively, users can set `output = "arrow"` to return an Arrow
 dataset, which can be integrated with the Arrow ecosystem for scalable
