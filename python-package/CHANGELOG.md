@@ -21,7 +21,7 @@ mindful of historical changes in the data.
 more detailed output if needed
 - Functions like `read_schools()` and `read_health_facilities()` now use a 
 combination of official spatial coordinates and coordinates found using the 
-[{geocodebr}](https://github.com/ipeaGIT/geocodebr/) package to improve spatial 
+[{geocodebr}](https://github.com/ipea/geocodebr/) package to improve spatial 
 accuracy. See documentation of these functions.
 - The function `lookup_muni()` now has a `year` parameter. 
 - The function and data `read_comparable_areas()` will be going under  major 
