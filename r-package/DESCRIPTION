@@ -1,7 +1,7 @@
 Type: Package
 Package: geobr
 Title: Download Official Spatial Data Sets of Brazil
-Version: 2.0.1.9000
+Version: 2.0.1
 Authors@R: c(person(given="Rafael H. M.", family="Pereira", email="rafa.pereira.br@gmail.com", role=c("aut", "cre"), comment = c(ORCID = "0000-0003-2125-7465")),
             person(given="Rogério Jerônimo", family="Barbosa", role=c("aut")),
             person(given="Caio Nogueira", family="Goncalves", role=c("ctb")),
