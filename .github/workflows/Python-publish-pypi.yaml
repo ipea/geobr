@@ -52,7 +52,7 @@ jobs:
       - name: Build package
         shell: bash
         working-directory: python-package
-        run: uv run python -m build
+        run: uv build 
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

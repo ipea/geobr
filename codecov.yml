@@ -26,9 +26,8 @@ coverage:
         threshold: 1%
         flags: python
 
-flag_management:
-  individual_flags:
-    - name: r
-      carryforward: true
-    - name: python
-      carryforward: true
+flags:
+  r:
+    carryforward: true
+  python:
+    carryforward: true
