@@ -4,7 +4,8 @@ version = "1.0.0"
 description = "geobr: Download Official Spatial Data Sets of Brazil"
 readme = "README.md"
 requires-python = "<4.0,>=3.10"
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE.txt"]
 authors = [
     {name = "João Carabetta"},
     {name = "Rafael H. M. Pereira"},
@@ -31,11 +32,16 @@ classifiers = [
     "Topic :: Scientific/Engineering :: GIS",
     "Topic :: Scientific/Engineering :: Visualization",
     "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 
 [project.urls]
-homepage = "https://github.com/ipeaGIT/geobr"
-repository = "https://github.com/ipeaGIT/geobr"
+homepage = "https://github.com/ipea/geobr"
+repository = "https://github.com/ipea/geobr"
 
 [build-system]
 requires = ["pdm-backend"]
@@ -49,7 +55,7 @@ includes = [
 
 [tool.black]
 line-length = 88
-target-version = ['py37']
+target-version = ['py310']
 include = '\.pyi?$'
 exclude = '''
 

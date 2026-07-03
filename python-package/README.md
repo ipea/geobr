@@ -37,7 +37,13 @@ It adds:
 
 # Release new version
 
+1. Update `version` in `pyproject.toml` and the `CHANGELOG.md`.
+2. Commit and push to `master`.
+3. Tag the release (the `python-v` prefix avoids conflicts with R package tags):
+
+```sh
+git tag python-v1.0.0
+git push origin python-v1.0.0
 ```
-poetry version [patch|minor|major]
-poetry publish --build
-```
+
+4. The `Python-publish-PyPI` workflow will automatically build, test, and upload to PyPI.

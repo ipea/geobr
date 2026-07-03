@@ -1,0 +1,60 @@
+on:
+  push:
+    tags:
+      - "python-v*"
+
+name: Python-publish-PyPI
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Check out geobr
+        uses: actions/checkout@v4
+
+      - name: Verify version matches tag
+        shell: bash
+        working-directory: python-package
+        run: |
+          TOML_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          TAG_VERSION="${GITHUB_REF_NAME#python-v}"
+          echo "pyproject.toml version: $TOML_VERSION"
+          echo "git tag version: $TAG_VERSION"
+          if [ "$TOML_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Version mismatch! pyproject.toml has '$TOML_VERSION' but tag expects '$TAG_VERSION'"
+            exit 1
+          fi
+          echo "Version matches: $TOML_VERSION"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        shell: bash
+        working-directory: python-package
+        run: uv sync --frozen
+
+      - name: Run tests
+        shell: bash
+        working-directory: python-package
+        run: uv run pytest -n 2 --durations=10 -s ./tests -m "not network"
+
+      - name: Build package
+        shell: bash
+        working-directory: python-package
+        run: uv run python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python-package/dist
