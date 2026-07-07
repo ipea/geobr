@@ -10,28 +10,32 @@ coverage:
       r:
         target: auto
         threshold: 1%
-        flags: r
+        flags: 
+          - r
       python:
         target: auto
         threshold: 1%
-        flags: python
+        flags: 
+          - python
     patch:
       default: false
       r:
         target: auto
         threshold: 1%
-        flags: r
+        flags: 
+          - r
       python:
         target: auto
         threshold: 1%
-        flags: python
+        flags: 
+          - python
 
 flags:
   r:
-    carryforward: true
     paths:
-        - r-package/
+      - r-package/
+    carryforward: true
   python:
-    carryforward: true
-    paths:
+      paths:
         - python-package/
+      carryforward: true

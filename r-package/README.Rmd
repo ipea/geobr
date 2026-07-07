@@ -41,7 +41,7 @@ remotes::install_github("ipea/geobr", subdir = "r-package")
 
 ```
 
-obs. If you use **Linux**, you need to install a couple dependencies before installing the libraries `sf` and `geobr`. [More info here](https://github.com/r-spatial/sf#linux).  
+obs. If you use **Linux**, you need to install a couple dependencies before installing the libraries `sf` and `geobr`.[More info here](https://github.com/r-spatial/sf#linux).  
 
 
 

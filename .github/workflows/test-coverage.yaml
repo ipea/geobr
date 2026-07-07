@@ -46,9 +46,8 @@ jobs:
         with:
           # Fail if error if not on PR, or if on PR and token is given
           fail_ci_if_error: ${{ github.event_name != 'pull_request' || secrets.CODECOV_TOKEN }}
-          file: ./cobertura.xml
-          plugin: noop
+          file: ./r-package/cobertura.xml
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
-          working-directory: r-package
           flags: r
+          name: codecov-r

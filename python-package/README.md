@@ -35,7 +35,7 @@ It adds:
 - larger documentation
 - very basic tests
 
-! Be aware that if the function that you are adding is more complicated than the template. So, always double check !
+Be aware that if the function that you are adding is more complicated than the template. So, always double check.
 
 # Release new version
 
