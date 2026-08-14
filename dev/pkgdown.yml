@@ -1,11 +1,10 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   intro_to_geobr: intro_to_geobr.html
-  py-intro-to-geobr: py-intro-to-geobr.html
   python-intro/py-intro-to-geobr: python-intro/py-intro-to-geobr.html
-last_built: 2026-07-03T13:10Z
+last_built: 2026-08-14T15:12Z
 urls:
   reference: https://ipeagit.github.io/geobr/reference
   article: https://ipeagit.github.io/geobr/articles
