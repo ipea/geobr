@@ -223,7 +223,8 @@ contributions to the community, including for example:
 #### **Similar packages for other countries/continents**
 
 - Africa: [afrimapr](https://afrimapr.github.io/afrimapr.website/)
-- Argentina: [geoAr](https://github.com/PoliticaArgentina/geoAr)
+- Argentina: [geoAr](https://github.com/PoliticaArgentina/geoAr),
+  [argentum](https://github.com/thomasartopoulos/argentum)
 - Brazil: [geobr](https://ipea.github.io/geobr/)
 - Canada:
   [cancensus](https://mountainmath.github.io/cancensus/index.html)
