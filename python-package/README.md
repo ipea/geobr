@@ -16,7 +16,9 @@ uv sync
 
 Test with
 
-`uv run pytest -n auto`
+```sh
+uv run pytest -n auto
+```
 
 You can use a helper to translate a function from R.
 If you want to add `read_biomes`, just run
@@ -33,11 +35,17 @@ It adds:
 - larger documentation
 - very basic tests
 
-! Be aware that if the function that you are adding is more complicated than the template. So, always double check !
+Be aware that if the function that you are adding is more complicated than the template. So, always double check.
 
 # Release new version
 
+1. Update `version` in `pyproject.toml` and the `CHANGELOG.md`.
+2. Commit and push to `master`.
+3. Tag the release (the `python-v` prefix avoids conflicts with R package tags):
+
+```sh
+git tag python-v1.0.0
+git push origin python-v1.0.0
 ```
-poetry version [patch|minor|major]
-poetry publish --build
-```
+
+4. The `Python-publish-PyPI` workflow will automatically build, test, and upload to PyPI.
