@@ -1,0 +1,455 @@
+# Skill Creation Template
+
+**Use this template to create domain-specific skills for your academic workflow.**
+
+---
+
+## When to Create a Custom Skill
+
+Create a skill when you find yourself:
+- Repeatedly explaining the same 3+ step workflow to Claude
+- Needing domain-specific quality checks (citation style, notation consistency, lab protocols)
+- Enforcing field-specific output formats (thesis structure, journal templates, lab notebooks)
+- Coordinating multi-tool workflows (Figma → R → LaTeX, data → analysis → manuscript)
+
+**Don't create a skill for:**
+- One-time tasks
+- Workflows that change frequently
+- Simple 1-2 step operations
+
+---
+
+## Template Structure
+
+Copy the structure below to `.claude/skills/[your-skill-name]/SKILL.md`:
+
+```markdown
+---
+name: your-skill-name
+description: [What it does] + [When to use it] + [Key capabilities]. Use when user asks for "[trigger phrase 1]", "[trigger phrase 2]", or "[context]".
+argument-hint: "[brief hint for user]"
+allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash", "Task"]
+---
+
+# [Skill Name]
+
+[One sentence: what this skill accomplishes and why it exists]
+
+## Instructions
+
+Step 1: [First major action with clear explanation]
+   - Detail: [Important consideration]
+   - Example: [Concrete example]
+
+Step 2: [Second major action]
+   - Detail: [Important consideration]
+
+Step 3: [Final action and verification]
+   - Verify: [What to check]
+   - Output: [What user receives]
+
+## Examples
+
+### Example 1: [Common Scenario Name]
+**Context:** [When this occurs]
+**User says:** "[Typical user request]"
+**Actions:**
+1. [What skill does first]
+2. [What skill does second]
+3. [Final output]
+**Result:** [What user receives]
+
+### Example 2: [Another Common Scenario]
+**Context:** [Different situation]
+**User says:** "[Alternative phrasing]"
+**Actions:**
+1. [Different path through the skill]
+**Result:** [Expected outcome]
+
+## Troubleshooting
+
+**Error:** [Common error message or symptom]
+**Cause:** [Why this happens]
+**Solution:** [How to fix it]
+
+**Error:** [Another common issue]
+**Cause:** [Root cause]
+**Solution:** [Fix steps]
+```
+
+---
+
+## Advanced Frontmatter Fields
+
+Beyond the basic fields shown above, skills support additional YAML frontmatter for fine-grained control:
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `effort` | Override reasoning effort level | `high` (for review skills), `low` (for formatting) |
+| `context` | Set to `fork` to run in an isolated subagent context | Protects main conversation from verbose output |
+| `agent` | Link to an agent definition in `.claude/agents/` | `proofreader` |
+| `hooks` | Skill-specific hooks (same syntax as settings.json) | Custom pre/post actions |
+| `model` | Force a specific model | `haiku` (cheaper), `opus` (smarter) |
+| `disable-model-invocation` | Prevent Claude from auto-triggering | `true` (only invoked via `/skill-name`) |
+| `disallowed-tools` | **Remove** tools from Claude's pool while the skill is active — the actual restriction mechanism (see the semantics note below) | `["Edit", "Write"]` for a read-only audit |
+| `paths` | Glob patterns that scope when the skill auto-activates — the skill-level analogue of path-scoped rules | `["scripts/**/*.R"]` |
+| `when_to_use` | Extra routing context for auto-invocation, beyond the description | `"after any merge conflict"` |
+| `arguments` | Named positional arguments for `$name` substitution in the body | `[infile, outfile]` |
+
+### `allowed-tools` vs `disallowed-tools` — the semantics matter {#allowed-vs-disallowed}
+
+**`allowed-tools` is a pre-approval list, not a sandbox.** Per the official docs: it "grants permission for the listed tools while the skill is active, so Claude can use them without prompting you for approval. **It does not restrict which tools are available: every tool remains callable**" — unlisted tools just go through your normal permission settings. Omitting `Bash` from `allowed-tools` does **not** make a skill read-only.
+
+**To actually remove tools, use `disallowed-tools`.** Tools listed there are taken out of Claude's available pool while the skill is active (the restriction clears on your next message). For autonomous or forked review skills that must never write — or never stall a background loop on a question — disallow explicitly:
+
+```yaml
+allowed-tools: ["Read", "Grep", "Glob"]        # pre-approve the read path (no prompts)
+disallowed-tools: ["Edit", "Write", "Bash"]    # actually remove the write path
+```
+
+**Dynamic content** — skills can include live data using string substitutions:
+
+- `$ARGUMENTS` — full argument string (e.g., `/skill-name Lecture01` → `Lecture01`)
+- `$0`, `$1` — positional arguments (0-based)
+- `${CLAUDE_SKILL_DIR}` — path to the skill's directory (for bundled supporting files)
+- `` `!git log --oneline -5` `` — dynamic command output injected when skill loads
+
+See [`.claude/skills/`](../.claude/skills/) for worked examples in this repo — `/r-package-check` and `/py-package-check` are the fullest.
+
+### When to set `disable-model-invocation: true` {#when-to-disable-model-invocation}
+
+Set this flag whenever the skill writes a **persistent, load-bearing file** that the user must explicitly intend to create. Otherwise, Claude may auto-trigger the skill in response to a vaguely-matching prompt and produce a file that's hard to undo without manual cleanup.
+
+**Set it for skills that:**
+
+- Create new persistent source files (`/create-lecture` → new `.tex`, `/new-diagram` → new TikZ source).
+- Write a self-modifying artifact (`/learn` → new SKILL.md, `/checkpoint` → state snapshot, `/preregister` → preregistration document).
+- Run a destructive cycle (`/deep-audit` → repo-wide fix loop).
+
+**Don't set it for skills that:**
+
+- Produce transient analysis output (`/proofread`, `/review-r`, `/visual-audit` — write reports under `quality_reports/` that are easy to delete).
+- Are read-only diagnostics or reports (`/review-r`, `/parity-check`).
+- Compile / render / deploy from existing source (`/compile-latex`, `/deploy`, `/extract-tikz`).
+
+The flag still allows direct invocation as `/skill-name` — it only blocks the model from auto-triggering on a heuristic match.
+
+### CLAUDE.md `@import` syntax (Anthropic Apr 2026)
+
+Anthropic's `CLAUDE.md` supports `@path/to/import` to pull in additional files. Example:
+
+```markdown
+See @README.md for project overview and @package.json for available commands.
+
+# Personal overrides
+@~/.claude/my-project-instructions.md
+
+# Domain-specific instructions
+@docs/git-instructions.md
+```
+
+**This template's `CLAUDE.md` deliberately does NOT use `@import`** — at 146 lines it's already lean, and importing fragments fractures the onboarding context (forkers expect "one file to load at session start"). Mention this here for forkers whose customization grows large enough to warrant splitting; for short CLAUDE.md files, splitting tends to hurt more than help.
+
+---
+
+## Writing Effective Descriptions
+
+The `description` field determines when Claude loads your skill. Use this structure:
+
+```
+[What it does] + [When to use it] + [Key capabilities]
+```
+
+### Good Examples (Field-Specific)
+
+**Citation Style Enforcement (APA Psychology):**
+```yaml
+description: Enforces APA 7th edition citation format in manuscripts. Use when user asks to "check citations", "fix references", "apply APA style", or when reviewing .tex or .qmd files with bibliography. Checks author-year format, DOI formatting, and reference list completeness.
+```
+
+**Lab Notebook Entry Generator (Wet Lab Biology):**
+```yaml
+description: Generates structured lab notebook entries from experimental notes. Use when user provides "experiment notes", "protocol results", or asks to "format lab entry". Ensures date, hypothesis, materials, procedure, observations, and conclusions are documented.
+```
+
+**Thesis Chapter Structure Checker (Graduate Students):**
+```yaml
+description: Validates thesis chapter structure against institutional requirements. Use when user asks to "check chapter format", "validate thesis structure", or when editing thesis .tex or .docx files. Verifies required sections, heading levels, and citation density.
+```
+
+**Econometric Specification Review (Economics):**
+```yaml
+description: Reviews econometric specifications for common errors. Use when user shares regression code in R or Stata, or asks to "check model spec", "review estimation". Validates: standard error clustering, fixed effects structure, missing covariates, and replication commands.
+```
+
+### Bad Examples (Too Generic)
+
+❌ `description: Helps with citations`
+→ Too vague, doesn't specify style or when to trigger
+
+❌ `description: Checks lab notebooks`
+→ Missing trigger phrases, no format specification
+
+❌ `description: Reviews thesis chapters`
+→ Doesn't specify what aspects or when to activate
+
+---
+
+## Academic Domain Examples
+
+### Example 1: Citation Cross-Reference Checker
+
+**File:** `.claude/skills/validate-citations/SKILL.md`
+
+```markdown
+---
+name: validate-citations
+description: Cross-references in-text citations against bibliography entries. Use when user asks to "check citations", "validate references", or when working on .tex, .qmd, or .md files with bibliographies. Identifies missing entries, unused references, and formatting inconsistencies.
+argument-hint: "[file or 'all']"
+allowed-tools: ["Read", "Grep", "Glob", "Write"]
+---
+
+# Validate Citations
+
+Ensures all in-text citations have corresponding bibliography entries and identifies unused references.
+
+## Instructions
+
+Step 1: **Extract in-text citations**
+   - Use Grep to find citation commands: `\cite{...}`, `\citep{...}`, `[@...]`
+   - Build list of cited keys
+
+Step 2: **Parse bibliography file**
+   - Read Bibliography_base.bib (or specified .bib file)
+   - Extract all `@article{key,`, `@book{key,` entries
+
+Step 3: **Cross-reference**
+   - Missing in bib: citations without entries
+   - Unused in bib: entries never cited
+
+Step 4: **Report findings**
+   - Save to `quality_reports/citation_validation.md`
+   - List missing entries (CRITICAL)
+   - List unused entries (for cleanup)
+   - Check DOI formatting if present
+
+## Examples
+
+### Example 1: Manuscript with Missing Citation
+**User says:** "Check if all my citations are in the bib file"
+**Actions:**
+1. Grep for `\citep{` in manuscript.tex
+2. Extract keys: `Smith2020`, `Jones2019`, `Lee2021`
+3. Parse Bibliography_base.bib
+4. Find `Lee2021` missing
+**Result:** Report: "Missing entry: Lee2021. Add to bibliography before submission."
+
+## Troubleshooting
+
+**Error:** Citation format not recognized
+**Cause:** Non-standard citation command
+**Solution:** Add pattern to Step 1 grep (e.g., `\citeauthor`, `\citeyear`)
+```
+
+---
+
+### Example 2: Regression Output Formatter
+
+**File:** `.claude/skills/format-regression-tables/SKILL.md`
+
+```markdown
+---
+name: format-regression-tables
+description: Converts R regression outputs to publication-ready LaTeX tables. Use when user runs regressions and says "make a table", "format results", or "export to LaTeX". Handles lm, glm, felm, and fixest objects. Applies field-specific conventions (standard errors in parentheses, stars for significance).
+argument-hint: "[model object name]"
+allowed-tools: ["Read", "Write", "Bash"]
+---
+
+# Format Regression Tables
+
+Converts R regression objects into publication-ready LaTeX tables with proper formatting.
+
+## Instructions
+
+Step 1: **Identify model objects**
+   - User provides R object names (e.g., `model1`, `model2`)
+   - Read corresponding .rds files from output/
+
+Step 2: **Extract coefficients and statistics**
+   - Coefficient estimates
+   - Standard errors (in parentheses)
+   - Significance stars: * p<0.10, ** p<0.05, *** p<0.01
+   - R-squared, N observations
+
+Step 3: **Generate LaTeX table**
+   - Use booktabs style (no vertical lines)
+   - Align on decimal points
+   - Add notes for standard errors and significance
+
+Step 4: **Save and verify**
+   - Save to `output/tables/regression_results.tex`
+   - Verify compiles in standalone .tex document
+
+## Examples
+
+### Example 1: Panel Regression with Fixed Effects
+**User says:** "Format my regression results for the paper"
+**Context:** User has run `felm(y ~ x | firm + year | 0 | firm, data=df)`
+**Actions:**
+1. Read saved model object
+2. Extract: coefficients, clustered SEs, R², N
+3. Generate LaTeX:
+   ```latex
+   \begin{table}[htbp]
+   \caption{Effect of X on Y}
+   \begin{tabular}{lc}
+   \toprule
+   & (1) \\
+   \midrule
+   X & 0.523*** \\
+     & (0.089) \\
+   \midrule
+   Firm FE & Yes \\
+   Year FE & Yes \\
+   \midrule
+   Observations & 1,234 \\
+   R-squared & 0.678 \\
+   \bottomrule
+   \multicolumn{2}{l}{\footnotesize Clustered SEs in parentheses.} \\
+   \multicolumn{2}{l}{\footnotesize * p<0.10, ** p<0.05, *** p<0.01}
+   \end{tabular}
+   \end{table}
+   ```
+**Result:** Ready to `\input` in manuscript.tex
+
+## Troubleshooting
+
+**Error:** Model object not found
+**Cause:** .rds file not in expected location
+**Solution:** Check output/ directory, verify saveRDS() was called
+
+**Error:** Standard errors missing
+**Cause:** Model didn't specify clustering/robust SEs
+**Solution:** Re-run with vcov specification, document assumption
+```
+
+---
+
+### Example 3: Experimental Protocol Validator
+
+**File:** `.claude/skills/validate-protocol/SKILL.md`
+
+```markdown
+---
+name: validate-protocol
+description: Validates experimental protocols against lab safety and reproducibility standards. Use when user provides lab protocol documents, asks to "check protocol", "validate procedure", or when reviewing .md or .docx experimental designs. Ensures required sections, safety notes, and replication details are present.
+argument-hint: "[protocol file]"
+allowed-tools: ["Read", "Write"]
+---
+
+# Validate Experimental Protocol
+
+Checks experimental protocols for completeness, safety documentation, and reproducibility.
+
+## Instructions
+
+Step 1: **Parse protocol document**
+   - Extract sections: Objective, Materials, Procedure, Safety, Expected Results
+   - Check for required metadata: Date, Version, Author
+
+Step 2: **Validate required elements**
+   - Materials list complete (catalog numbers, suppliers)
+   - Safety warnings for hazardous materials
+   - Quantitative measurements (volumes, temperatures, times)
+   - Controls specified
+
+Step 3: **Reproducibility check**
+   - Equipment specifications listed
+   - Randomization described (if applicable)
+   - Sample sizes justified
+   - Data recording method specified
+
+Step 4: **Generate report**
+   - PASS/FAIL for each section
+   - Missing elements highlighted
+   - Suggestions for improvement
+
+## Examples
+
+### Example 1: Cell Culture Protocol
+**User says:** "Check if my protocol is complete before submitting to IRB"
+**Context:** Protocol for isolating primary neurons
+**Actions:**
+1. Read protocol.md
+2. Check Materials: ✓ catalog numbers present
+3. Check Safety: ✗ missing biosafety level designation
+4. Check Procedure: ✓ quantitative (37°C, 5% CO₂, 10 mL media)
+**Result:** Report: "Missing: BSL-2 designation. Add before IRB submission."
+
+## Troubleshooting
+
+**Error:** Cannot parse sections
+**Cause:** Non-standard heading format
+**Solution:** Add heading patterns to Step 1 (e.g., "### Safety Notes")
+```
+
+---
+
+## Testing Your Skill
+
+### Step 1: Manual Test
+1. Create skill directory: `mkdir -p .claude/skills/your-skill-name`
+2. Copy SKILL.md template and customize
+3. Skills hot-reload automatically --- changes are detected without restarting
+4. Trigger skill: Use one of your trigger phrases
+5. Verify: Skill loads, instructions are clear, output is correct
+
+### Step 2: Iteration
+- **If skill doesn't trigger:** Revise description with more specific trigger phrases
+- **If instructions unclear:** Add more examples and detail to Steps
+- **If output wrong:** Add validation steps, troubleshooting section
+
+### Step 3: Success Criteria
+- ✅ Skill triggers on 90%+ of relevant queries
+- ✅ Complete workflow in expected number of steps
+- ✅ Zero API errors during normal operation
+- ✅ Same task yields consistent outputs across sessions
+
+---
+
+## Field-Specific Customization Checklist
+
+When adapting this template to your domain:
+
+- [ ] Replace example trigger phrases with your field's terminology
+- [ ] Add domain-specific file types (`.R`, `.py`, `.ipynb`, `.tex`, `.stan`)
+- [ ] Include field conventions (notation, formatting, citation styles)
+- [ ] Reference standard tools (`ggplot2`, `pandas`, `TikZ`, `Stata`)
+- [ ] Add common error messages from your toolchain
+- [ ] Include institutional requirements (thesis formats, journal templates)
+
+---
+
+## Allowed Tools Reference
+
+| Tool | Use For |
+|------|---------|
+| `Read` | Reading file contents (scripts, manuscripts, data) |
+| `Write` | Creating new files (reports, tables, outputs) |
+| `Edit` | Modifying existing files in place |
+| `Grep` | Searching file contents (citations, function names) |
+| `Glob` | Finding files by pattern (*.R, *.tex, *.csv) |
+| `Bash` | Running commands (R scripts, LaTeX compilation, git) |
+| `Task` | Launching subagents (for complex multi-step workflows) |
+
+**Security note:** `allowed-tools` only pre-approves — it does **not** restrict (see [the semantics note](#allowed-vs-disallowed)). For a genuinely read-only validation skill, add `disallowed-tools: ["Edit", "Write", "Bash"]`; for autonomous/background skills, also disallow `AskUserQuestion` so the loop can't stall on a prompt. Listing only what you use in `allowed-tools` is still good hygiene (it documents intent and minimizes silent pre-approvals), but it is not a sandbox.
+
+---
+
+## Where This Template Lives
+
+- **File:** `templates/skill-template.md`
+- **Purpose:** Starter for domain-specific skills
+- **Usage:** Copy to `.claude/skills/[name]/SKILL.md`, customize for your field
+
+For worked examples, see the `.claude/skills/` directory — `/r-package-check`, `/py-package-check`, and `/parity-check` are the fullest.
