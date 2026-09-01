@@ -4,7 +4,6 @@
 <img align="right" src="https://github.com/ipea/geobr/blob/master/r-package/man/figures/geobr_logo_b.png?raw=true" alt="logo" width="140">
 <img align="right" src="https://github.com/ipea/geobr/blob/master/r-package/man/figures/geobr_logo_y.png?raw=true" alt="logo" width="140">
 <p align="justify">
-
 geobr is a computational package to download official spatial data sets
 of Brazil. The package covers a wide range of spatial data sets,
 available at various geographic scales and for various years with
@@ -16,8 +15,8 @@ The package is currently available in
 [**R**](https://CRAN.R-project.org/package=geobr) and
 [**Python**](https://pypi.org/project/geobr/).
 
-| ***R*** | ***Python*** | ***Repo*** |
-|----|----|----|
+| ***R***                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ***Python***                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | ***Repo***                                                                                                                                                                                                                                                                                                          |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [![CRAN/METACRAN Version](https://www.r-pkg.org/badges/version/geobr)](https://CRAN.R-project.org/package=geobr) <br /> [![CRAN/METACRAN Total downloads](https://cranlogs.r-pkg.org/badges/grand-total/geobr?color=blue)](https://CRAN.R-project.org/package=geobr) <br /> [![CRAN/METACRAN downloads per month](https://cranlogs.r-pkg.org/badges/geobr?color=yellow)](https://CRAN.R-project.org/package=geobr) <br /> [![Codecov test coverage](https://codecov.io/gh/ipea/geobr/branch/master/graph/badge.svg?flag=r)](https://app.codecov.io/gh/ipea/geobr/tree/master?flags%5B0%5D=r) <br /> [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable) <br /> [![R build status](https://github.com/ipea/geobr/workflows/R-CMD-check/badge.svg)](https://github.com/ipea/geobr/actions) | [![PyPI version](https://badge.fury.io/py/geobr.svg)](https://badge.fury.io/py/geobr) <br /> [![Downloads](https://static.pepy.tech/badge/geobr)](https://pepy.tech/project/geobr) <br /> [![Downloads](https://static.pepy.tech/badge/geobr/month)](https://pepy.tech/project/geobr) <br /> [![Python Codecov test coverage](https://codecov.io/gh/ipea/geobr/branch/master/graph/badge.svg?flag=python)](https://app.codecov.io/gh/ipea/geobr/tree/master?flags%5B0%5D=python) <br /> [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable) <br /> [![Python build status](https://github.com/ipea/geobr/workflows/Python-CMD-check/badge.svg)](https://github.com/ipea/geobr/actions) | <img alt="GitHub stars" src="https://img.shields.io/github/stars/ipea/geobr.svg?color=orange"> <br /> <br /> [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) |
 
 ## Installation R
@@ -32,7 +31,7 @@ remotes::install_github("ipea/geobr", subdir = "r-package")
 ```
 
 obs. If you use **Linux**, you need to install a couple dependencies
-before installing the libraries `sf` and `geobr`. [More info
+before installing the libraries `sf` and `geobr`.[More info
 here](https://github.com/r-spatial/sf#linux).
 
 ## Installation Python
@@ -103,8 +102,8 @@ mun = read_municipality(code_muni="RJ", year=2010)
 mun = read_municipality(code_muni="all", year=2018)
 ```
 
-Since v1.0.0, the Python package uses a GeoParquet pipeline. For DuckDB workflows, use `query()` to load and
-analyze snapshots directly in SQL.
+Since v1.0.0, the Python package uses a GeoParquet pipeline. For DuckDB
+workflows, use `query()` to load and analyze snapshots directly in SQL.
 
 ## Python, DuckDB SQL and spatial analysis
 
@@ -142,52 +141,52 @@ including
 
 You can check all the data sets available with \``list_geobr()`
 
-| Function | Geographies available | Source | Years available |
-|:---|:---|:---|:---|
-| read_amazon | Brazil’s Legal Amazon | MMA | 2019, 2020, 2021, 2022, 2024 |
-| read_biomes | Biomes | IBGE | 2006, 2019, 2025 |
-| read_census_tract | Census tract (setor censitário) | IBGE | 2000, 2010, 2022 |
-| read_conservation_units | Environmental Conservation Units | MMA | 202402, 202503 |
-| read_country | Country | IBGE | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
-| read_disaster_risk_area | Disaster risk areas | CEMADEN and IBGE | 2010 |
-| read_favelas | Favelas and urban communities | IBGE | 2022 |
-| read_health_facilities | Health facilities | CNES, DataSUS | 201704, 201707, 201710, 201801, 201804, 201807, 201810, 201901, 201904, 201907, 201910, 202001, 202004, 202007, 202010, 202101, 202104, 202107, 202110, 202201, 202204, 202207, 202210, 202301, 202304, 202307, 202310, 202401, 202404, 202407, 202410, 202501, 202504, 202507, 202510, 202601, 202604 |
-| read_health_region | Health regions and macro regions | DataSUS | 1991, 1994, 1997, 2001, 2005, 2013, 2023, 2024, 2025 |
-| read_immediate_region | Immediate region | IBGE | 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
-| read_indigenous_land | Indigenous lands | FUNAI | 2016, 2017, 2018, 2019, 2022, 2024, 2025 |
-| read_intermediate_region | Intermediate region | IBGE | 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
-| read_meso_region | Meso region | IBGE | 2000, 2001, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 |
-| read_metro_area | Metropolitan areas | IBGE | 1970, 2001, 2002, 2003, 2005, 2008, 2009, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024 |
-| read_micro_region | Micro region | IBGE | 2000, 2001, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 |
-| read_municipality | Municipality | IBGE | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2005, 2007, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
-| read_municipal_seat | Municipality seats (sedes municipais) | IBGE | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2010, 2022 |
-| read_neighborhood | Neighborhood limits | IBGE | 2010, 2022 |
-| read_polling_places | Voting places | TSE | 2010, 2012, 2014, 2016, 2018, 2020, 2022, 2024 |
-| read_urban_concentrations | Urban concentration areas (concentrações urbanas) | IBGE | 2010 |
-| read_pop_arrangements | Population arrangements (arranjos populacionais) | IBGE | 2010 |
-| read_quilombola_lands | Quilombola lands officialy recognized | Incra | 202605 |
-| read_comparable_areas | Historically comparable municipalities, aka áreas mínimas comparáveis (AMCs) | IBGE | temporarily suspended |
-| read_region | Region | IBGE | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
-| read_schools | Schools | INEP | 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
-| read_semiarid | Semi Arid region | IBGE | 2005, 2017, 2021, 2022 |
-| read_state | States | IBGE | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
-| read_statistical_grid | Statistical Grid (gridded population) | IBGE | 2010, 2022 |
-| read_urban_area | Urban footprints | IBGE | 2005, 2015, 2019 |
-| read_weighting_area | Census weighting area (área de ponderação) | IBGE | 2010 |
+| Function                  | Geographies available                                                        | Source           | Years available                                                                                                                                                                                                                                                                                        |
+|:--------------------------|:-----------------------------------------------------------------------------|:-----------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| read_amazon               | Brazil’s Legal Amazon                                                        | MMA              | 2019, 2020, 2021, 2022, 2024                                                                                                                                                                                                                                                                           |
+| read_biomes               | Biomes                                                                       | IBGE             | 2006, 2019, 2025                                                                                                                                                                                                                                                                                       |
+| read_census_tract         | Census tract (setor censitário)                                              | IBGE             | 2000, 2010, 2022                                                                                                                                                                                                                                                                                       |
+| read_conservation_units   | Environmental Conservation Units                                             | MMA              | 202402, 202503                                                                                                                                                                                                                                                                                         |
+| read_country              | Country                                                                      | IBGE             | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025                                                                                                                                       |
+| read_disaster_risk_area   | Disaster risk areas                                                          | CEMADEN and IBGE | 2010                                                                                                                                                                                                                                                                                                   |
+| read_favelas              | Favelas and urban communities                                                | IBGE             | 2022                                                                                                                                                                                                                                                                                                   |
+| read_health_facilities    | Health facilities                                                            | CNES, DataSUS    | 201704, 201707, 201710, 201801, 201804, 201807, 201810, 201901, 201904, 201907, 201910, 202001, 202004, 202007, 202010, 202101, 202104, 202107, 202110, 202201, 202204, 202207, 202210, 202301, 202304, 202307, 202310, 202401, 202404, 202407, 202410, 202501, 202504, 202507, 202510, 202601, 202604 |
+| read_health_region        | Health regions and macro regions                                             | DataSUS          | 1991, 1994, 1997, 2001, 2005, 2013, 2023, 2024, 2025                                                                                                                                                                                                                                                   |
+| read_immediate_region     | Immediate region                                                             | IBGE             | 2019, 2020, 2021, 2022, 2023, 2024, 2025                                                                                                                                                                                                                                                               |
+| read_indigenous_land      | Indigenous lands                                                             | FUNAI            | 2016, 2017, 2018, 2019, 2022, 2024, 2025                                                                                                                                                                                                                                                               |
+| read_intermediate_region  | Intermediate region                                                          | IBGE             | 2019, 2020, 2021, 2022, 2023, 2024, 2025                                                                                                                                                                                                                                                               |
+| read_meso_region          | Meso region                                                                  | IBGE             | 2000, 2001, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022                                                                                                                                                                                                                                 |
+| read_metro_area           | Metropolitan areas                                                           | IBGE             | 1970, 2001, 2002, 2003, 2005, 2008, 2009, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024                                                                                                                                                                                 |
+| read_micro_region         | Micro region                                                                 | IBGE             | 2000, 2001, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022                                                                                                                                                                                                                                 |
+| read_municipality         | Municipality                                                                 | IBGE             | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2005, 2007, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025                                                                                                                           |
+| read_municipal_seat       | Municipality seats (sedes municipais)                                        | IBGE             | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2010, 2022                                                                                                                                                                                                                           |
+| read_neighborhood         | Neighborhood limits                                                          | IBGE             | 2010, 2022                                                                                                                                                                                                                                                                                             |
+| read_polling_places       | Voting places                                                                | TSE              | 2010, 2012, 2014, 2016, 2018, 2020, 2022, 2024                                                                                                                                                                                                                                                         |
+| read_urban_concentrations | Urban concentration areas (concentrações urbanas)                            | IBGE             | 2010                                                                                                                                                                                                                                                                                                   |
+| read_pop_arrangements     | Population arrangements (arranjos populacionais)                             | IBGE             | 2010                                                                                                                                                                                                                                                                                                   |
+| read_quilombola_lands     | Quilombola lands officialy recognized                                        | Incra            | 202605                                                                                                                                                                                                                                                                                                 |
+| read_comparable_areas     | Historically comparable municipalities, aka áreas mínimas comparáveis (AMCs) | IBGE             | temporarily suspended                                                                                                                                                                                                                                                                                  |
+| read_region               | Region                                                                       | IBGE             | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025                                                                                                                                       |
+| read_schools              | Schools                                                                      | INEP             | 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025                                                                                                                                                                                       |
+| read_semiarid             | Semi Arid region                                                             | IBGE             | 2005, 2017, 2021, 2022                                                                                                                                                                                                                                                                                 |
+| read_state                | States                                                                       | IBGE             | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025                                                                                                                                       |
+| read_statistical_grid     | Statistical Grid (gridded population)                                        | IBGE             | 2010, 2022                                                                                                                                                                                                                                                                                             |
+| read_urban_area           | Urban footprints                                                             | IBGE             | 2005, 2015, 2019, 2022                                                                                                                                                                                                                                                                                 |
+| read_weighting_area       | Census weighting area (área de ponderação)                                   | IBGE             | 2010, 2022                                                                                                                                                                                                                                                                                             |
 
 point_right: **All datasets use geodetic reference system “SIRGAS2000”,
 CRS(4674).**
 
 ## Other support functions:
 
-| Function | Action |
-|----|----|
-| `list_geobr` | List all datasets available in the geobr package |
-| `lookup_muni` | Look up municipality codes by their name, or the other way around |
-| `remove_islands` | Removes distant oceanic islands from Brazil |
+| Function                          | Action                                                                                                      |
+|-----------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `list_geobr`                      | List all datasets available in the geobr package                                                            |
+| `lookup_muni`                     | Look up municipality codes by their name, or the other way around                                           |
+| `remove_islands`                  | Removes distant oceanic islands from Brazil                                                                 |
 | `grid_state_correspondence_table` | Loads a correspondence table indicating what quadrants of IBGE’s statistical grid intersect with each state |
-| `cep_to_state` | Determine the state of a given CEP postal code |
-| … | … |
+| `cep_to_state`                    | Determine the state of a given CEP postal code                                                              |
+| …                                 | …                                                                                                           |
 
 Note 1. Data sets and Functions marked with “dev” are only available in
 the development version of `geobr`.
@@ -226,7 +225,7 @@ contributions to the community, including for example:
 #### **Similar packages for other countries/continents**
 
 - Africa: [afrimapr](https://afrimapr.github.io/afrimapr.website/)
-- Argentina: [geoAr](https://github.com/PoliticaArgentina/geoAr), [argentum](https://github.com/thomasartopoulos/argentum)
+- Argentina: [geoAr](https://github.com/PoliticaArgentina/geoAr)
 - Brazil: [geobr](https://ipea.github.io/geobr/)
 - Canada:
   [cancensus](https://mountainmath.github.io/cancensus/index.html)
