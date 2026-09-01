@@ -27,7 +27,7 @@ remotes::install_github("ipea/geobr", subdir = "r-package")
 ```
 
 obs. If you use **Linux**, you need to install a couple dependencies
-before installing the libraries `sf` and `geobr`. [More info
+before installing the libraries `sf` and `geobr`.[More info
 here](https://github.com/r-spatial/sf#linux).
 
 ## Installation Python
@@ -169,8 +169,8 @@ You can check all the data sets available with
 | read_semiarid | Semi Arid region | IBGE | 2005, 2017, 2021, 2022 |
 | read_state | States | IBGE | 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 |
 | read_statistical_grid | Statistical Grid (gridded population) | IBGE | 2010, 2022 |
-| read_urban_area | Urban footprints | IBGE | 2005, 2015, 2019 |
-| read_weighting_area | Census weighting area (área de ponderação) | IBGE | 2010 |
+| read_urban_area | Urban footprints | IBGE | 2005, 2015, 2019, 2022 |
+| read_weighting_area | Census weighting area (área de ponderação) | IBGE | 2010, 2022 |
 
 point_right: **All datasets use geodetic reference system “SIRGAS2000”,
 CRS(4674).**
@@ -223,8 +223,7 @@ contributions to the community, including for example:
 #### **Similar packages for other countries/continents**
 
 - Africa: [afrimapr](https://afrimapr.github.io/afrimapr.website/)
-- Argentina: [geoAr](https://github.com/PoliticaArgentina/geoAr),
-  [argentum](https://github.com/thomasartopoulos/argentum)
+- Argentina: [geoAr](https://github.com/PoliticaArgentina/geoAr)
 - Brazil: [geobr](https://ipea.github.io/geobr/)
 - Canada:
   [cancensus](https://mountainmath.github.io/cancensus/index.html)
