@@ -1,6 +1,24 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
+# Development version
+
+**Bug fixes**
+
+- Fixed `AttributeError: module 'pyarrow.compute' has no attribute
+  'match_substring_regex'`, which made **every** `read_*()` function fail on
+  pandas 3 when the installed pyarrow was built without RE2. Under pandas 3
+  strings are Arrow-backed, so a regex `str.contains()` dispatches to a pyarrow
+  kernel that such builds do not provide. Because the failure was in
+  `download_metadata_v2()`, it only appeared when the metadata cache had to be
+  rebuilt, so an existing `~/.cache/geobr` could mask it indefinitely. The
+  affected calls all match literal strings and now pass `regex=False`
+  (`utils.py`: `select_simplified()`, `download_metadata_v2()`, and the
+  `zone` filter in `select_metadata_v2()` used by `read_census_tract()`).
+  Found while running geobr inside QGIS 4.2.1, which ships pandas 3.0.3 and an
+  RE2-less pyarrow.
+
+-------------------------------------------------------
 # 1.0.0
 
 Update the python package to match the R 2.0.0 version. 
