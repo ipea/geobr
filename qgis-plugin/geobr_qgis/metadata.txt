@@ -1,0 +1,25 @@
+[general]
+name=geobr
+qgisMinimumVersion=3.40
+qgisMaximumVersion=4.99
+description=Download official spatial data sets of Brazil as QGIS layers
+about=Exposes the geobr Python package as QGIS Processing algorithms. Every geobr reader - states, municipalities, census tracts, biomes, indigenous lands, health facilities, schools, favelas and more - becomes an algorithm you can run from the Processing Toolbox, chain in Model Builder, run in batch, or call from qgis_process. Data comes from IBGE and other official Brazilian sources and is returned in EPSG:4674 (SIRGAS 2000). REQUIRES the geobr Python package, which must be installed into the interpreter QGIS itself uses, not a system Python. On Windows, run: "C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user geobr. On Linux and macOS, use the Python that QGIS runs. This also pulls in duckdb and rapidfuzz, which QGIS does not bundle. Restart QGIS afterwards.
+version=0.1.0
+author=Rafael H. M. Pereira, Ipea
+email=rafa.pereira.br@gmail.com
+repository=https://github.com/ipea/geobr
+tracker=https://github.com/ipea/geobr/issues
+homepage=https://github.com/ipea/geobr/tree/master/qgis-plugin
+category=Vector
+icon=icon.png
+experimental=True
+deprecated=False
+hasProcessingProvider=True
+external_deps=geobr
+tags=brazil,ibge,boundaries,census,municipality,opendata,vector
+changelog=0.1.0 - First release
+    Exposes 31 geobr readers as QGIS Processing algorithms, discovered from the
+    installed geobr package so new readers appear without a plugin update.
+    Verified on QGIS 3.42 (Qt5) and QGIS 4.2 (Qt6).
+    Known limitation: read_health_region is offered at municipality level only,
+    because geobr's micro/macro aggregation is currently broken upstream.

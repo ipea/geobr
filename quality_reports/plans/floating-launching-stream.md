@@ -175,8 +175,10 @@ configuration only — no package source, no tests, no CI.
 
 ## Out of scope (flagged, not fixed)
 
-- `python-package/pyproject.toml` gives `homepage = "https://github.com/ipeaGIT/geobr"`, but the git
-  remote and `r-package/DESCRIPTION` both say `ipea/geobr`. Real inconsistency in package metadata —
-  a one-line fix, but it is package source, not config. Say the word and I'll fold it in.
+- ~~`python-package/pyproject.toml` disagrees with the git remote about the GitHub org.~~
+  **RESOLVED 2026-09-02 — and the original reading was backwards.** The org was renamed
+  `ipeaGIT` → `ipea`; `pyproject.toml` already had the *current* name and the git remote had the
+  *legacy* one (a remote URL is not updated by an org rename). The whole repository has since been
+  normalised to `ipea`. See `MEMORY.md` `[LEARN:meta]`.
 - The duplicated `data_release` constant (`onLoad.R:8` / `utils.R:4`) is **documented** as a hazard by
   the new rule in §3; consolidating it is a source change for a separate task.

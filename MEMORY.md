@@ -88,10 +88,25 @@ languages. Verified: a rejected `output` value still downloaded the full parquet
 lacks; `_GEO_LOADERS` marks `indigenousland` with `year_param: "date"` while `read_indigenous_land()`
 takes `year`; `CHANGELOG.md` announces `read_quilombola_lands()` but the function is singular.
 
-[LEARN:meta] `python-package/pyproject.toml` declares `homepage = ".../ipeaGIT/geobr"`; the remote and
-`r-package/DESCRIPTION` use `ipea/geobr`.
+[LEARN:meta] **A `git remote` URL is not authoritative about a GitHub organisation's current name.**
+An org rename leaves existing remotes untouched — they keep working purely through GitHub's
+redirect, so a remote records what the clone was made from, never what is canonical today. To
+determine the canonical name, resolve the redirect: it points **old → new**. Here
+`ipeaGIT/geobr → 301 → ipea/geobr` (which returns 200 directly), so **`ipea` is current**. Reading
+the remote instead once produced a "fix" that replaced correct URLs with legacy ones and declared
+the correct file a blocker. The rename moved the docs domain too: `ipeagit.github.io` **404s**,
+while `ipea.github.io/geobr/` is live — same for the sister package `censobr`. The whole repository,
+and the remote, were normalised to `ipea` on 2026-09-02.
 
 ## Settled decisions (do not re-propose)
+
+[LEARN:decision] **QGIS plugin authorship stays as-is (2026-09-02).** `qgis-plugin/geobr_qgis/`
+keeps `author=Rafael H. M. Pereira, Ipea` and `email=rafa.pereira.br@gmail.com`. Raised because the
+plugin credits one person while the Python package lists six authors and the R package two `aut`
+plus ~19 `ctb`, and because plugins.qgis.org shows the email to any logged-in user; the maintainer
+declined both changes. Do not re-propose an institutional address or a collective author line. Note
+QGIS's `author` is a free-text string with no role or multi-author concept, so it cannot mirror
+`DESCRIPTION`/`pyproject.toml` anyway.
 
 [LEARN:decision] **No `skip_if_offline()`.** All 38 R test files call `skip_on_cran()`; none call
 `skip_if_offline()`, and the maintainer declined adding it (2026-08-31). Consequence: the R suite

@@ -37,7 +37,7 @@ architecture.
 2. **R and Python resolve the release differently.** R pins to `geobr_env$data_release`. Python
    calls `releases/latest` *first* and only falls back to the pinned tag — so Python can silently
    serve a newer data release than R for the same package version.
-3. `python-package/pyproject.toml` homepage says `ipeaGIT/geobr`; remote and DESCRIPTION say `ipea/geobr`.
+3. `python-package/pyproject.toml` homepage says `ipea/geobr`; remote and DESCRIPTION say `ipea/geobr`.
 
 ## Progress
 
