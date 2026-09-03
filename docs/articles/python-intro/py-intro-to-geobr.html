@@ -61,7 +61,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/ipeaGIT/geobr/">
+  <a href="https://github.com/ipea/geobr/">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -82,14 +82,14 @@
       <h1 data-toc-skip>Introduction to geobr (Python)</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ipeaGIT/geobr/tree/master/r-package/vignettes/python-intro/py-intro-to-geobr.Rmd"><code>vignettes/python-intro/py-intro-to-geobr.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ipea/geobr/tree/master/r-package/vignettes/python-intro/py-intro-to-geobr.Rmd"><code>vignettes/python-intro/py-intro-to-geobr.Rmd</code></a></small>
       <div class="hidden name"><code>py-intro-to-geobr.Rmd</code></div>
 
     </div>
 
     
     
-<p>The <a href="https://github.com/ipeaGIT/geobr"><strong>geobr</strong></a> package provides quick and easy access to official spatial data sets of Brazil. The syntax of all <strong>geobr</strong> functions operate on a simple logic that allows users to easily download a wide variety of data sets with updated geometries and harmonized attributes and geographic projections across geographies and years. This vignette presents a quick intro to <strong>geobr</strong>.</p>
+<p>The <a href="https://github.com/ipea/geobr"><strong>geobr</strong></a> package provides quick and easy access to official spatial data sets of Brazil. The syntax of all <strong>geobr</strong> functions operate on a simple logic that allows users to easily download a wide variety of data sets with updated geometries and harmonized attributes and geographic projections across geographies and years. This vignette presents a quick intro to <strong>geobr</strong>.</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
@@ -290,7 +290,7 @@ Source: INEP
 <a href="#merge-external-data" class="anchor"></a>Merge external data</h4>
 <p>First, we need a <code>DataFrame</code> with estimates of Life Expectancy and merge it to our spatial database. The two-digit abbreviation of state name is our key column to join these two databases.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read DataFrame with life expectancy data</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>data_url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/ipeaGIT/geobr/master/r-package/inst/extdata/br_states_lifexpect2017.csv"</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>data_url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/ipea/geobr/master/r-package/inst/extdata/br_states_lifexpect2017.csv"</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(data_url, index_col<span class="op">=</span><span class="dv">0</span>)</span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>

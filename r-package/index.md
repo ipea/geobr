@@ -1,7 +1,7 @@
 # geobr: Download Official Spatial Data Sets of Brazil 
 
-<img align="right" src="https://github.com/ipeaGIT/geobr/blob/master/r-package/man/figures/geobr_logo_b.png?raw=true" alt="logo" width="140"> 
-<img align="right" src="https://github.com/ipeaGIT/geobr/blob/master/r-package/man/figures/geobr_logo_y.png?raw=true" alt="logo" width="140">
+<img align="right" src="https://github.com/ipea/geobr/blob/master/r-package/man/figures/geobr_logo_b.png?raw=true" alt="logo" width="140"> 
+<img align="right" src="https://github.com/ipea/geobr/blob/master/r-package/man/figures/geobr_logo_y.png?raw=true" alt="logo" width="140">
 <p align="justify">geobr is a computational package to download official spatial data sets of Brazil. The package includes a wide range of geospatial data in geopackage format (like shapefiles but better), available at various geographic scales and for various years with harmonized attributes, projection and topology (see detailed list of available data sets below). </p> 
 
 
@@ -11,7 +11,7 @@ The package is currently available in [**R**](https://CRAN.R-project.org/package
 
 | ***R*** | ***Python*** | ***Repo***|
 |-----|-----|----|
-| [![CRAN/METACRAN Version](https://www.r-pkg.org/badges/version/geobr)](https://CRAN.R-project.org/package=geobr) <br /> [![CRAN/METACRAN Total downloads](http://cranlogs.r-pkg.org/badges/grand-total/geobr?color=blue)](https://CRAN.R-project.org/package=geobr) <br /> [![CRAN/METACRAN downloads per month](http://cranlogs.r-pkg.org/badges/geobr?color=yellow)](https://CRAN.R-project.org/package=geobr) <br /> [![Codecov test coverage](https://codecov.io/gh/ipeaGIT/geobr/branch/master/graph/badge.svg)](https://codecov.io/gh/ipeaGIT/geobr?branch=master)  <br /> [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable) | [![PyPI version](https://badge.fury.io/py/geobr.svg)](https://badge.fury.io/py/geobr) <br />  [![Downloads](https://pepy.tech/badge/geobr)](https://pepy.tech/project/geobr) <br />  [![Downloads](https://pepy.tech/badge/geobr/month)](https://pepy.tech/project/geobr/month)  <br /> [![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing) |<img alt="GitHub stars" src="https://img.shields.io/github/stars/ipeaGIT/geobr.svg?color=orange"> <br /> [![R build status](https://github.com/ipeaGIT/geobr/workflows/R-CMD-check/badge.svg)](https://github.com/ipeaGIT/geobr/actions) <br />  [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) |
+| [![CRAN/METACRAN Version](https://www.r-pkg.org/badges/version/geobr)](https://CRAN.R-project.org/package=geobr) <br /> [![CRAN/METACRAN Total downloads](http://cranlogs.r-pkg.org/badges/grand-total/geobr?color=blue)](https://CRAN.R-project.org/package=geobr) <br /> [![CRAN/METACRAN downloads per month](http://cranlogs.r-pkg.org/badges/geobr?color=yellow)](https://CRAN.R-project.org/package=geobr) <br /> [![Codecov test coverage](https://codecov.io/gh/ipea/geobr/branch/master/graph/badge.svg)](https://codecov.io/gh/ipea/geobr?branch=master)  <br /> [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable) | [![PyPI version](https://badge.fury.io/py/geobr.svg)](https://badge.fury.io/py/geobr) <br />  [![Downloads](https://pepy.tech/badge/geobr)](https://pepy.tech/project/geobr) <br />  [![Downloads](https://pepy.tech/badge/geobr/month)](https://pepy.tech/project/geobr/month)  <br /> [![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing) |<img alt="GitHub stars" src="https://img.shields.io/github/stars/ipea/geobr.svg?color=orange"> <br /> [![R build status](https://github.com/ipea/geobr/workflows/R-CMD-check/badge.svg)](https://github.com/ipea/geobr/actions) <br />  [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) |
 
 
 
@@ -24,7 +24,7 @@ The package is currently available in [**R**](https://CRAN.R-project.org/package
 
 # or use the development version with latest features
   utils::remove.packages('geobr')
-  devtools::install_github("ipeaGIT/geobr", subdir = "r-package")
+  devtools::install_github("ipea/geobr", subdir = "r-package")
   library(geobr)
 ```
 obs. If you use **Linux**, you need to install a couple dependencies before installing the libraries `sf` and `geobr`. [More info here](https://github.com/r-spatial/sf#linux).
@@ -80,7 +80,7 @@ mun = read_municipality(code_muni="RJ", year=2010)
 # Read all municipalities in the country at a given year
 mun = read_municipality(code_muni="all", year=2018)
 ```
-More examples [here](https://github.com/ipeaGIT/geobr/tree/master/python-package/examples) 
+More examples [here](https://github.com/ipea/geobr/tree/master/python-package/examples) 
 
 # Available datasets:
 
@@ -148,7 +148,7 @@ Note 2. Most data sets are available at scale 1:250,000 (see documentation for d
 
 
 # Contributing to geobr
-If you would like to contribute to geobr and add new functions or data sets, please check this [guide](https://github.com/ipeaGIT/geobr/blob/master/CONTRIBUTING.md) to propose your contribution.
+If you would like to contribute to geobr and add new functions or data sets, please check this [guide](https://github.com/ipea/geobr/blob/master/CONTRIBUTING.md) to propose your contribution.
 
 
 -----
@@ -165,7 +165,7 @@ As of today, there is another R package with similar functionalities: [simplefea
 
 #### **Similar packages for other countries/continents**
 - Africa: [afrimapr](https://afrimapr.github.io/afrimapr.website/)
-- Brazil: [geobr](https://ipeagit.github.io/geobr/)
+- Brazil: [geobr](https://ipea.github.io/geobr/)
 - Canada: [cancensus](https://mountainmath.github.io/cancensus/index.html)
 - Chile: [chilemapas](https://pacha.dev/chilemapas/)
 - Czech Republic: [RCzechia](https://github.com/jlacko/RCzechia)
@@ -177,11 +177,11 @@ As of today, there is another R package with similar functionalities: [simplefea
 
 -----
 
-# Credits <img align="right" src="https://github.com/ipeaGIT/geobr/blob/master/r-package/man/figures/ipea_logo.png?raw=true" alt="ipea" width="300">
+# Credits <img align="right" src="https://github.com/ipea/geobr/blob/master/r-package/man/figures/ipea_logo.png?raw=true" alt="ipea" width="300">
 
 Original shapefiles are created by official government institutions. The **geobr** package is developed by a team at the Institute for Applied Economic Research (Ipea), Brazil. If you want to cite this package, you can cite it as:
 
-* Pereira, R.H.M.; Gonçalves, C.N.; et. all (2019) **geobr: Loads Shapefiles of Official Spatial Data Sets of Brazil**. GitHub repository - https://github.com/ipeaGIT/geobr.
+* Pereira, R.H.M.; Gonçalves, C.N.; et. all (2019) **geobr: Loads Shapefiles of Official Spatial Data Sets of Brazil**. GitHub repository - https://github.com/ipea/geobr.
 
 
 

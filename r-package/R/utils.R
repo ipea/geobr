@@ -137,7 +137,7 @@ check_connection <- function(url = 'https://github.com/ipea/geobr_prep_data/rele
 
   # Source - https://stackoverflow.com/questions/59796178/r-curlhas-internet-false-even-though-there-are-internet-connection/59800411#59800411
   # Posted by Hong Ooi
-  # allow internet connection via proxy. Closes https://github.com/ipeaGIT/geobr/issues/399
+  # allow internet connection via proxy. Closes https://github.com/ipea/geobr/issues/399
   assign("has_internet_via_proxy", TRUE, environment(curl::has_internet))
 
   # Check if user has internet connection

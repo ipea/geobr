@@ -34,25 +34,25 @@ library(sf)
 library(httr)
 library(httr2)
 library(httpcache)
-am <- 'https://github.com/ipeaGIT/censobr/releases/download/v0.3.0/1970_population_v0.3.0.parquet'
-as <- 'https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/amazonia_legal_simplified.gpkg'
+am <- 'https://github.com/ipea/censobr/releases/download/v0.3.0/1970_population_v0.3.0.parquet'
+as <- 'https://github.com/ipea/geobr/releases/download/v1.7.0/amazonia_legal_simplified.gpkg'
 
 
 url_d <- dput(file_url)
 
 
 url <- c(
-         "https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/33municipality_2015.gpkg",
-         # "https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/35municipality_2015.gpkg",
-         # "https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/31municipality_2015.gpkg",
-         # "https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/11municipality_2015.gpkg",
-         # "https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/27municipality_2015.gpkg",
-         # "https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/26municipality_2015.gpkg",
-         # "https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/25municipality_2015.gpkg",
-         # "https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/24municipality_2015.gpkg",
-         # "https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/23municipality_2015.gpkg",
-         # "https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/22municipality_2015.gpkg",
-         "https://github.com/ipeaGIT/geobr/releases/download/v1.7.0/21municipality_2015.gpkg"
+         "https://github.com/ipea/geobr/releases/download/v1.7.0/33municipality_2015.gpkg",
+         # "https://github.com/ipea/geobr/releases/download/v1.7.0/35municipality_2015.gpkg",
+         # "https://github.com/ipea/geobr/releases/download/v1.7.0/31municipality_2015.gpkg",
+         # "https://github.com/ipea/geobr/releases/download/v1.7.0/11municipality_2015.gpkg",
+         # "https://github.com/ipea/geobr/releases/download/v1.7.0/27municipality_2015.gpkg",
+         # "https://github.com/ipea/geobr/releases/download/v1.7.0/26municipality_2015.gpkg",
+         # "https://github.com/ipea/geobr/releases/download/v1.7.0/25municipality_2015.gpkg",
+         # "https://github.com/ipea/geobr/releases/download/v1.7.0/24municipality_2015.gpkg",
+         # "https://github.com/ipea/geobr/releases/download/v1.7.0/23municipality_2015.gpkg",
+         # "https://github.com/ipea/geobr/releases/download/v1.7.0/22municipality_2015.gpkg",
+         "https://github.com/ipea/geobr/releases/download/v1.7.0/21municipality_2015.gpkg"
 
 )
 
@@ -272,7 +272,7 @@ arqs_ibge = paste0(dest_dir,"/",basename(urls_ibge))
 #benchmark
 library(tictoc)
 
-url = 'https://github.com/ipeaGIT/censobr/releases/download/v0.3.1/test_2000_families.parquet'
+url = 'https://github.com/ipea/censobr/releases/download/v0.3.1/test_2000_families.parquet'
 
 tic()
 downloaded_files <- curl::multi_download(
@@ -293,7 +293,7 @@ tools::md5sum(url) |> unname()
 
 # cache with curl::multi_download ----------------------------------
 library(tictoc)
-url = 'https://github.com/ipeaGIT/censobr/releases/download/v0.3.1/test2_2000_families.parquet'
+url = 'https://github.com/ipea/censobr/releases/download/v0.3.1/test2_2000_families.parquet'
 
 tictoc::tic()
 downloaded_files <- curl::multi_download(
@@ -314,7 +314,7 @@ tictoc::toc()
 
 library(httr2)
 
-url <- 'https://github.com/ipeaGIT/censobr/releases/download/v0.3.1/test2_2000_families.parquet'
+url <- 'https://github.com/ipea/censobr/releases/download/v0.3.1/test2_2000_families.parquet'
 
 reqs <- lapply(X=url, FUN=httr2::request)
 

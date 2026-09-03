@@ -61,7 +61,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/ipeaGIT/geobr/">
+  <a href="https://github.com/ipea/geobr/">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -82,14 +82,14 @@
       <h1 data-toc-skip>Introduction to geobr</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ipeaGIT/geobr/tree/master/r-package/vignettes/intro_to_geobr.Rmd"><code>vignettes/intro_to_geobr.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ipea/geobr/tree/master/r-package/vignettes/intro_to_geobr.Rmd"><code>vignettes/intro_to_geobr.Rmd</code></a></small>
       <div class="hidden name"><code>intro_to_geobr.Rmd</code></div>
 
     </div>
 
     
     
-<p>The <a href="https://github.com/ipeaGIT/geobr"><strong>geobr</strong></a> package provides quick and easy access to official spatial data sets of Brazil. The syntax of all <strong>geobr</strong> functions operate on a simple logic that allows users to easily download a wide variety of data sets with updated geometries and harmonized attributes and geographic projections across geographies and years. This vignette presents a quick intro to <strong>geobr</strong>.</p>
+<p>The <a href="https://github.com/ipea/geobr"><strong>geobr</strong></a> package provides quick and easy access to official spatial data sets of Brazil. The syntax of all <strong>geobr</strong> functions operate on a simple logic that allows users to easily download a wide variety of data sets with updated geometries and harmonized attributes and geographic projections across geographies and years. This vignette presents a quick intro to <strong>geobr</strong>.</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
@@ -100,10 +100,10 @@
 
 <span class="co"># Development version</span>
   <span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/remove.packages.html">remove.packages</a></span><span class="op">(</span><span class="st">'geobr'</span><span class="op">)</span>
-  <span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">"ipeaGIT/geobr"</span>, subdir <span class="op">=</span> <span class="st">"r-package"</span><span class="op">)</span></code></pre></div>
+  <span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">"ipea/geobr"</span>, subdir <span class="op">=</span> <span class="st">"r-package"</span><span class="op">)</span></code></pre></div>
 <p>Now let’s load the libraries we’ll use in this vignette.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R">  <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ipeaGIT/geobr">geobr</a></span><span class="op">)</span>
+<code class="sourceCode R">  <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ipea/geobr">geobr</a></span><span class="op">)</span>
   <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
   <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
   <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></code></pre></div>

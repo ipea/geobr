@@ -255,7 +255,7 @@ ggplot() +
 # Using **geobr** together with **censobr**
 
 Following the same steps as above, we can use together **geobr** with our sister 
-package [**censobr**](https://ipeagit.github.io/censobr/index.html) to map the
+package [**censobr**](https://ipea.github.io/censobr/index.html) to map the
 proportion of households connected to a sewage network in Brazilian municipalities 
 
 First, we need to download households data from the Brazilian census using the 

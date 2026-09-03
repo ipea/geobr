@@ -20,7 +20,7 @@ install.packages("geobr")
 library(geobr)
 
   # or use development version of geobr
-    # devtools::install_github("ipeaGIT/geobr")
+    # devtools::install_github("ipea/geobr")
 
 
 # Rafael
@@ -244,7 +244,7 @@ system.time(
 ### Test coverage  ----------------
 
 # TRAVIS
-#  https://travis-ci.org/ipeaGIT/geobr
+#  https://travis-ci.org/ipea/geobr
 
 library(covr)
 library(testthat)

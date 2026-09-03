@@ -155,7 +155,7 @@ to filter the data directly in the function call: `read_disaster_risk_area()`,
 
 **Minor changes**
 
-- Update intro vignette to show how to use geobr together with the new [**censobr**](https://ipeagit.github.io/censobr/index.html) sister package.
+- Update intro vignette to show how to use geobr together with the new [**censobr**](https://ipea.github.io/censobr/index.html) sister package.
 
 **Bug fixes**
 
