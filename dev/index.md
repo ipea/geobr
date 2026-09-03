@@ -137,7 +137,7 @@ including
 # Available datasets:
 
 You can check all the data sets available with
-\`[`list_geobr()`](https://ipeagit.github.io/geobr/dev/reference/list_geobr.md)
+\`[`list_geobr()`](https://ipea.github.io/geobr/dev/reference/list_geobr.md)
 
 | Function | Geographies available | Source | Years available |
 |:---|:---|:---|:---|

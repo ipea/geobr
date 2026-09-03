@@ -17,9 +17,9 @@ remove_islands(x)
 
   An 'sf' object with CRS EPSG:4674. Usually an object returned from
   other geobr functions, such as
-  [`read_country()`](https://ipeagit.github.io/geobr/dev/reference/read_country.md),
+  [`read_country()`](https://ipea.github.io/geobr/dev/reference/read_country.md),
   `read_states()`,
-  [`read_municipality()`](https://ipeagit.github.io/geobr/dev/reference/read_municipality.md),
+  [`read_municipality()`](https://ipea.github.io/geobr/dev/reference/read_municipality.md),
   or similar functions.
 
 ## Value

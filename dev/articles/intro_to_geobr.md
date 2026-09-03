@@ -41,7 +41,7 @@ library(ggplot2)
 The geobr package currently covers 30 spatial data sets, including a
 variety of political-administrative and statistical areas used in
 Brazil. You can view what data sets are available using the
-[`list_geobr()`](https://ipeagit.github.io/geobr/dev/reference/list_geobr.md)
+[`list_geobr()`](https://ipea.github.io/geobr/dev/reference/list_geobr.md)
 function.
 
 ``` r
@@ -280,7 +280,7 @@ ggplot() +
 
 Following the same steps as above, we can use together **geobr** with
 our sister package
-[**censobr**](https://ipeagit.github.io/censobr/index.html) to map the
+[**censobr**](https://ipea.github.io/censobr/index.html) to map the
 proportion of households connected to a sewage network in Brazilian
 municipalities
 

@@ -14,11 +14,11 @@ CRAN release: 2026-06-23
 
 - Moves the {arrow} package from “Suggests” to “Imports”.
 - Fix bug in
-  [`read_immediate_region()`](https://ipeagit.github.io/geobr/dev/reference/read_immediate_region.md)
+  [`read_immediate_region()`](https://ipea.github.io/geobr/dev/reference/read_immediate_region.md)
   which was hardcoded to read state 11 by mistake. Closes
   [\#436](https://github.com/ipea/geobr/issues/436).
 - The function
-  [`remove_islands()`](https://ipeagit.github.io/geobr/dev/reference/remove_islands.md)
+  [`remove_islands()`](https://ipea.github.io/geobr/dev/reference/remove_islands.md)
   now correctly drops the arquipelago de Trindade e Martim Vaz
 - Fix documentation of arguments `year` and `date`.
 - Make the internal function that downloads geobr metadata more robust
@@ -33,10 +33,10 @@ CRAN release: 2026-05-20
 
 **New functions**
 
-- [`read_favela()`](https://ipeagit.github.io/geobr/dev/reference/read_favela.md)
+- [`read_favela()`](https://ipea.github.io/geobr/dev/reference/read_favela.md)
   with data of favelas and urban communities (source: IBGE) Closes
   [\#387](https://github.com/ipea/geobr/issues/387).
-- [`read_polling_places()`](https://ipeagit.github.io/geobr/dev/reference/read_polling_places.md)
+- [`read_polling_places()`](https://ipea.github.io/geobr/dev/reference/read_polling_places.md)
   with data of polling places (source: TSE) Closes
   [\#184](https://github.com/ipea/geobr/issues/184) and
   [\#242](https://github.com/ipea/geobr/issues/242).
@@ -44,7 +44,7 @@ CRAN release: 2026-05-20
   quilombola lands (source: INCRA)
   [Closes](https://github.com/ipea/geobr/issues/242)
   [\#242](https://github.com/ipea/geobr/issues/242).
-- [`remove_islands()`](https://ipeagit.github.io/geobr/dev/reference/remove_islands.md)
+- [`remove_islands()`](https://ipea.github.io/geobr/dev/reference/remove_islands.md)
   to remove islands from Brazil. Closes
   [\#412](https://github.com/ipea/geobr/issues/412).
 
@@ -55,29 +55,29 @@ CRAN release: 2026-05-20
   encourage users to be more mindful of historical changes in the data.
 - The `geom` column has been renamed to `geometry` for consistency
 - The
-  [`read_health_region()`](https://ipeagit.github.io/geobr/dev/reference/read_health_region.md)
+  [`read_health_region()`](https://ipea.github.io/geobr/dev/reference/read_health_region.md)
   has been completely rewritten to allow users return more detailed
   output if needed
 - Functions like
-  [`read_schools()`](https://ipeagit.github.io/geobr/dev/reference/read_schools.md)
+  [`read_schools()`](https://ipea.github.io/geobr/dev/reference/read_schools.md)
   and
-  [`read_health_facilities()`](https://ipeagit.github.io/geobr/dev/reference/read_health_facilities.md)
+  [`read_health_facilities()`](https://ipea.github.io/geobr/dev/reference/read_health_facilities.md)
   now use a combination of official spatial coordinates and coordinates
   found using the [{geocodebr}](https://github.com/ipea/geocodebr/)
   package to improve spatial accuracy. See documentation of these
   functions.
 - The function
-  [`lookup_muni()`](https://ipeagit.github.io/geobr/dev/reference/lookup_muni.md)
+  [`lookup_muni()`](https://ipea.github.io/geobr/dev/reference/lookup_muni.md)
   now has a `year` parameter. Closes
   [\#401](https://github.com/ipea/geobr/issues/401).
 - The function and data
-  [`read_comparable_areas()`](https://ipeagit.github.io/geobr/dev/reference/read_comparable_areas.md)
+  [`read_comparable_areas()`](https://ipea.github.io/geobr/dev/reference/read_comparable_areas.md)
   will be going under major changes. For now, this function is
   temporarily suspended.
 - The only year available so far for the functions
-  [`read_urban_concentrations()`](https://ipeagit.github.io/geobr/dev/reference/read_urban_concentrations.md)
+  [`read_urban_concentrations()`](https://ipea.github.io/geobr/dev/reference/read_urban_concentrations.md)
   and
-  [`read_pop_arrangements()`](https://ipeagit.github.io/geobr/dev/reference/read_pop_arrangements.md)is
+  [`read_pop_arrangements()`](https://ipea.github.io/geobr/dev/reference/read_pop_arrangements.md)is
   2010, and not 2015.
 
 **Major changes**
@@ -97,29 +97,29 @@ CRAN release: 2026-05-20
   bar. If `FALSE`, the function is silent. Closes
   [\#400](https://github.com/ipea/geobr/issues/400).
 - The function
-  [`list_geobr()`](https://ipeagit.github.io/geobr/dev/reference/list_geobr.md)
+  [`list_geobr()`](https://ipea.github.io/geobr/dev/reference/list_geobr.md)
   now has a boolean argument `wide`, so users can choose whether the
   output should be presented in wide or long format.
 - The function
-  [`lookup_muni()`](https://ipeagit.github.io/geobr/dev/reference/lookup_muni.md)
+  [`lookup_muni()`](https://ipea.github.io/geobr/dev/reference/lookup_muni.md)
   now uses probabilistic match to find municipality names that users
   might input with typos. Closes
   [\#406](https://github.com/ipea/geobr/issues/406).
 - The following functions now include the column `code_state` to allow
   users to filter the data directly in the function call:
-  [`read_indigenous_land()`](https://ipeagit.github.io/geobr/dev/reference/read_indigenous_land.md),
-  [`read_metro_area()`](https://ipeagit.github.io/geobr/dev/reference/read_metro_area.md),
-  [`read_pop_arrangements()`](https://ipeagit.github.io/geobr/dev/reference/read_pop_arrangements.md)
+  [`read_indigenous_land()`](https://ipea.github.io/geobr/dev/reference/read_indigenous_land.md),
+  [`read_metro_area()`](https://ipea.github.io/geobr/dev/reference/read_metro_area.md),
+  [`read_pop_arrangements()`](https://ipea.github.io/geobr/dev/reference/read_pop_arrangements.md)
   and
-  [`read_urban_concentrations()`](https://ipeagit.github.io/geobr/dev/reference/read_urban_concentrations.md).
+  [`read_urban_concentrations()`](https://ipea.github.io/geobr/dev/reference/read_urban_concentrations.md).
 - The following functions now include the column `code_muni` to allow
   users to filter the data directly in the function call:
-  [`read_disaster_risk_area()`](https://ipeagit.github.io/geobr/dev/reference/read_disaster_risk_area.md),
-  [`read_health_facilities()`](https://ipeagit.github.io/geobr/dev/reference/read_health_facilities.md),
+  [`read_disaster_risk_area()`](https://ipea.github.io/geobr/dev/reference/read_disaster_risk_area.md),
+  [`read_health_facilities()`](https://ipea.github.io/geobr/dev/reference/read_health_facilities.md),
   `read_neighborhood`(),
-  [`read_statistical_grid()`](https://ipeagit.github.io/geobr/dev/reference/read_statistical_grid.md)
+  [`read_statistical_grid()`](https://ipea.github.io/geobr/dev/reference/read_statistical_grid.md)
   and
-  [`read_schools()`](https://ipeagit.github.io/geobr/dev/reference/read_schools.md).
+  [`read_schools()`](https://ipea.github.io/geobr/dev/reference/read_schools.md).
 
 **Minor changes**
 
@@ -151,7 +151,7 @@ CRAN release: 2024-09-06
 **Minor changes**
 
 - The
-  [`read_municipality()`](https://ipeagit.github.io/geobr/dev/reference/read_municipality.md)
+  [`read_municipality()`](https://ipea.github.io/geobr/dev/reference/read_municipality.md)
   has a new parameter `keep_areas_operacionais`, which allows users to
   control wether the data should keep the polygons of Lagoas dos Patos
   and Lagoa Mirim in the State of Rio Grande do Sul (considered as areas
@@ -177,15 +177,15 @@ CRAN release: 2024-04-18
 **Major changes**
 
 - Function
-  [`read_health_facilities()`](https://ipeagit.github.io/geobr/dev/reference/read_health_facilities.md)
+  [`read_health_facilities()`](https://ipea.github.io/geobr/dev/reference/read_health_facilities.md)
   now has a new parameter `date`, which will allow users to access data
   for different dates of reference. The plan is to have at least one
   update of this data set per year. Closes
   [\#334](https://github.com/ipea/geobr/issues/334).
 - Functions
-  [`read_urban_area()`](https://ipeagit.github.io/geobr/dev/reference/read_urban_area.md)
+  [`read_urban_area()`](https://ipea.github.io/geobr/dev/reference/read_urban_area.md)
   and
-  [`read_metro_area()`](https://ipeagit.github.io/geobr/dev/reference/read_metro_area.md)
+  [`read_metro_area()`](https://ipea.github.io/geobr/dev/reference/read_metro_area.md)
   now have a new parameter `code_state`, which will allow users to
   filter selected states. Closes
   [\#338](https://github.com/ipea/geobr/issues/338)
@@ -218,7 +218,7 @@ CRAN release: 2024-01-09
 **Minor changes**
 
 - Fixed non-ASCII characters in data
-  [`geobr::grid_state_correspondence_table()`](https://ipeagit.github.io/geobr/dev/reference/grid_state_correspondence_table.md)
+  [`geobr::grid_state_correspondence_table()`](https://ipea.github.io/geobr/dev/reference/grid_state_correspondence_table.md)
 
 ## geobr v1.8.1
 
@@ -234,7 +234,7 @@ CRAN release: 2023-09-09
 
 **New function**
 
-- [`read_capitals()`](https://ipeagit.github.io/geobr/dev/reference/read_capitals.md)
+- [`read_capitals()`](https://ipea.github.io/geobr/dev/reference/read_capitals.md)
   to download either a spatial `sf` object with the location of the
   municipal seats (sede dos municipios) of state capitals, or a
   `data.frame` with the names of codes of state capitals.
@@ -244,7 +244,7 @@ CRAN release: 2023-09-09
 **Minor changes**
 
 - Update intro vignette to show how to use geobr together with the new
-  [**censobr**](https://ipeagit.github.io/censobr/index.html) sister
+  [**censobr**](https://ipea.github.io/censobr/index.html) sister
   package.
 
 **Bug fixes**
@@ -256,14 +256,14 @@ CRAN release: 2023-09-09
   [Closes](https://github.com/ipea/geobr/issues/279)
   [\#279](https://github.com/ipea/geobr/issues/279).
 - fixed bug in
-  [`cep_to_state()`](https://ipeagit.github.io/geobr/dev/reference/cep_to_state.md)
+  [`cep_to_state()`](https://ipea.github.io/geobr/dev/reference/cep_to_state.md)
   function. [Closes](https://github.com/ipea/geobr/issues/317)
   [\#317](https://github.com/ipea/geobr/issues/317).
 - fixed bug in progress bar.
   [Closes](https://github.com/ipea/geobr/issues/154)
   [\#154](https://github.com/ipea/geobr/issues/154).
 - The
-  [`lookup_muni()`](https://ipeagit.github.io/geobr/dev/reference/lookup_muni.md)
+  [`lookup_muni()`](https://ipea.github.io/geobr/dev/reference/lookup_muni.md)
   and `download_metadata()` functions are now more robust to internet
   connection failures.
 
@@ -285,7 +285,7 @@ CRAN release: 2022-08-16
 - Started using package documentation templates with Roxygen
 - Reduced a lot of code redundancy
 - Important update tothe
-  [`check_connection()`](https://ipeagit.github.io/geobr/dev/reference/check_connection.md)
+  [`check_connection()`](https://ipea.github.io/geobr/dev/reference/check_connection.md)
   function
 
 ## geobr v1.6.6
@@ -295,7 +295,7 @@ CRAN release: 2022-08-16
 - another attempt to make geobr fail gracefully when there is no
   connection to server.
 - Improved documentation of
-  [`read_statistical_grid()`](https://ipeagit.github.io/geobr/dev/reference/read_statistical_grid.md)
+  [`read_statistical_grid()`](https://ipea.github.io/geobr/dev/reference/read_statistical_grid.md)
   Closed [\#289](https://github.com/ipea/geobr/issues/289).
 
 ## geobr v1.6.5
@@ -358,7 +358,7 @@ CRAN release: 2021-04-16
 **Minor changes**
 
 - Improved
-  [`check_connection()`](https://ipeagit.github.io/geobr/dev/reference/check_connection.md)
+  [`check_connection()`](https://ipea.github.io/geobr/dev/reference/check_connection.md)
   to fail gracefully. Return message, no error.
 
 ## geobr v1.6.0
@@ -373,7 +373,7 @@ CRAN release: 2021-04-16
   [\#17](https://github.com/ipea/geobr/issues/17)
 - New data set of macro regions og health, which can be accessed using
   the new `macro` parameter added to
-  [`read_health_region()`](https://ipeagit.github.io/geobr/dev/reference/read_health_region.md)
+  [`read_health_region()`](https://ipea.github.io/geobr/dev/reference/read_health_region.md)
   function. Closes issue
   [\#219](https://github.com/ipea/geobr/issues/219).
 - New internal support function `is_online()`to check internet
@@ -453,7 +453,7 @@ CRAN release: 2020-10-04
 - improved documentation of argument `simplified`
 - included documentation of argument `zone` in the `read_census_tract`
   function
-- [`read_municipality()`](https://ipeagit.github.io/geobr/dev/reference/read_municipality.md)
+- [`read_municipality()`](https://ipea.github.io/geobr/dev/reference/read_municipality.md)
   function now also takes additional inputs for data sets before 1992.
   Closes issue [\#163](https://github.com/ipea/geobr/issues/163) (added
   in 2020-06)
@@ -465,7 +465,7 @@ CRAN release: 2020-10-04
   [\#135](https://github.com/ipea/geobr/issues/135)
   [\#172](https://github.com/ipea/geobr/issues/172)
 - fix typo in
-  [`geobr::grid_state_correspondence_table`](https://ipeagit.github.io/geobr/dev/reference/grid_state_correspondence_table.md).
+  [`geobr::grid_state_correspondence_table`](https://ipea.github.io/geobr/dev/reference/grid_state_correspondence_table.md).
   Closes [\#187](https://github.com/ipea/geobr/issues/187)
 - argument `tp` fully deprecated and replaced with `simplified`. No more
   warning message

@@ -44,7 +44,7 @@ read_health_facilities(
   abbreviation of a state is passed (e.g. `33` or `"RJ"`), all data of
   that state are downloaded. Municipality codes can be consulted with
   the
-  [`geobr::lookup_muni()`](https://ipeagit.github.io/geobr/dev/reference/lookup_muni.md)
+  [`geobr::lookup_muni()`](https://ipea.github.io/geobr/dev/reference/lookup_muni.md)
   function.
 
 - output:

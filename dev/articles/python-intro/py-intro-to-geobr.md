@@ -32,7 +32,7 @@ import pandas as pd
 The geobr package currently covers 30 spatial data sets, including a
 variety of political-administrative and statistical areas used in
 Brazil. You can view what data sets are available using the
-[`list_geobr()`](https://ipeagit.github.io/geobr/dev/reference/list_geobr.md)
+[`list_geobr()`](https://ipea.github.io/geobr/dev/reference/list_geobr.md)
 function.
 
 ``` python
