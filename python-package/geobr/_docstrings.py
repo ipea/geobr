@@ -65,6 +65,16 @@ code_muni : int, str or list, default "all"
     abbreviation of a state is passed (e.g. ``33`` or ``"RJ"``), all data of
     that state are downloaded. Municipality codes can be consulted with
     ``geobr.lookup_muni()``.""",
+    # `read_statistical_grid` takes code_muni as a required argument, so it
+    # cannot use the block above. (The R package documents this one with the
+    # shared `code_muni` template, which wrongly calls "all" the default.)
+    "code_muni_required": """\
+code_muni : int, str or list
+    Required. The 7-digit code of a municipality. If a two-digit state code or
+    a two-letter uppercase abbreviation of a state is passed (e.g. ``33`` or
+    ``"RJ"``), all data of that state are downloaded. Pass ``"all"`` to
+    download all the data available in the country. Municipality codes can be
+    consulted with ``geobr.lookup_muni()``.""",
     "code_state": """\
 code_state : int, str or list, default "all"
     The two-digit code of a state or a two-letter uppercase abbreviation
@@ -77,14 +87,12 @@ code_immediate : int, str or list, default "all"
     ``"RJ"``), the function will load all immediate regions of that state. If
     ``code_immediate="all"`` (the default), the function downloads all
     immediate regions of the country.""",
-    # NOTE: the Python signature spells this `code_intermadiate`; the R package
-    # uses `code_intermediate`. The key matches the Python signature.
-    "code_intermadiate": """\
-code_intermadiate : int, str or list, default "all"
+    "code_intermediate": """\
+code_intermediate : int, str or list, default "all"
     The 4-digit code of an intermediate region. If the two-digit code or a
     two-letter uppercase abbreviation of a state is passed (e.g. ``33`` or
     ``"RJ"``), the function will load all intermediate regions of that state.
-    If ``code_intermadiate="all"`` (the default), the function downloads all
+    If ``code_intermediate="all"`` (the default), the function downloads all
     intermediate regions of the country.""",
     "code_meso": """\
 code_meso : int, str or list, default "all"
@@ -106,6 +114,16 @@ code_tract : int, str or list, default "all"
     function will load all census tracts of that state. If
     ``code_tract="all"`` (the default), the function downloads all census
     tracts of the country.""",
+    # `read_census_tract` takes code_tract as a required argument, so it cannot
+    # use the block above. Loading every census tract in the country is slow
+    # and may exhaust memory, so the argument is deliberately not defaulted --
+    # matching the R package.
+    "code_tract_required": """\
+code_tract : int, str or list
+    Required. The 7-digit code of a municipality. If the two-digit code or a
+    two-letter uppercase abbreviation of a state is passed (e.g. ``33`` or
+    ``"RJ"``), the function will load all census tracts of that state. Pass
+    ``"all"`` to download all census tracts of the country.""",
     "code_weighting": """\
 code_weighting : int, str or list, default "all"
     The 7-digit code of a municipality. If the two-digit code or a two-letter

@@ -505,11 +505,6 @@ def _simplified_attempts(preferred: bool) -> list[bool]:
     return [True, False] if preferred else [False]
 
 
-def _simplified_attempts(preferred: bool) -> list[bool]:
-    """Try preferred flag first; when True was requested, also try original geometry."""
-    return [True, False] if preferred else [False]
-
-
 def read_geobr_hybrid(
     geography_v2: str,
     geography_gpkg: str,

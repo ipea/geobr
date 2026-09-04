@@ -130,6 +130,43 @@ _GEO_LOADERS: dict[str, dict[str, Any]] = {
     },
 }
 
+# Geographies that are point layers: there is nothing to simplify, so the data
+# release ships no `*_simplified.parquet` asset for them and asking for one
+# raises in `select_metadata_v2()`. The public readers encode this by passing
+# `simplified=False`; this set is the same fact for the SQL/session path.
+#
+# `tests/test_point_geographies.py` checks this set against the live metadata,
+# so upstream drift surfaces in CI rather than in a user's query.
+POINT_GEOGRAPHIES = frozenset(
+    {
+        "healthfacilities",
+        "municipalseats",
+        "pollingplaces",
+        "schools",
+        "statsgrid",
+    }
+)
+
+
+def _resolve_simplified(geo: str, simplified: Optional[bool]) -> bool:
+    """Resolve the `simplified` flag for `geo`.
+
+    `None` means the caller did not choose, so point layers resolve to False.
+    An explicit True on a point layer is downgraded with a warning rather than
+    left to fail deeper in `select_metadata_v2()`.
+    """
+    if geo not in POINT_GEOGRAPHIES:
+        return True if simplified is None else bool(simplified)
+
+    if simplified:
+        warnings.warn(
+            f"{geo!r} is a point layer and has no simplified variant; "
+            "reading the original geometry instead.",
+            UserWarning,
+            stacklevel=3,
+        )
+    return False
+
 
 def _setup_connection(conn) -> None:
     for stmt in (
@@ -330,7 +367,7 @@ def _load_geo_dataset(
     year: int,
     *,
     connection,
-    simplified: bool = True,
+    simplified: Optional[bool] = None,
     code: str = "all",
 ) -> Any:
     view_name = f"{geo}_{year}"
@@ -340,6 +377,8 @@ def _load_geo_dataset(
         raise ValueError(
             f"Geography {geo!r} cannot be auto-loaded. Available: {available}."
         )
+
+    simplified = _resolve_simplified(geo, simplified)
 
     from geobr.utils import read_geobr_hybrid, read_geobr_v2
 
@@ -555,7 +594,7 @@ class GeoBrDuckDB:
         geo: str,
         *,
         year: Optional[int] = None,
-        simplified: bool = True,
+        simplified: Optional[bool] = None,
         code: str = "all",
     ):
         if year is None:
