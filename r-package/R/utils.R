@@ -287,6 +287,11 @@ download_metadata2 <- function(){ # nocov start
   # download metadata to temp file
   temp_meta <- NULL
 
+  metadata_failed <- paste0(
+    "Could not download geobr metadata. ",
+    "Please check your internet connection or try again later."
+  )
+
   # test server connection with github first
   using_github_server <- TRUE
   metadata_link <- paste0(
@@ -311,12 +316,6 @@ download_metadata2 <- function(){ # nocov start
   }
 
   if (inherits(response, "try-error") || response$status_code != 200L) {
-    
-    metadata_failed <- paste0(
-      "Could not download geobr metadata. ",
-      "Please check your internet connection or try again later."
-    )
-
     cli::cli_alert_danger(metadata_failed)
 
     return(NULL)
@@ -332,7 +331,7 @@ download_metadata2 <- function(){ # nocov start
     asset_urls <- unique(regmatches(release_page, gregexpr(asset_pattern, release_page))[[1]])
   } else {
     asset_pattern <- '(?<=href=")[^"]+\\.parquet(?=")'
-    parquet_file_names <- unique(regmatches(release_page, gregexpr(asset_pattern, release_page, perl = TRUE))[[1]])
+    asset_urls <- unique(regmatches(release_page, gregexpr(asset_pattern, release_page, perl = TRUE))[[1]])
   }
 
   if (length(asset_urls) == 0L | is.null(asset_urls)) {
@@ -399,7 +398,8 @@ download_parquet <- function(filename_to_download,
       )
 
     file_url2 <- paste0(
-      "https://www.ipea.gov.br/geobr/data_v2.0.0/",
+      "https://www.ipea.gov.br/geobr/data_",
+      geobr_env$data_release, "/",
       filename_to_download
     )
 
