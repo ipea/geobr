@@ -43,7 +43,7 @@ mun <- lookup_muni(
   year = 2022
   )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpHsv2Sk/duckdb
+#> ℹ /tmp/RtmpwzpAh0/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.

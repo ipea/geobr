@@ -5,6 +5,8 @@
 **Bug fixes**
 
 - Requires duckdb (\>= 1.5.1)
+- geobr now fallsback to ipea servers whenever users cannot access
+  github servers.
 
 ## geobr v2.0.1
 
