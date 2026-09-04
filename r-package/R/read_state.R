@@ -26,7 +26,7 @@
 #' # Read specific state at a given year
 #' uf <- read_state(code_state=12, year = 2025)
 #'
-read_state <- function(year = NULL,
+read_state <- function(year,
                        code_state = "all",
                        simplified  = TRUE,
                        output = "sf",
