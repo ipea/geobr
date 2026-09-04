@@ -1,12 +1,14 @@
 """A Processing algorithm that clears geobr's download cache.
 
-geobr's Python cache is deliberately persistent - unlike the R package, which
-uses a per-session temp directory, it writes to ~/.cache/geobr and never expires
-or caps it. A few years of census tracts add up to gigabytes, so this gives the
-user a visible, deliberate way to reclaim the space. Nothing is ever cleared
-automatically: the directory is shared with every other geobr consumer on the
-machine (scripts, notebooks), and a QGIS plugin silently wiping it would force
-re-downloads for tools it knows nothing about.
+Since geobr 1.0.1, the Python package caches downloads in a per-session temp
+directory that is deleted when the Python process exits - the same behavior
+as the R package - so it needs no manual cleanup. geobr 1.0.0, though, cached
+persistently in ~/.cache/geobr with no expiry or cap; a few years of census
+tracts add up to gigabytes. This algorithm gives the user a visible, deliberate
+way to remove files left behind by that older version. Nothing is cleared
+automatically: the legacy directory is shared with every other geobr 1.0.0
+consumer on the machine (scripts, notebooks), and a QGIS plugin silently
+wiping it would force re-downloads for tools it knows nothing about.
 """
 
 from __future__ import annotations
@@ -23,19 +25,22 @@ from qgis.core import (
 
 
 def cache_dirs():
-    """Every directory geobr might have cached into, most likely first.
+    """Directories where geobr 1.0.0 cached downloads, most likely first.
 
-    This mirrors ``geobr._cache.cache_dir()`` rather than importing it. That
-    module is private, and importing it would execute ``geobr/__init__.py``,
-    pulling in pandas, geopandas and duckdb for what is otherwise a path
-    lookup. The contract - ``$XDG_CACHE_HOME/geobr``, else ``~/.cache/geobr``,
-    falling back to the system temp directory when that cannot be created - is
-    documented in both geobr packages.
+    This mirrors the contract of ``geobr._cache.cache_dir()`` as it stood in
+    geobr 1.0.0 - ``$XDG_CACHE_HOME/geobr``, else ``~/.cache/geobr``, falling
+    back to the system temp directory when that cannot be created - rather
+    than importing it. That module is private, and importing it would execute
+    ``geobr/__init__.py``, pulling in pandas, geopandas and duckdb for what
+    is otherwise a path lookup.
 
-    Duplicating it is safe in the one direction that matters: if geobr ever
-    moves the cache, this reports an empty directory rather than deleting
-    something else. Every candidate ends in a directory literally named
-    ``geobr``.
+    geobr 1.0.1 and later use a per-session ``Temp/geobr_<random>`` directory
+    instead, which these candidates deliberately do not match: a live session
+    cache belongs to a running process and must not be deleted. Duplicating
+    the old contract is safe in the one direction that matters: if the
+    locations ever change again, this reports an empty directory rather than
+    deleting something else. Every candidate ends in a directory literally
+    named ``geobr``.
     """
     candidates = []
     base = os.environ.get("XDG_CACHE_HOME")
@@ -52,7 +57,7 @@ def cache_dirs():
 
 
 class ClearCacheAlgorithm(QgsProcessingAlgorithm):
-    """Removes the parquet files geobr has downloaded."""
+    """Removes parquet files cached by geobr 1.0.0."""
 
     def createInstance(self):
         return ClearCacheAlgorithm()
@@ -71,15 +76,19 @@ class ClearCacheAlgorithm(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
         return (
-            "Deletes the data files geobr has downloaded.\n\n"
-            "geobr caches every dataset it downloads and never expires or caps "
-            "that cache, so it grows without bound - a single year of census "
-            "tracts can exceed 350 MB. This algorithm reclaims that space.\n\n"
+            "Removes files left behind by geobr 1.0.0's persistent cache.\n\n"
+            "geobr 1.0.0 cached every download in ~/.cache/geobr (or "
+            "$XDG_CACHE_HOME/geobr) with no expiry or size cap, so it grew "
+            "without bound - a single year of census tracts can exceed 350 MB. "
+            "geobr 1.0.1 and later cache in a per-session temp directory that "
+            "is deleted automatically on exit, so they need no cleanup; this "
+            "algorithm reclaims space from the legacy directory only.\n\n"
             "Nothing is lost permanently: anything deleted is downloaded again "
             "the next time you request it.\n\n"
-            "Note the cache is shared with any other geobr use on this machine, "
-            "such as Python scripts or notebooks, which will also re-download "
-            "afterwards. Tick 'List files only' to see what is there first."
+            "Note the legacy directory is shared with any other geobr 1.0.0 "
+            "use on this machine, such as Python scripts or notebooks, which "
+            "will also re-download afterwards. Tick 'List files only' to see "
+            "what is there first."
         )
 
     def initAlgorithm(self, config=None):

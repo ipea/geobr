@@ -128,18 +128,17 @@ the log, so an unexpected fallthrough is visible.
   on a network that black-holes connections that call would hang until QGIS is restarted. It is
   excluded in `provider.py` (`_EXCLUDED_READERS`) and returns once geobr fixes it. Every other
   reader uses the current parquet path.
-- **The cache is persistent and unbounded.** geobr caches downloads in `~/.cache/geobr` (or
-  `$XDG_CACHE_HOME/geobr`) with no expiry and no size cap, and it **survives QGIS restarts** — this
-  is deliberate, and the sharpest difference from the R package, whose cache lives in a per-session
-  temp directory and dies with the session. It grows without bound: a single year of census tracts
-  exceeds 350 MB. Run **Clear geobr download cache** in the toolbox to reclaim the space, or tick
-  *List files only* on it first to see what is there.
+- **Downloads are cached per session.** As of geobr 1.0.1, the Python package stores downloads and
+  metadata in a fresh temp directory that is deleted when the Python process exits — the same
+  behavior as the R package. Source updates are picked up on the next QGIS start, with no action
+  needed. Within one session repeated reads are served from that session cache, but restarting QGIS
+  re-downloads whatever the session uses, and a single year of census tracts exceeds 350 MB.
 
-  Nothing is cleared automatically, on exit or otherwise, because that directory is shared with
-  every other geobr consumer on the machine — Python scripts, notebooks — and silently wiping it
-  would force re-downloads for tools the plugin knows nothing about.
-
-  If a dataset looks out of date, clearing the cache is the fix. The plugin does not expose geobr's
+  geobr 1.0.0 instead cached persistently in `~/.cache/geobr` (or `$XDG_CACHE_HOME/geobr`), with no
+  expiry and no size cap, surviving restarts — so stale data went unnoticed unless the cache was
+  cleared by hand. Upgrading no longer uses that directory, but nothing removes it automatically
+  either; the **Clear geobr download cache** algorithm still deletes its contents. Tick *List files
+  only* on it first to see whether any legacy files remain. The plugin does not expose geobr's
   `cache` argument, because `cache=False` does not refresh the *metadata* — the thing that actually
   goes stale.
 - **Shapefile output truncates field names** to 10 characters. Prefer GeoPackage.

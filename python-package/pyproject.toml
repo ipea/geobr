@@ -1,6 +1,6 @@
 [project]
 name = "geobr"
-version = "1.0.0"
+version = "1.0.1"
 description = "geobr: Download Official Spatial Data Sets of Brazil"
 readme = "README.md"
 requires-python = "<4.0,>=3.10"

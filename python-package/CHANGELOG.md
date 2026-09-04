@@ -1,7 +1,7 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
-# Development version
+# 1.0.1 version
 
 **Bug fixes**
 
@@ -17,6 +17,15 @@
   `zone` filter in `select_metadata_v2()` used by `read_census_tract()`).
   Found while running geobr inside QGIS 4.2.1, which ships pandas 3.0.3 and an
   RE2-less pyarrow.
+
+- The download cache is now temporary, matching the behavior of the R
+  package: parquet and metadata files are stored in a session-specific
+  directory under the system temp folder and are removed when the Python
+  process exits. Previously, files persisted in `~/.cache/geobr` across
+  sessions, so data updated at the source was not picked up unless the user
+  cleared the cache manually. Cache directories left behind in
+  `~/.cache/geobr` by previous versions are no longer used and can be safely
+  deleted.
 
 -------------------------------------------------------
 # 1.0.0
