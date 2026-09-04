@@ -7,10 +7,10 @@ def read_metro_area(
     year: int,
     code_state: str = "all",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download metropolitan area polygons grouped by metro region.
 
@@ -19,10 +19,10 @@ def read_metro_area(
     {year}
     {code_state}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
     return read_geobr_v2(

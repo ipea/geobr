@@ -12,11 +12,11 @@ def read_municipality(
     year,
     code_muni="all",
     simplified=True,
-    verbose=False,
-    keep_areas_operacionais=False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose=False,
+    keep_areas_operacionais=False,
 ):
     """Download shape files of Brazilian municipalities.
 
@@ -25,11 +25,11 @@ def read_municipality(
     {year}
     {code_muni}
     {simplified}
-    {verbose}
-    {keep_areas_operacionais}
     {output}
     {show_progress}
     {cache}
+    {verbose}
+    {keep_areas_operacionais}
 
     """
 

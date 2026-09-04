@@ -7,10 +7,10 @@ def read_meso_region(
     year: int,
     code_meso: str = "all",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download spatial data of meso region as sf objects.
 
@@ -21,10 +21,10 @@ def read_meso_region(
     {year}
     {code_meso}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
 

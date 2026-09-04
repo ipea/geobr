@@ -7,10 +7,10 @@ def read_state(
     year: int,
     code_state: str = "all",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download spatial data of Brazilian states.
 
@@ -19,10 +19,10 @@ def read_state(
     {year}
     {code_state}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
 

@@ -6,13 +6,13 @@ from geobr._docstrings import docparams
 
 @docparams
 def read_pop_arrangements(
-    year: InterruptedError,
+    year: int,
     code_state: str = "all",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download population arrangements (IBGE).
 
@@ -21,10 +21,10 @@ def read_pop_arrangements(
     {year}
     {code_state}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
     relation = read_geobr_v2(

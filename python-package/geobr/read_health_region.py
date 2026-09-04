@@ -13,10 +13,10 @@ def read_health_region(
     geometry_level: str = "municipality",
     macro=None,
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download Brazilian health region data.
 
@@ -27,10 +27,10 @@ def read_health_region(
     {geometry_level}
     {macro}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
     if macro is not None:
@@ -65,20 +65,22 @@ def read_health_region(
 
     all_cols = relation.columns
 
+    # Columns dropped before aggregating, matched by prefix so that
+    # municipality-level variants such as `code_muni6` (present in the
+    # 1991-2013 files) are dropped as well. Keeping `code_muni6` in the
+    # GROUP BY would silently defeat the aggregation. Mirrors the R side.
     if geometry_level == "micro":
-        group_cols = [
-            c
-            for c in all_cols
-            if c != "geometry"
-            and c not in ("code_muni", "name_muni", "code_health_macroregion", "name_health_macroregion")
-        ]
+        drop_prefixes = (
+            "geometry", "code_muni", "name_muni",
+            "code_health_macroregion", "name_health_macroregion",
+        )
     else:
-        group_cols = [
-            c
-            for c in all_cols
-            if c != "geometry"
-            and c not in ("code_muni", "name_muni", "code_health_region", "name_health_region")
-        ]
+        drop_prefixes = (
+            "geometry", "code_muni", "name_muni",
+            "code_health_region", "name_health_region",
+        )
+
+    group_cols = [c for c in all_cols if not c.startswith(drop_prefixes)]
 
     group_cols_str = ", ".join(group_cols)
 

@@ -6,10 +6,10 @@ from geobr._docstrings import docparams
 def read_country(
     year: int,
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download Brazil's national borders data.
 
@@ -17,10 +17,10 @@ def read_country(
     ----------
     {year}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
 

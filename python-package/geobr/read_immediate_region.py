@@ -7,10 +7,10 @@ def read_immediate_region(
     year: int,
     code_immediate: str = "all",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """ Download Brazil's Immediate Geographic Areas data (IBGE).
 
@@ -24,10 +24,10 @@ def read_immediate_region(
     {year}
     {code_immediate}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
 

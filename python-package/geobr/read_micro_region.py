@@ -7,10 +7,10 @@ def read_micro_region(
     year: int,
     code_micro: str = "all",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download spatial data of micro region.
 
@@ -21,10 +21,10 @@ def read_micro_region(
     {year}
     {code_micro}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
 

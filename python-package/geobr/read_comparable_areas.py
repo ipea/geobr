@@ -4,7 +4,12 @@ from geobr._docstrings import docparams
 
 @docparams
 def read_comparable_areas(
-    start_year=1970, end_year=2010, simplified=True, verbose=False
+    start_year=1970,
+    end_year=2010,
+    simplified=True,
+    show_progress=True,
+    cache=True,
+    verbose=False,
 ):
     r"""Download spatial data of historically comparable municipalities
 
@@ -23,6 +28,8 @@ def read_comparable_areas(
     {start_year}
     {end_year}
     {simplified}
+    {show_progress}
+    {cache}
     {verbose}
 
     Returns
@@ -42,6 +49,11 @@ def read_comparable_areas(
     # Read comparable areas for a given period
     >>> df = read_comparable_areas(start_year=1970, end_year=2010)
     """
+
+    # `show_progress` and `cache` are accepted for signature parity with the R
+    # package, where they are likewise unused while the gpkg download path for
+    # this data set is suspended.
+    del show_progress, cache
 
     years_available = [
         1872,

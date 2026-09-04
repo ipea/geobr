@@ -6,10 +6,10 @@ from geobr._docstrings import docparams
 def read_region(
     year: int,
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """ Download spatial data of Brazil Regions.
 
@@ -17,10 +17,10 @@ def read_region(
     ----------
     {year}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
 

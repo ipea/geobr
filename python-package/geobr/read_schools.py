@@ -6,7 +6,6 @@ from geobr._docstrings import docparams
 def read_schools(
     year: int,
     code_muni: str = "all",
-    simplified: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
@@ -18,7 +17,6 @@ def read_schools(
     ----------
     {year}
     {code_muni}
-    {simplified}
     {output}
     {show_progress}
     {cache}
@@ -29,7 +27,7 @@ def read_schools(
         "schools",
         year,
         code=code_muni,
-        simplified=simplified,
+        simplified=False,
         output=output,
         show_progress=show_progress,
         cache=cache,

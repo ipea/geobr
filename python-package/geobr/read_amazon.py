@@ -5,10 +5,10 @@ from geobr._docstrings import docparams
 def read_amazon(
     year: int,
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download official Brazil's Legal Amazon data (Brazilian Ministry of Environment - MMA).
 
@@ -16,10 +16,10 @@ def read_amazon(
     ----------
     {year}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
 

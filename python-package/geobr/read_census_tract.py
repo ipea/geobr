@@ -5,26 +5,26 @@ from geobr._docstrings import docparams
 @docparams
 def read_census_tract(
     year: int,
-    code_tract: str = "all",
+    code_tract,
     zone="urban",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download spatial data of census tracts (setores censitários) of the Brazilian Population Census.
 
     Parameters
     ----------
     {year}
-    {code_tract}
+    {code_tract_required}
     {zone}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
 

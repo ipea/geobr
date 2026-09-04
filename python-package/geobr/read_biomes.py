@@ -6,10 +6,10 @@ from geobr._docstrings import docparams
 def read_biomes(
     year: int,
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download official Brazilian biomes data (IBGE).
 
@@ -17,10 +17,10 @@ def read_biomes(
     ----------
     {year}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
 

@@ -40,21 +40,21 @@ _CAPITALS = pd.DataFrame(
 
 @docparams
 def read_capitals(
+    year: int = 2010,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
     verbose: bool = False,
-    year: int = 2010,
 ):
     """Download spatial or tabular data for the 27 state capitals.
 
     Parameters
     ----------
+    {year}
     {output}
     {show_progress}
     {cache}
     {verbose}
-    {year}
 
     """
     codes = _CAPITALS["code_muni"].tolist()

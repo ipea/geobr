@@ -6,7 +6,7 @@ from geobr._docstrings import docparams
 def read_urban_area(
     year: int,
     code_muni: str = "all",
-    simplified: bool = False,
+    simplified: bool = True,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,

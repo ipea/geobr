@@ -7,10 +7,10 @@ def read_weighting_area(
     year: int,
     code_weighting: str = "all",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download Census Weighting Areas (area de ponderacao) data of the Brazilian Population Census.
 
@@ -19,10 +19,10 @@ def read_weighting_area(
     {year}
     {code_weighting}
     {simplified}
-    {verbose}
     {output}
     {show_progress}
     {cache}
+    {verbose}
 
     """
 
