@@ -45,10 +45,18 @@ def test_every_argument_is_documented(name, func):
 
 
 def test_shared_blocks_are_wellformed():
-    """Each PARAMS entry is a numpydoc block: unindented name, indented body."""
+    """Each PARAMS entry is a numpydoc block: unindented name, indented body.
+
+    A key may carry a variant suffix (``code_muni_required``) as long as the
+    header still names the actual argument (``code_muni``).
+    """
     for key, block in PARAMS.items():
         head, *body = block.splitlines()
-        assert head.startswith(f"{key} : "), f"{key}: bad header {head!r}"
+        assert " : " in head, f"{key}: bad header {head!r}"
+        arg = head.split(" : ", 1)[0]
+        assert key == arg or key.startswith(f"{arg}_"), (
+            f"{key}: header names {arg!r}, which is not that argument"
+        )
         assert body, f"{key}: no description"
         assert all(
             line.startswith("    ") for line in body

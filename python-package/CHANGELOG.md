@@ -3,6 +3,97 @@
 -------------------------------------------------------
 # Development version
 
+**Bug fixes**
+
+- Fixed `query()` and `session().read()` failing on point layers. Both resolve
+  a geography through `_load_geo_dataset()`, which defaulted to
+  `simplified=True` for every geography. The data release ships no simplified
+  asset for the five point layers (`healthfacilities`, `municipalseats`,
+  `pollingplaces`, `schools`, `statsgrid`), so `select_metadata_v2()` raised
+  `ValueError: No simplified data for ... in year ...`. Four of the five were
+  masked by `read_geobr_hybrid()`, which retries with the flag toggled, but
+  `pollingplaces` is `v2_only` and takes the `read_geobr_v2()` branch, so
+  `geobr.query("SELECT * FROM pollingplaces_2022")` failed outright. These
+  geographies now resolve to the original geometry directly; passing
+  `simplified=True` explicitly warns and reads the original geometry instead of
+  failing.
+
+- Removed a duplicate, identical definition of `utils._simplified_attempts()`.
+
+- `read_health_region(geometry_level="micro"|"macro")` no longer groups by
+  `code_muni6`. That column is present in the 1991-2013 files, and including it
+  in the `GROUP BY` split every health region back into its municipalities, so
+  the union aggregation silently did nothing for those years. Columns to drop
+  are now matched by prefix, as R already did.
+
+- `read_pop_arrangements()`'s `year` parameter was annotated
+  `InterruptedError` instead of `int`.
+
+**Breaking changes**
+
+- `read_municipal_seat()`, `read_schools()` and `read_health_facilities()` no
+  longer accept a `simplified` argument. These return point geometries, which
+  have nothing to simplify, and the R package has never exposed the argument
+  for them. All three now pass `simplified=False` into the download pipeline,
+  matching R and matching the two point readers that already did this
+  (`read_polling_places()`, `read_statistical_grid()`). Calls that passed
+  `simplified` explicitly will now raise `TypeError`; positional calls that
+  relied on the old argument order will silently bind one argument earlier, so
+  prefer keyword arguments. `read_health_facilities()` already defaulted to
+  `simplified=False`, so its behavior is unchanged for default callers.
+
+- `read_intermediate_region()`'s second argument was misspelled
+  `code_intermadiate` and is now `code_intermediate`, matching the R package.
+  Calls that passed the old name as a keyword will raise `TypeError`;
+  positional calls are unaffected.
+
+- `read_statistical_grid()` arguments are now ordered
+  `year, code_muni, output, show_progress, cache, verbose`, matching the R
+  package and the other four point readers. `verbose` was previously third.
+  Only calls that passed `verbose` positionally are affected; keyword calls
+  are unchanged.
+
+- **All 31 `read_*()` functions now take their arguments in the same order as
+  the R package**, which is the canonical
+  `<year|date>, <code_*>, [extras], simplified, output, show_progress, cache,
+  verbose`. Python previously used two orders: 10 readers already matched R,
+  while 21 hoisted `verbose` ahead of `output`. Only positional calls that
+  reached `verbose`, `output`, `show_progress` or `cache` are affected;
+  keyword calls are unchanged. The affected readers are `read_amazon()`,
+  `read_biomes()`, `read_capitals()`, `read_census_tract()`,
+  `read_conservation_units()`, `read_country()`, `read_health_region()`,
+  `read_immediate_region()`, `read_indigenous_land()`,
+  `read_intermediate_region()`, `read_meso_region()`, `read_metro_area()`,
+  `read_micro_region()`, `read_municipality()`, `read_pop_arrangements()`,
+  `read_region()`, `read_semiarid()`, `read_state()`,
+  `read_urban_concentrations()` and `read_weighting_area()`.
+  `tests/test_reader_argument_order.py` pins the R order for every reader so
+  this cannot drift again.
+
+- `read_conservation_units()` no longer accepts `code_state`. The conservation
+  unit data set has no `code_state` or `abbrev_state` column, so the argument
+  could not filter anything: `read_filter_parquet_relation()` silently returns
+  the unfiltered relation when no code column matches. R has never exposed it.
+
+- `read_capitals()` takes `year` as its first argument rather than its last,
+  matching the `read_<geography>(year, ...)` shape used by every other reader.
+  The default is unchanged (2010). R gained the same argument, which it
+  previously hardcoded.
+
+- `read_census_tract()` now requires `code_tract`; it previously defaulted to
+  `"all"`. Downloading every census tract in the country is slow and may
+  exhaust memory, which is why R has always required it.
+  `read_census_tract(year=2022)` now raises `TypeError`; pass
+  `code_tract="all"` to keep the old behavior.
+
+- `read_urban_area()` defaults to `simplified=True`, matching R and every other
+  reader. It defaulted to `False`, so callers who did not pass the argument
+  were downloading the full-resolution geometry.
+
+- `read_comparable_areas()` accepts `show_progress` and `cache` for signature
+  parity with R. As in R, both are currently unused: the gpkg download path for
+  this data set is suspended.
+
 **Documentation**
 
 - Every `read_*()` function now documents all of its arguments in full. The
