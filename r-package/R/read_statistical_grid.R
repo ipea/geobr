@@ -4,7 +4,15 @@
 #' Official gridded population estimate of Brazil.
 #'
 #' @template year
-#' @template code_muni
+#' @param code_muni The 7-digit code of a municipality. Alternatively, if a
+#'        two-digit state code or a two-letter uppercase abbreviation of a state
+#'        is passed (e.g. `33` or `"RJ"`), all data of that state are
+#'        downloaded. Passing `code_muni = "all"` downloads the grid for the
+#'        whole country. Municipality codes can be consulted with the
+#'        `geobr::lookup_muni()` function. Unlike in most `geobr` functions,
+#'        this argument is **required and has no default**: loading the grid for
+#'        the whole country takes a long time and may exhaust memory, so the
+#'        choice is left explicitly to the user.
 #' @template output
 #' @template showProgress
 #' @template cache

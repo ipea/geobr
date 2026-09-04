@@ -18,11 +18,15 @@ read_census_tract(
 \arguments{
 \item{year}{Numeric. Year of the data in \code{YYYY} format.}
 
-\item{code_tract}{The 7-digit code of a Municipality. If the two-digit code
-or a two-letter uppercase abbreviation of a state is passed, (e.g. 33
-or "RJ") the function will load all census tracts of that state. If
-\code{code_tract="all"}, the function downloads all census tracts of the
-country.}
+\item{code_tract}{The 7-digit code of a municipality. Alternatively, if a
+two-digit state code or a two-letter uppercase abbreviation of a state
+is passed (e.g. \code{33} or \code{"RJ"}), all census tracts of that state are
+downloaded. Passing \code{code_tract = "all"} downloads all census tracts
+of the country. Municipality codes can be consulted with the
+\code{geobr::lookup_muni()} function. Unlike in most \code{geobr} functions,
+this argument is \strong{required and has no default}: loading all census
+tracts of the country takes a long time and may exhaust memory, so the
+choice is left explicitly to the user.}
 
 \item{zone}{For census tracts before 2010, 'urban' and 'rural' census tracts
 are separate data sets.}
