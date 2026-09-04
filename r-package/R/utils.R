@@ -284,36 +284,58 @@ download_metadata2 <- function(){ # nocov start
     return(temp_meta)
   }
 
+  # download metadata to temp file
+  temp_meta <- NULL
 
-  # test server connection with github
+  # test server connection with github first
+  using_github_server <- TRUE
   metadata_link <- paste0(
     "https://github.com/ipea/geobr_prep_data/releases/expanded_assets/",
     geobr_env$data_release
   )
-
-  # download metadata to temp file
-  temp_meta <- NULL
-
+  
   response <- try(curl::curl_fetch_memory(metadata_link), silent = TRUE)
 
-  metadata_failed <- paste0(
-    "Could not download geobr metadata. ",
-    "Please check your internet connection or try again later."
-  )
+  # 1st try with github. If it fails, point url to ipea server and try again
+  if (inherits(response, "try-error") || response$status_code != 200L) {
+    
+    using_github_server <- FALSE
+    
+    metadata_link <- paste0(
+      "https://www.ipea.gov.br/geobr/data_",
+      geobr_env$data_release, "/"
+    )
+    
+    # 2nd try, with Ipea
+    response <- try(curl::curl_fetch_memory(metadata_link), silent = TRUE)
+  }
 
   if (inherits(response, "try-error") || response$status_code != 200L) {
+    
+    metadata_failed <- paste0(
+      "Could not download geobr metadata. ",
+      "Please check your internet connection or try again later."
+    )
+
     cli::cli_alert_danger(metadata_failed)
+
     return(NULL)
   }
 
+
+  # parse url content to capture file names
   release_page <- rawToChar(response$content)
 
   # get only parquet files
-  asset_pattern <- "/[^\"]+\\.parquet"
+  if (isTRUE(using_github_server)) {
+    asset_pattern <- "/[^\"]+\\.parquet"
+    asset_urls <- unique(regmatches(release_page, gregexpr(asset_pattern, release_page))[[1]])
+  } else {
+    asset_pattern <- '(?<=href=")[^"]+\\.parquet(?=")'
+    parquet_file_names <- unique(regmatches(release_page, gregexpr(asset_pattern, release_page, perl = TRUE))[[1]])
+  }
 
-  asset_urls <- unique(regmatches(release_page, gregexpr(asset_pattern, release_page))[[1]])
-
-  if (length(asset_urls) == 0L) {
+  if (length(asset_urls) == 0L | is.null(asset_urls)) {
     cli::cli_alert_danger(metadata_failed)
     return(NULL)
   }
