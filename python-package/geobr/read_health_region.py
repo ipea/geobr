@@ -3,8 +3,10 @@ import warnings
 from geobr.utils import read_geobr_v2
 from geobr._output import convert_output
 from geobr._duckdb_backend import duckdb_connection
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_health_region(
     year: int,
     code_state: str = "all",
@@ -20,16 +22,16 @@ def read_health_region(
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_state : str or int
-        State abbrev, two-digit code, or ``"all"``.
-    geometry_level : str
-        ``"municipality"`` (default), ``"micro"``, or ``"macro"``.
-    macro : bool, optional
-        Deprecated. Use ``geometry_level`` instead.
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_state}
+    {geometry_level}
+    {macro}
+    {simplified}
+    {verbose}
+    {output}
+    {show_progress}
+    {cache}
+
     """
     if macro is not None:
         warnings.warn(
@@ -84,7 +86,7 @@ def read_health_region(
     query = f"""
         WITH aggregated AS (
             -- perform the standard union aggregation
-            SELECT 
+            SELECT
                 {group_cols_str},
                 ST_Union_Agg(geometry) AS geom
             FROM relation
@@ -92,20 +94,20 @@ def read_health_region(
         ),
         unwrapped_polygons AS (
             -- flatten multipolygons into separate rows of simple polygons
-            SELECT 
+            SELECT
                 {group_cols_str},
                 (UNNEST(ST_Dump(geom))).geom AS single_geom
             FROM aggregated
         ),
         holes_removed AS (
             -- remove holes from the simple polygons using the outer ring
-            SELECT 
+            SELECT
                 {group_cols_str},
                 ST_MakePolygon(ST_ExteriorRing(single_geom)) AS clean_geom
             FROM unwrapped_polygons
         )
         -- recollect the cleaned parts back into the final shapes
-        SELECT 
+        SELECT
             {group_cols_str},
             ST_Union_Agg(clean_geom) AS geometry
         FROM holes_removed

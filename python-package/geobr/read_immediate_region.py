@@ -1,6 +1,8 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_immediate_region(
     year: int,
     code_immediate: str = "all",
@@ -11,20 +13,22 @@ def read_immediate_region(
     cache: bool = True,
 ):
     """ Download Brazil's Immediate Geographic Areas data (IBGE).
-    
-     The Immediate Geographic Areas are part of the geographic division of 
-     Brazil created in 2017 by IBGE to replace the "Micro Regions" division. 
-     Data at scale 1:250,000, using Geodetic reference system "SIRGAS2000" 
+
+     The Immediate Geographic Areas are part of the geographic division of
+     Brazil created in 2017 by IBGE to replace the "Micro Regions" division.
+     Data at scale 1:250,000, using Geodetic reference system "SIRGAS2000"
      and CRS(4674)
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_immediate : str or int
-        6-digit immediate regiaon code, state abbrev, two-digit code, or ``"all"``.
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_immediate}
+    {simplified}
+    {verbose}
+    {output}
+    {show_progress}
+    {cache}
+
     """
 
     return read_geobr_v2(

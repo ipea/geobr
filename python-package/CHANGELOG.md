@@ -1,6 +1,33 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
+# Development version
+
+**Documentation**
+
+- Every `read_*()` function now documents all of its arguments in full. The
+  shared options (`year`, `date`, `code_*`, `simplified`, `output`,
+  `show_progress`, `cache`, `verbose`) were previously collapsed into an
+  undescribed `"Standard geobr options."` line in 29 of the 31 readers, so
+  their meaning was not available from `help()` or IDE hover. The text is
+  ported from the roxygen templates in `r-package/man/roxygen/templates/`,
+  adapted where the two packages genuinely differ (`output="gpd"` vs `"sf"`,
+  `verbose=False` vs `TRUE`, `show_progress` vs `showProgress`).
+
+- The descriptions live once in the new private module `geobr/_docstrings.py`
+  and are interpolated into each reader by the `@docparams` decorator at
+  import time, mirroring how roxygen `@template` works on the R side. A
+  wording change now propagates to all readers at once.
+
+- Fixed incorrect argument documentation found while porting:
+  `read_municipal_seat()` and `read_urban_area()` documented a
+  `code_weighting` argument they do not have (it is `code_muni`);
+  `read_comparable_areas()` documented a non-existent `year` argument and
+  omitted `start_year` / `end_year`, and its example was not runnable;
+  `read_capitals()` described the default `output` as `"sf"` rather than
+  `"gpd"`.
+
+-------------------------------------------------------
 # 1.0.1 version
 
 **Bug fixes**

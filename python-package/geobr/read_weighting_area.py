@@ -1,6 +1,8 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_weighting_area(
     year: int,
     code_weighting: str = "all",
@@ -14,12 +16,14 @@ def read_weighting_area(
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_weighting : str or int
-        Municipality code, state abbrev, or ``"all"``.
-    simplified, output, show_progress, cache, verbose
-        Standard geobr options.
+    {year}
+    {code_weighting}
+    {simplified}
+    {verbose}
+    {output}
+    {show_progress}
+    {cache}
+
     """
 
     return read_geobr_v2(

@@ -5,6 +5,7 @@ from __future__ import annotations
 import pandas as pd
 
 from geobr.read_municipal_seat import read_municipal_seat
+from geobr._docstrings import docparams
 
 _CAPITALS = pd.DataFrame(
     {
@@ -37,6 +38,7 @@ _CAPITALS = pd.DataFrame(
 ).sort_values("code_muni")
 
 
+@docparams
 def read_capitals(
     output: str = "gpd",
     show_progress: bool = True,
@@ -48,12 +50,12 @@ def read_capitals(
 
     Parameters
     ----------
-    output : str
-        ``"sf"`` for GeoDataFrame (default), ``"duckdb"``, or ``"arrow"``.
-    show_progress, cache, verbose
-        Passed through to the underlying municipal seat download.
-    year : int
-        Year for municipal seat geometries (default 2010).
+    {output}
+    {show_progress}
+    {cache}
+    {verbose}
+    {year}
+
     """
     codes = _CAPITALS["code_muni"].tolist()
 

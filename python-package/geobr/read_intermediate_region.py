@@ -1,6 +1,8 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_intermediate_region(
     year: int,
     code_intermadiate: str = "all",
@@ -19,12 +21,14 @@ def read_intermediate_region(
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_intermadiate : str or int
-        4-digit intermediate regiaon code, state abbrev, two-digit code, or ``"all"``.
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_intermadiate}
+    {simplified}
+    {verbose}
+    {output}
+    {show_progress}
+    {cache}
+
     """
 
     return read_geobr_v2(

@@ -1,5 +1,7 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
+@docparams
 def read_statistical_grid(
     year: int,
     code_muni,
@@ -12,16 +14,17 @@ def read_statistical_grid(
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_muni : str or int
-        State abbrev, state code or municipality code
-    verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_muni}
+    {verbose}
+    {output}
+    {show_progress}
+    {cache}
+
     """
 
     return read_geobr_v2(
-        "statsgrid", 
+        "statsgrid",
         year,
         code=code_muni,
         simplified=False,

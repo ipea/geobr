@@ -1,6 +1,8 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_biomes(
     year: int,
     simplified: bool = True,
@@ -13,10 +15,13 @@ def read_biomes(
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {simplified}
+    {verbose}
+    {output}
+    {show_progress}
+    {cache}
+
     """
 
     return read_geobr_v2(

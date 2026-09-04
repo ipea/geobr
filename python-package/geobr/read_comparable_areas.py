@@ -1,6 +1,8 @@
 from geobr.utils import select_metadata, download_gpkg
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_comparable_areas(
     start_year=1970, end_year=2010, simplified=True, verbose=False
 ):
@@ -18,18 +20,15 @@ def read_comparable_areas(
 
     Parameters
     ----------
-    year : int, optional
-        Year of the data, by default
-    simplified: boolean, by default True
-        Data 'type', indicating whether the function returns the 'original' dataset
-        with high resolution or a dataset with 'simplified' borders (Default)
-    verbose : bool, optional
-        by default False
+    {start_year}
+    {end_year}
+    {simplified}
+    {verbose}
 
     Returns
     -------
     gpd.GeoDataFrame
-        Metadata and geopackage of selected states
+        Minimum comparable areas (AMCs) for the requested period.
 
     Raises
     ------
@@ -40,8 +39,8 @@ def read_comparable_areas(
     -------
     >>> from geobr import read_comparable_areas
 
-    # Read specific state at a given year
-    >>> df = read_comparable_areas(year=)
+    # Read comparable areas for a given period
+    >>> df = read_comparable_areas(start_year=1970, end_year=2010)
     """
 
     years_available = [

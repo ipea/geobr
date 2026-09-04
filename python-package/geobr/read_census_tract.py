@@ -1,6 +1,8 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_census_tract(
     year: int,
     code_tract: str = "all",
@@ -15,14 +17,15 @@ def read_census_tract(
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_tract : str or int
-        7-digit municipality code, state abbrev, two-digit code, or ``"all"``.
-    zone: string, optional
-        "urban" or "rural" census tracts come in separate files in the year 2000, by default urban
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_tract}
+    {zone}
+    {simplified}
+    {verbose}
+    {output}
+    {show_progress}
+    {cache}
+
     """
 
     allowed = ("urban", "rural")

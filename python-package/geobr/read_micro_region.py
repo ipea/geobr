@@ -1,6 +1,8 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_micro_region(
     year: int,
     code_micro: str = "all",
@@ -16,12 +18,14 @@ def read_micro_region(
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_micro : str or int
-        5-digit micro region code, state abbrev, two-digit code, or ``"all"``.
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_micro}
+    {simplified}
+    {verbose}
+    {output}
+    {show_progress}
+    {cache}
+
     """
 
     return read_geobr_v2(

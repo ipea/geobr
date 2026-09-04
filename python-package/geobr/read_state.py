@@ -1,6 +1,8 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_state(
     year: int,
     code_state: str = "all",
@@ -10,16 +12,18 @@ def read_state(
     show_progress: bool = True,
     cache: bool = True,
 ):
-    """Download spatial daa of Brazilian states.
+    """Download spatial data of Brazilian states.
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_state : str or int
-        State abbrev, two-digit code, or ``"all"``.
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_state}
+    {simplified}
+    {verbose}
+    {output}
+    {show_progress}
+    {cache}
+
     """
 
     return read_geobr_v2(

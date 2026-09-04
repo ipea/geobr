@@ -1,6 +1,8 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_conservation_units(
     date: int,
     code_state: str = "all",
@@ -14,12 +16,14 @@ def read_conservation_units(
 
     Parameters
     ----------
-    date : int
-        Date in YYYYMM format.
-    code_state : str or int
-        State abbrev, two-digit code, or ``"all"``.
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {date}
+    {code_state}
+    {simplified}
+    {verbose}
+    {output}
+    {show_progress}
+    {cache}
+
     """
     return read_geobr_v2(
         "conservationunits",

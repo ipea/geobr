@@ -1,6 +1,8 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_health_facilities(
     date: int,
     code_muni: str = "all",
@@ -14,12 +16,14 @@ def read_health_facilities(
 
     Parameters
     ----------
-    date : int
-        Snapshot date in YYYYMM format.
-    code_muni : str or int
-        Municipality code, state abbrev, or ``"all"``.
-    simplified, output, show_progress, cache, verbose
-        Standard geobr options.
+    {date}
+    {code_muni}
+    {simplified}
+    {output}
+    {show_progress}
+    {cache}
+    {verbose}
+
     """
     return read_geobr_v2(
         "healthfacilities",

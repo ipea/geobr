@@ -1,6 +1,8 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_semiarid(
     year: int,
     simplified: bool = True,
@@ -10,13 +12,16 @@ def read_semiarid(
     cache: bool = True,
 ):
     """ Download official data of Brazilian Semiarid region (IBGE).
-    
+
     Parameters
     ----------
-    year : int
-        Year of the data.
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {simplified}
+    {verbose}
+    {output}
+    {show_progress}
+    {cache}
+
     """
     return read_geobr_v2(
         "semiarid",
