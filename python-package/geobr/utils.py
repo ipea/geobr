@@ -148,11 +148,17 @@ def select_simplified(metadata, simplified):
 
     """
 
+    # regex=False: literal match, and it avoids the missing RE2 kernel under
+    # pandas 3 with Arrow-backed strings (see download_metadata_v2).
     if simplified:
-        return metadata[metadata["download_path"].str.contains("simplified")]
+        return metadata[
+            metadata["download_path"].str.contains("simplified", regex=False)
+        ]
 
     else:
-        return metadata[~metadata["download_path"].str.contains("simplified")]
+        return metadata[
+            ~metadata["download_path"].str.contains("simplified", regex=False)
+        ]
 
 
 @lru_cache(maxsize=1240)
@@ -379,8 +385,15 @@ def download_metadata_v2() -> pd.DataFrame:
     temp_meta["year"] = pd.to_numeric(
         temp_meta["file_name"].str.extract(r"(\d+)", expand=False), errors="coerce"
     )
-    temp_meta["simplified"] = temp_meta["file_name"].str.contains(
-        "simplified", case=False, na=False
+    # Matched without a regex on purpose. Under pandas 3 strings are
+    # Arrow-backed, so a regex match dispatches to
+    # `pyarrow.compute.match_substring_regex`, which is missing from pyarrow
+    # builds compiled without RE2 - QGIS ships one, so `case=False` there
+    # raised AttributeError and no reader could resolve its metadata.
+    temp_meta["simplified"] = (
+        temp_meta["file_name"].str.lower().str.contains(
+            "simplified", na=False, regex=False
+        )
     )
     temp_meta.to_parquet(cache_meta, index=False)
     return temp_meta
@@ -415,7 +428,12 @@ def select_metadata_v2(geography, year, simplified=True, verbose=False, zone=Non
 
     # used for read_census_tract
     if zone:
-        temp_meta = temp_meta[temp_meta["file_name"].str.contains(zone)]
+        # regex=False for the same reason as download_metadata_v2: `zone` is a
+        # literal ("urban"/"rural"), and the regex path needs an RE2-enabled
+        # pyarrow that QGIS does not ship.
+        temp_meta = temp_meta[
+            temp_meta["file_name"].str.contains(zone, regex=False)
+        ]
 
     return temp_meta.iloc[0]
 

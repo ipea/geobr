@@ -53,3 +53,6 @@ python-package/.coverage
 /r-package/.Rhistory
 /r-package/.Rhistory
 .pdm-build
+
+# QGIS plugin build artifact (the repo must not contain zipped files)
+qgis-plugin/dist/

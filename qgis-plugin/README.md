@@ -1,9 +1,13 @@
 # geobr for QGIS
 
-A QGIS plugin that exposes the [geobr](https://github.com/ipea/geobr) Python package as
-Processing algorithms. Every geobr reader — states, municipalities, census tracts, biomes,
-indigenous lands, health facilities, schools, favelas, polling places — becomes an algorithm in the
-Processing Toolbox.
+
+geobr is a computational package to download official spatial data sets
+of Brazil. The package covers a wide range of spatial data sets,
+available at various geographic scales and for various years with
+harmonized attributes, projection and fixed topology. This QGIS plugin 
+exposes the [geobr](https://github.com/ipea/geobr) Python package as
+Processing algorithms. geobr's readers — states, municipalities, census tracts, biomes,
+indigenous lands, health facilities, schools, favelas, polling places — become algorithms in the Processing Toolbox.
 
 Because they are Processing algorithms rather than a custom dialog, they work in **batch mode**, in
 **Model Builder**, and from the **`qgis_process`** command line, and they run on a background
@@ -96,10 +100,15 @@ the log, so an unexpected fallthrough is visible.
   from the Processing Toolbox and then quitting QGIS 4.2.1 was confirmed clean by the maintainer,
   so this is a `qgis_process` teardown problem only.
 - **QGIS 4.2.1 ships a geo stack outside geobr's declared bounds** — geopandas 1.1.4 (geobr pins
-  `<=1.1.2`), shapely 2.1.2 (pins `<=2.1.0`) and pandas 3.0.3. In testing, `read_state`,
-  `read_municipality` and `read_biomes` returned byte-identical feature counts to QGIS 3.42.1, so
-  it works today, but geobr does not claim support for these versions and a future geopandas or
-  pandas change could break it without warning.
+  `<=1.1.2`), shapely 2.1.2 (pins `<=2.1.0`) and pandas 3.0.3. This is not theoretical: pandas 3
+  makes strings Arrow-backed, so geobr's regex `str.contains()` dispatched to
+  `pyarrow.compute.match_substring_regex`, a kernel absent from QGIS's RE2-less pyarrow, and
+  **every reader failed** with `AttributeError`. It surfaced only when the metadata cache had to be
+  rebuilt, so a pre-existing `~/.cache/geobr` hid it. Fixed upstream in geobr by matching those
+  literal strings with `regex=False`; verified on QGIS 4.2.1 and 3.42.1 from a cold cache.
+  **This requires a geobr newer than 1.0.0** — on 1.0.0 the plugin works on QGIS 4 only while a
+  cache built elsewhere survives. The version bounds are still unclaimed territory, so treat other
+  pandas-3 breakage as possible.
 - **`read_health_region` is offered at municipality level only.** geobr accepts a `geometry_level`
   argument but ignores it: the `micro`/`macro` aggregation groups by every column it does not
   explicitly exclude, and `code_muni6` survives that `GROUP BY`, so all three levels return one
@@ -113,12 +122,25 @@ the log, so an unexpected fallthrough is visible.
   is worse than the cosmetic wart. Cast them in the field calculator if you need an integer join key.
 - **Downloads cannot be cancelled mid-request.** geobr fetches in one blocking call, so *Cancel*
   takes effect between stages, not during a transfer.
-- **`read_comparable_areas` uses geobr's legacy download path**, whose HTTP call has no timeout. On
-  a network that black-holes connections it can hang until QGIS is restarted. The other 30 readers
-  use the current parquet path.
-- **Stale cache.** geobr caches downloads in `~/.cache/geobr` with no expiry. If a dataset looks
-  out of date, delete that directory. The plugin does not expose a `cache` toggle, because geobr's
-  `cache=False` does not refresh the *metadata* — the thing that actually goes stale.
+- **`read_comparable_areas` is not exposed.** It is currently broken upstream, and it is also the
+  only reader still on geobr's legacy gpkg download path, whose `url_solver()` calls
+  `requests.get()` with **no timeout**. A Processing algorithm cannot be cancelled mid-request, so
+  on a network that black-holes connections that call would hang until QGIS is restarted. It is
+  excluded in `provider.py` (`_EXCLUDED_READERS`) and returns once geobr fixes it. Every other
+  reader uses the current parquet path.
+- **Downloads are cached per session.** As of geobr 1.0.1, the Python package stores downloads and
+  metadata in a fresh temp directory that is deleted when the Python process exits — the same
+  behavior as the R package. Source updates are picked up on the next QGIS start, with no action
+  needed. Within one session repeated reads are served from that session cache, but restarting QGIS
+  re-downloads whatever the session uses, and a single year of census tracts exceeds 350 MB.
+
+  geobr 1.0.0 instead cached persistently in `~/.cache/geobr` (or `$XDG_CACHE_HOME/geobr`), with no
+  expiry and no size cap, surviving restarts — so stale data went unnoticed unless the cache was
+  cleared by hand. Upgrading no longer uses that directory, but nothing removes it automatically
+  either; the **Clear geobr download cache** algorithm still deletes its contents. Tick *List files
+  only* on it first to see whether any legacy files remain. The plugin does not expose geobr's
+  `cache` argument, because `cache=False` does not refresh the *metadata* — the thing that actually
+  goes stale.
 - **Shapefile output truncates field names** to 10 characters. Prefer GeoPackage.
 
 ## Proxies
@@ -141,6 +163,7 @@ geobr_qgis/
 ├── __init__.py    classFactory, plugin lifecycle, dependency probe
 ├── provider.py    reader discovery (ast) + the Processing provider
 ├── algorithm.py   the one algorithm class that serves every reader
+├── cache.py       the "Clear geobr download cache" algorithm
 └── metadata.txt
 ```
 

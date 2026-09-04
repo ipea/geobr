@@ -20,6 +20,7 @@ from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 
 from .algorithm import REQUIRED, GeobrAlgorithm
+from .cache import ClearCacheAlgorithm
 
 
 class ReaderSpec(NamedTuple):
@@ -28,6 +29,14 @@ class ReaderSpec(NamedTuple):
     name: str
     params: tuple  # ((argument_name, default_or_REQUIRED), ...)
     doc: str
+
+
+#: Readers deliberately not exposed, despite being in geobr's ``__all__``.
+#: ``read_comparable_areas`` is currently broken, and it is also the only reader
+#: still on geobr's legacy gpkg path, whose ``url_solver()`` calls
+#: ``requests.get()`` with no timeout - inside a Processing worker thread that
+#: cannot be cancelled mid-request, a hang there lasts until QGIS is restarted.
+_EXCLUDED_READERS = {"read_comparable_areas"}
 
 
 def _package_dir():
@@ -97,7 +106,7 @@ def discover_readers():
     if package_dir is None:
         return []
     try:
-        wanted = _exported_readers(package_dir)
+        wanted = _exported_readers(package_dir) - _EXCLUDED_READERS
     except (OSError, SyntaxError):
         return []
     if not wanted:
@@ -142,3 +151,6 @@ class GeobrProvider(QgsProcessingProvider):
     def loadAlgorithms(self):
         for spec in discover_readers():
             self.addAlgorithm(GeobrAlgorithm(spec))
+        # Registered unconditionally: clearing the cache is useful even when
+        # geobr itself is missing, and it needs nothing from the package.
+        self.addAlgorithm(ClearCacheAlgorithm())
