@@ -1,25 +1,29 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_urban_concentrations(
     year: int,
     code_state: str = "all",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download urban concentration areas (IBGE).
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_state : str or int
-        State abbrev, two-digit code, or ``"all"``.
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_state}
+    {simplified}
+    {output}
+    {show_progress}
+    {cache}
+    {verbose}
+
     """
     return read_geobr_v2(
         "poparrangements",

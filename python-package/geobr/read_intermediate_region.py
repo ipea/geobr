@@ -1,14 +1,16 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_intermediate_region(
     year: int,
-    code_intermadiate: str = "all",
+    code_intermediate: str = "all",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     r"""Download Brazil's Intermediate Geographic Areas data (IBGE).
 
@@ -19,18 +21,20 @@ def read_intermediate_region(
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_intermadiate : str or int
-        4-digit intermediate regiaon code, state abbrev, two-digit code, or ``"all"``.
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_intermediate}
+    {simplified}
+    {output}
+    {show_progress}
+    {cache}
+    {verbose}
+
     """
 
     return read_geobr_v2(
         "intermediateregions",
         year,
-        code=code_intermadiate,
+        code=code_intermediate,
         simplified=simplified,
         output=output,
         show_progress=show_progress,

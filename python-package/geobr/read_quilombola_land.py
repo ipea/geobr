@@ -1,8 +1,10 @@
 """Download spatial data of quilombola lands (INCRA)."""
 
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_quilombola_land(
     date: int,
     code_state: str = "all",
@@ -16,12 +18,14 @@ def read_quilombola_land(
 
     Parameters
     ----------
-    date : int
-        Snapshot date in YYYYMM format (required).
-    code_state : str or int
-        State abbrev (e.g. ``"BA"``), two-digit code, or ``"all"``.
-    simplified, output, show_progress, cache, verbose
-        Standard geobr v2 options.
+    {date}
+    {code_state}
+    {simplified}
+    {output}
+    {show_progress}
+    {cache}
+    {verbose}
+
     """
     return read_geobr_v2(
         geography="quilombolalands",

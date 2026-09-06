@@ -1,28 +1,31 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_census_tract(
     year: int,
-    code_tract: str = "all",
+    code_tract,
     zone="urban",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download spatial data of census tracts (setores censitários) of the Brazilian Population Census.
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_tract : str or int
-        7-digit municipality code, state abbrev, two-digit code, or ``"all"``.
-    zone: string, optional
-        "urban" or "rural" census tracts come in separate files in the year 2000, by default urban
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_tract_required}
+    {zone}
+    {simplified}
+    {output}
+    {show_progress}
+    {cache}
+    {verbose}
+
     """
 
     allowed = ("urban", "rural")
