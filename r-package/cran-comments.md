@@ -1,5 +1,5 @@
-── R CMD check results ────────────────────────────────────── geobr 2.0.1 ────
-Duration: 13m 16.4s
+── R CMD check results ───────────────────────────────────────────────────────────── geobr 2.0.1.999 ────
+Duration: 13m 9.9s
 
 0 errors ✔ | 0 warnings ✔ | 0 notes ✔
 
