@@ -1,8 +1,10 @@
 """Download spatial data of favelas and urban communities."""
 
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_favela(
     year: int,
     code_muni: str = "all",
@@ -16,12 +18,14 @@ def read_favela(
 
     Parameters
     ----------
-    year : int
-        Year of the data (required).
-    code_muni : str or int
-        Municipality code, state abbrev (e.g. ``"RJ"``), or ``"all"``.
-    simplified, output, show_progress, cache, verbose
-        Standard geobr v2 options.
+    {year}
+    {code_muni}
+    {simplified}
+    {output}
+    {show_progress}
+    {cache}
+    {verbose}
+
     """
     return read_geobr_v2(
         geography="favelas",

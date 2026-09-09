@@ -120,12 +120,51 @@ def test_auto_resolve_bare_download_warns(monkeypatch, duckdb_conn, tmp_path):
     assert calls == [2020]
 
 
-def test_auto_resolve_schools_retries_non_simplified(monkeypatch, duckdb_conn, tmp_path):
+def test_auto_resolve_retries_non_simplified(monkeypatch, duckdb_conn, tmp_path):
+    """A polygon geography still falls back when its simplified asset is absent.
+
+    Uses `states` rather than `schools`: point layers now resolve to
+    `simplified=False` up front (see tests/test_point_geographies.py), so they
+    no longer exercise the retry.
+    """
+    from shapely.geometry import box
+
+    path = write_geom_parquet(
+        tmp_path / "states_2020.parquet",
+        {"code_state": [33, 35]},
+        geometry=[box(0, 0, 1, 1), box(1, 1, 2, 2)],
+    )
+    simplified_calls = []
+
+    def fake_read_geobr_v2(geography, year, *, simplified, output, connection, view_name, **kwargs):
+        simplified_calls.append(simplified)
+        if simplified:
+            raise ValueError("No simplified data for states in year 2020.")
+        register_geom_view(connection, view_name, path)
+        return connection.sql(f'SELECT * FROM "{view_name}"')
+
+    patch_module_attr(monkeypatch, "geobr.utils", "read_geobr_v2", fake_read_geobr_v2)
+    monkeypatch.setattr("geobr._duckdb_backend._known_geos", lambda: {"states"})
+    monkeypatch.setattr("geobr._duckdb_backend._available_years", lambda geo: [2020])
+
+    count = query("SELECT count(*) FROM states_2020", connection=duckdb_conn).fetchone()[0]
+    assert count == 2
+    assert simplified_calls == [True, False]
+
+
+def test_auto_resolve_point_layer_skips_the_simplified_attempt(
+    monkeypatch, duckdb_conn, tmp_path
+):
+    """`pollingplaces` is v2_only, so a wrong `simplified=True` had no retry.
+
+    Before the fix this query raised
+    `ValueError: No simplified data for pollingplaces in year 2022.`
+    """
     from shapely.geometry import Point
 
     path = write_geom_parquet(
-        tmp_path / "schools_2020.parquet",
-        {"code_school": [101, 102]},
+        tmp_path / "pollingplaces_2022.parquet",
+        {"code_muni": [3304557, 3550308]},
         geometry=[Point(0, 0), Point(1, 1)],
     )
     simplified_calls = []
@@ -133,14 +172,16 @@ def test_auto_resolve_schools_retries_non_simplified(monkeypatch, duckdb_conn, t
     def fake_read_geobr_v2(geography, year, *, simplified, output, connection, view_name, **kwargs):
         simplified_calls.append(simplified)
         if simplified:
-            raise ValueError("No simplified data for schools in year 2020.")
+            raise ValueError(f"No simplified data for {geography} in year {year}.")
         register_geom_view(connection, view_name, path)
         return connection.sql(f'SELECT * FROM "{view_name}"')
 
     patch_module_attr(monkeypatch, "geobr.utils", "read_geobr_v2", fake_read_geobr_v2)
-    monkeypatch.setattr("geobr._duckdb_backend._known_geos", lambda: {"schools"})
-    monkeypatch.setattr("geobr._duckdb_backend._available_years", lambda geo: [2020])
+    monkeypatch.setattr("geobr._duckdb_backend._known_geos", lambda: {"pollingplaces"})
+    monkeypatch.setattr("geobr._duckdb_backend._available_years", lambda geo: [2022])
 
-    count = query("SELECT count(*) FROM schools_2020", connection=duckdb_conn).fetchone()[0]
+    count = query(
+        "SELECT count(*) FROM pollingplaces_2022", connection=duckdb_conn
+    ).fetchone()[0]
     assert count == 2
-    assert simplified_calls == [True, False]
+    assert simplified_calls == [False]

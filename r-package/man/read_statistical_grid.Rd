@@ -16,12 +16,15 @@ read_statistical_grid(
 \arguments{
 \item{year}{Numeric. Year of the data in \code{YYYY} format.}
 
-\item{code_muni}{The 7-digit code of a municipality. If \code{code_muni = "all"}
-(Default), the function downloads all the data available in the
-country. Alternatively, if a two-digit state code or a two-letter
-uppercase abbreviation of a state is passed (e.g. \code{33} or \code{"RJ"}), all
-data of that state are downloaded. Municipality codes can be consulted
-with the \code{geobr::lookup_muni()} function.}
+\item{code_muni}{The 7-digit code of a municipality. Alternatively, if a
+two-digit state code or a two-letter uppercase abbreviation of a state
+is passed (e.g. \code{33} or \code{"RJ"}), all data of that state are
+downloaded. Passing \code{code_muni = "all"} downloads the grid for the
+whole country. Municipality codes can be consulted with the
+\code{geobr::lookup_muni()} function. Unlike in most \code{geobr} functions,
+this argument is \strong{required and has no default}: loading the grid for
+the whole country takes a long time and may exhaust memory, so the
+choice is left explicitly to the user.}
 
 \item{output}{String. Type of object returned by the function. Defaults to
 \code{"sf"}, which loads the data into memory as an sf object. Alternatively,

@@ -1,6 +1,8 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_polling_places(
     year: int,
     code_muni: str = "all",
@@ -28,12 +30,12 @@ def read_polling_places(
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_muni : str or int
-        Municipality code, state abbrev, or ``"all"``.
-    output, show_progress, cache, verbose
-        Standard geobr v2 options.
+    {year}
+    {code_muni}
+    {output}
+    {show_progress}
+    {cache}
+    {verbose}
 
     Notes
     -----
