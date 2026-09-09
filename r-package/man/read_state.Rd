@@ -5,7 +5,7 @@
 \title{Download spatial data of Brazilian states}
 \usage{
 read_state(
-  year = NULL,
+  year,
   code_state = "all",
   simplified = TRUE,
   output = "sf",

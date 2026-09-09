@@ -1,27 +1,31 @@
 from geobr.utils import read_geobr_v2
+from geobr._docstrings import docparams
 
+
+@docparams
 def read_statistical_grid(
     year: int,
     code_muni,
-    verbose=False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download IBGE statistical grid data.
 
     Parameters
     ----------
-    year : int
-        Year of the data.
-    code_muni : str or int
-        State abbrev, state code or municipality code
-    verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_muni_required}
+    {output}
+    {show_progress}
+    {cache}
+    {verbose}
+
     """
 
     return read_geobr_v2(
-        "statsgrid", 
+        "statsgrid",
         year,
         code=code_muni,
         simplified=False,

@@ -1,27 +1,31 @@
 from geobr.utils import read_geobr_v2
 from geobr._output import convert_output
 from geobr._duckdb_backend import duckdb_connection
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_pop_arrangements(
-    year: InterruptedError,
+    year: int,
     code_state: str = "all",
     simplified: bool = True,
-    verbose: bool = False,
     output: str = "gpd",
     show_progress: bool = True,
     cache: bool = True,
+    verbose: bool = False,
 ):
     """Download population arrangements (IBGE).
 
     Parameters
     ----------
-    year : int
-        Year of the data (2010 in v2).
-    code_state : str or int
-        State abbrev, two-digit code, or ``"all"``.
-    simplified, verbose, output, show_progress, cache
-        Standard geobr options.
+    {year}
+    {code_state}
+    {simplified}
+    {output}
+    {show_progress}
+    {cache}
+    {verbose}
+
     """
     relation = read_geobr_v2(
         "poparrangements",

@@ -1,8 +1,15 @@
 from geobr.utils import select_metadata, download_gpkg
+from geobr._docstrings import docparams
 
 
+@docparams
 def read_comparable_areas(
-    start_year=1970, end_year=2010, simplified=True, verbose=False
+    start_year=1970,
+    end_year=2010,
+    simplified=True,
+    show_progress=True,
+    cache=True,
+    verbose=False,
 ):
     r"""Download spatial data of historically comparable municipalities
 
@@ -18,18 +25,17 @@ def read_comparable_areas(
 
     Parameters
     ----------
-    year : int, optional
-        Year of the data, by default
-    simplified: boolean, by default True
-        Data 'type', indicating whether the function returns the 'original' dataset
-        with high resolution or a dataset with 'simplified' borders (Default)
-    verbose : bool, optional
-        by default False
+    {start_year}
+    {end_year}
+    {simplified}
+    {show_progress}
+    {cache}
+    {verbose}
 
     Returns
     -------
     gpd.GeoDataFrame
-        Metadata and geopackage of selected states
+        Minimum comparable areas (AMCs) for the requested period.
 
     Raises
     ------
@@ -40,9 +46,14 @@ def read_comparable_areas(
     -------
     >>> from geobr import read_comparable_areas
 
-    # Read specific state at a given year
-    >>> df = read_comparable_areas(year=)
+    # Read comparable areas for a given period
+    >>> df = read_comparable_areas(start_year=1970, end_year=2010)
     """
+
+    # `show_progress` and `cache` are accepted for signature parity with the R
+    # package, where they are likewise unused while the gpkg download path for
+    # this data set is suspended.
+    del show_progress, cache
 
     years_available = [
         1872,

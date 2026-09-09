@@ -108,11 +108,17 @@ read_health_region <- function(year,
 
     all_cols <- names(temp)
 
+    # Columns dropped before aggregating, matched by prefix so that
+    # municipality-level variants such as `code_muni6` (present in the
+    # 1991-2013 files) are dropped as well. Keeping `code_muni6` in the
+    # grouping would silently defeat the aggregation. Mirrors the Python side.
     if(geometry_level=="micro"){
-      group_cols <- all_cols[!grepl('geometry|code_muni|name_muni|code_health_macroregion|name_health_macroregion', all_cols)]
+      drop_pattern <- '^(geometry|code_muni|name_muni|code_health_macroregion|name_health_macroregion)'
     } else {
-      group_cols <- all_cols[!grepl('geometry|code_muni|name_muni|code_health_region|name_health_region', all_cols)]
+      drop_pattern <- '^(geometry|code_muni|name_muni|code_health_region|name_health_region)'
     }
+
+    group_cols <- all_cols[!grepl(drop_pattern, all_cols)]
 
     temp <- duckspatial::ddbs_union_agg(
       x = temp,
