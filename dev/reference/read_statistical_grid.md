@@ -23,14 +23,16 @@ read_statistical_grid(
 
 - code_muni:
 
-  The 7-digit code of a municipality. If `code_muni = "all"` (Default),
-  the function downloads all the data available in the country.
-  Alternatively, if a two-digit state code or a two-letter uppercase
-  abbreviation of a state is passed (e.g. `33` or `"RJ"`), all data of
-  that state are downloaded. Municipality codes can be consulted with
-  the
+  The 7-digit code of a municipality. Alternatively, if a two-digit
+  state code or a two-letter uppercase abbreviation of a state is passed
+  (e.g. `33` or `"RJ"`), all data of that state are downloaded. Passing
+  `code_muni = "all"` downloads the grid for the whole country.
+  Municipality codes can be consulted with the
   [`geobr::lookup_muni()`](https://ipea.github.io/geobr/dev/reference/lookup_muni.md)
-  function.
+  function. Unlike in most `geobr` functions, this argument is
+  **required and has no default**: loading the grid for the whole
+  country takes a long time and may exhaust memory, so the choice is
+  left explicitly to the user.
 
 - output:
 

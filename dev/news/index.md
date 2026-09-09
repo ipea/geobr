@@ -8,6 +8,20 @@
 - geobr now fallsback to ipea servers whenever users cannot access
   github servers.
 
+**Documentation**
+
+- Fixed the documentation of `code_muni` in
+  [`read_statistical_grid()`](https://ipea.github.io/geobr/dev/reference/read_statistical_grid.md).
+  It was pulled from the shared roxygen template, which states that
+  `code_muni = "all"` is the default. In this function `code_muni` is
+  required and has no default, deliberately, because loading the grid
+  for the whole country is slow and may exhaust memory.
+
+- [`read_census_tract()`](https://ipea.github.io/geobr/dev/reference/read_census_tract.md)
+  now documents that `code_tract` is required and has no default, for
+  the same reason. These two functions are the only readers that do not
+  default to downloading the whole country.
+
 ## geobr v2.0.1
 
 CRAN release: 2026-06-23
