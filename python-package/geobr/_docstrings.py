@@ -44,27 +44,31 @@ PARAMS = {
     # ------------------------------------------------------------------
     "year": """\
 year : int
-    Year of the data in ``YYYY`` format.""",
+    Year of the data in ``YYYY`` format.
+    """,
     "date": """\
 date : int
-    Date of the data in ``YYYYMM`` format.""",
+    Date of the data in ``YYYYMM`` format.
+    """,
     "start_year": """\
 start_year : int, default 1970
-    Start year of the period, in ``YYYY`` format.""",
+    Start year of the period, in ``YYYY`` format.
+    """,
     "end_year": """\
 end_year : int, default 2010
-    End year of the period, in ``YYYY`` format.""",
+    End year of the period, in ``YYYY`` format.
+    """,
     # ------------------------------------------------------------------
     # Geography codes
     # ------------------------------------------------------------------
     "code_muni": """\
 code_muni : int, str or list, default "all"
-    The 7-digit code of a municipality. If ``code_muni="all"`` (the default),
-    the function downloads all the data available in the country.
-    Alternatively, if a two-digit state code or a two-letter uppercase
-    abbreviation of a state is passed (e.g. ``33`` or ``"RJ"``), all data of
-    that state are downloaded. Municipality codes can be consulted with
-    ``geobr.lookup_muni()``.""",
+    The 7-digit code of a municipality. If a two-digit state code or 
+    a two-letter uppercase abbreviation of a state is passed (e.g. ``33`` or 
+    ``"RJ"``), all data of that state are downloaded.  If ``code_muni="all"``,
+    the function downloads all the data available in the country. 
+    Municipality codes can be consulted with ``geobr.lookup_muni()``.
+    """,
     # `read_statistical_grid` takes code_muni as a required argument, so it
     # cannot use the block above. (The R package documents this one with the
     # shared `code_muni` template, which wrongly calls "all" the default.)
@@ -74,46 +78,53 @@ code_muni : int, str or list
     a two-letter uppercase abbreviation of a state is passed (e.g. ``33`` or
     ``"RJ"``), all data of that state are downloaded. Pass ``"all"`` to
     download all the data available in the country. Municipality codes can be
-    consulted with ``geobr.lookup_muni()``.""",
+    consulted with ``geobr.lookup_muni()``.
+    """,
     "code_state": """\
 code_state : int, str or list, default "all"
     The two-digit code of a state or a two-letter uppercase abbreviation
-    (e.g. ``33`` or ``"RJ"``). If ``code_state="all"`` (the default), the
-    function downloads all states.""",
+    (e.g. ``33`` or ``"RJ"``). If ``code_state="all"``, the
+    function downloads all states.
+    """,
     "code_immediate": """\
 code_immediate : int, str or list, default "all"
     The 6-digit code of an immediate region. If the two-digit code or a
     two-letter uppercase abbreviation of a state is passed (e.g. ``33`` or
     ``"RJ"``), the function will load all immediate regions of that state. If
-    ``code_immediate="all"`` (the default), the function downloads all
-    immediate regions of the country.""",
+    ``code_immediate="all"``, the function downloads all
+    immediate regions of the country.
+    """,
     "code_intermediate": """\
 code_intermediate : int, str or list, default "all"
     The 4-digit code of an intermediate region. If the two-digit code or a
     two-letter uppercase abbreviation of a state is passed (e.g. ``33`` or
     ``"RJ"``), the function will load all intermediate regions of that state.
-    If ``code_intermediate="all"`` (the default), the function downloads all
-    intermediate regions of the country.""",
+    If ``code_intermediate="all"``, the function downloads all
+    intermediate regions of the country.
+    """,
     "code_meso": """\
 code_meso : int, str or list, default "all"
     The 4-digit code of a meso region. If the two-digit code or a two-letter
     uppercase abbreviation of a state is passed (e.g. ``33`` or ``"RJ"``), the
-    function will load all meso regions of that state. If ``code_meso="all"``
-    (the default), the function downloads all meso regions of the country.""",
+    function will load all meso regions of that state. If ``code_meso="all"``, 
+    the function downloads all meso regions of the country.
+    """,
     "code_micro": """\
 code_micro : int, str or list, default "all"
     The 5-digit code of a micro region. If the two-digit code or a two-letter
     uppercase abbreviation of a state is passed (e.g. ``33`` or ``"RJ"``), the
     function will load all micro regions of that state. If
-    ``code_micro="all"`` (the default), the function downloads all micro
-    regions of the country.""",
+    ``code_micro="all"``, the function downloads all micro
+    regions of the country.
+    """,
     "code_tract": """\
 code_tract : int, str or list, default "all"
     The 7-digit code of a municipality. If the two-digit code or a two-letter
     uppercase abbreviation of a state is passed (e.g. ``33`` or ``"RJ"``), the
     function will load all census tracts of that state. If
-    ``code_tract="all"`` (the default), the function downloads all census
-    tracts of the country.""",
+    ``code_tract="all"``, the function downloads all census
+    tracts of the country.
+    """,
     # `read_census_tract` takes code_tract as a required argument, so it cannot
     # use the block above. Loading every census tract in the country is slow
     # and may exhaust memory, so the argument is deliberately not defaulted --
@@ -123,66 +134,75 @@ code_tract : int, str or list
     Required. The 7-digit code of a municipality. If the two-digit code or a
     two-letter uppercase abbreviation of a state is passed (e.g. ``33`` or
     ``"RJ"``), the function will load all census tracts of that state. Pass
-    ``"all"`` to download all census tracts of the country.""",
+    ``"all"`` to download all census tracts of the country.
+    """,
     "code_weighting": """\
 code_weighting : int, str or list, default "all"
     The 7-digit code of a municipality. If the two-digit code or a two-letter
     uppercase abbreviation of a state is passed (e.g. ``33`` or ``"RJ"``), the
     function will load all weighting areas of that state. If
-    ``code_weighting="all"`` (the default), all weighting areas of the country
-    are loaded.""",
+    ``code_weighting="all"``, all weighting areas of the country
+    are loaded.
+    """,
     # ------------------------------------------------------------------
     # Standard options
     # ------------------------------------------------------------------
     "simplified": """\
 simplified : bool, default True
     Whether the function should return the data set with 'original' spatial
-    resolution or a data set with 'simplified' geometry. Defaults to ``True``.
+    resolution or a data set with 'simplified' geometry.
     For spatial analysis and statistics, users should set
     ``simplified=False``. Borders have been simplified by removing vertices of
-    borders while preserving topology, with a ``dTolerance`` of 100.""",
+    borders while preserving topology, with a ``dTolerance`` of 100.
+    """,
     "output": """\
 output : str, default "gpd"
-    Type of object returned by the function. Defaults to ``"gpd"``, which
+    Type of object returned by the function. ``"gpd"``
     loads the data into memory as a geopandas ``GeoDataFrame``.
     Alternatively, ``"duckdb"`` returns a lazy spatial relation backed by
     DuckDB, and ``"arrow"`` returns an Arrow table. Both ``"duckdb"`` and
-    ``"arrow"`` support out-of-memory processing of large data sets.""",
+    ``"arrow"`` support out-of-memory processing of large data sets.
+    """,
     "show_progress": """\
 show_progress : bool, default True
-    Whether to display a download progress bar.""",
+    Whether to display a download progress bar.
+    """,
     "cache": """\
 cache : bool, default True
-    Whether the function should read the data cached locally, which is faster.
-    Defaults to ``True``. By default, ``geobr`` stores data files in a
-    temporary directory that exists only within each Python session. If
-    ``cache=False``, the function will download the data again and overwrite
-    the local file.""",
+    Whether the function should read the data cached locally, which is faster, 
+    or download the data again and overwrite the local cached file.
+    By default, the data files are stored in a
+    temporary directory that exists only within each Python session. 
+    """,
     "verbose": """\
 verbose : bool, default False
-    If ``True``, the function prints informative messages. If ``False`` (the
-    default), the function is silent.""",
+    If ``True``, the function prints informative messages. If ``False``, the function is silent.
+    """,
     # ------------------------------------------------------------------
     # Reader-specific
     # ------------------------------------------------------------------
     "zone": """\
 zone : str, default "urban"
     For census tracts before 2010, 'urban' and 'rural' census tracts are
-    separate data sets. Must be either ``"urban"`` or ``"rural"``.""",
+    separate data sets. Must be either ``"urban"`` or ``"rural"``.
+    """,
     "geometry_level": """\
 geometry_level : str, default "municipality"
     Spatial level of the output geometries. Use ``"municipality"`` to return
-    municipal geometries (the default), ``"micro"`` to aggregate geometries by
+    municipal geometries, ``"micro"`` to aggregate geometries by
     health region, or ``"macro"`` to aggregate geometries by health
-    macroregion.""",
+    macroregion.
+    """,
     "macro": """\
 macro : bool, optional
-    Deprecated. Use ``geometry_level`` instead.""",
+    Deprecated. Use ``geometry_level`` instead.
+    """,
     "keep_areas_operacionais": """\
 keep_areas_operacionais : bool, default False
     Whether the function should keep the polygons of Lagoa dos Patos and Lagoa
     Mirim in the state of Rio Grande do Sul (considered as *areas estaduais
-    operacionais*). Defaults to ``False``.""",
+    operacionais*).
+    """,
 }
 
 

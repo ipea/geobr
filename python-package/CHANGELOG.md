@@ -1,9 +1,31 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
-# Development version
+# 2.0.0
 
 **Bug fixes**
+
+- Fixed `AttributeError: module 'pyarrow.compute' has no attribute
+  'match_substring_regex'`, which made **every** `read_*()` function fail on
+  pandas 3 when the installed pyarrow was built without RE2. Under pandas 3
+  strings are Arrow-backed, so a regex `str.contains()` dispatches to a pyarrow
+  kernel that such builds do not provide. Because the failure was in
+  `download_metadata_v2()`, it only appeared when the metadata cache had to be
+  rebuilt, so an existing `~/.cache/geobr` could mask it indefinitely. The
+  affected calls all match literal strings and now pass `regex=False`
+  (`utils.py`: `select_simplified()`, `download_metadata_v2()`, and the
+  `zone` filter in `select_metadata_v2()` used by `read_census_tract()`).
+  Found while running geobr inside QGIS 4.2.1, which ships pandas 3.0.3 and an
+  RE2-less pyarrow.
+
+- The download cache is now temporary, matching the behavior of the R
+  package: parquet and metadata files are stored in a session-specific
+  directory under the system temp folder and are removed when the Python
+  process exits. Previously, files persisted in `~/.cache/geobr` across
+  sessions, so data updated at the source was not picked up unless the user
+  cleared the cache manually. Cache directories left behind in
+  `~/.cache/geobr` by previous versions are no longer used and can be safely
+  deleted.
 
 - Fixed `query()` and `session().read()` failing on point layers. Both resolve
   a geography through `_load_geo_dataset()`, which defaulted to
@@ -18,7 +40,6 @@
   `simplified=True` explicitly warns and reads the original geometry instead of
   failing.
 
-- Removed a duplicate, identical definition of `utils._simplified_attempts()`.
 
 - `read_health_region(geometry_level="micro"|"macro")` no longer groups by
   `code_muni6`. That column is present in the 1991-2013 files, and including it
@@ -118,32 +139,6 @@
   `read_capitals()` described the default `output` as `"sf"` rather than
   `"gpd"`.
 
--------------------------------------------------------
-# 1.0.1 version
-
-**Bug fixes**
-
-- Fixed `AttributeError: module 'pyarrow.compute' has no attribute
-  'match_substring_regex'`, which made **every** `read_*()` function fail on
-  pandas 3 when the installed pyarrow was built without RE2. Under pandas 3
-  strings are Arrow-backed, so a regex `str.contains()` dispatches to a pyarrow
-  kernel that such builds do not provide. Because the failure was in
-  `download_metadata_v2()`, it only appeared when the metadata cache had to be
-  rebuilt, so an existing `~/.cache/geobr` could mask it indefinitely. The
-  affected calls all match literal strings and now pass `regex=False`
-  (`utils.py`: `select_simplified()`, `download_metadata_v2()`, and the
-  `zone` filter in `select_metadata_v2()` used by `read_census_tract()`).
-  Found while running geobr inside QGIS 4.2.1, which ships pandas 3.0.3 and an
-  RE2-less pyarrow.
-
-- The download cache is now temporary, matching the behavior of the R
-  package: parquet and metadata files are stored in a session-specific
-  directory under the system temp folder and are removed when the Python
-  process exits. Previously, files persisted in `~/.cache/geobr` across
-  sessions, so data updated at the source was not picked up unless the user
-  cleared the cache manually. Cache directories left behind in
-  `~/.cache/geobr` by previous versions are no longer used and can be safely
-  deleted.
 
 -------------------------------------------------------
 # 1.0.0
