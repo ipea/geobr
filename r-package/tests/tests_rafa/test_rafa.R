@@ -395,7 +395,7 @@ pkgdown::build_site()
 urlchecker::url_update()
 
 
-### CMD Check ----------------
+# CMD Check ----------------
 # Check package errors
 rcmdcheck::rcmdcheck(build_args = c('--compact-vignettes=gs+qpdf'))
 

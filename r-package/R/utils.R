@@ -292,49 +292,34 @@ download_metadata2 <- function(){ # nocov start
     "Please check your internet connection or try again later."
   )
 
-  # test server connection with github first
-  using_github_server <- TRUE
-  metadata_link <- paste0(
-    "https://github.com/ipea/geobr_prep_data/releases/expanded_assets/",
-    geobr_env$data_release
-  )
-  
-  response <- try(curl::curl_fetch_memory(metadata_link), silent = TRUE)
-
-  # 1st try with github. If it fails, point url to ipea server and try again
-  if (inherits(response, "try-error") || response$status_code != 200L) {
-    
-    using_github_server <- FALSE
-    
-    metadata_link <- paste0(
+  # Try GitHub first, then Ipea if the response has no usable asset links.
+  metadata_links <- c(
+    paste0(
+      "https://github.com/ipea/geobr_prep_data/releases/expanded_assets/",
+      geobr_env$data_release
+    ),
+    paste0(
       "https://www.ipea.gov.br/geobr/data_",
       geobr_env$data_release, "/"
     )
-    
-    # 2nd try, with Ipea
-    response <- try(curl::curl_fetch_memory(metadata_link), silent = TRUE)
-  }
+  )
+  asset_urls <- character()
 
-  if (inherits(response, "try-error") || response$status_code != 200L) {
-    cli::cli_alert_danger(metadata_failed)
+  for (i in seq_along(metadata_links)) {
+    response <- try(curl::curl_fetch_memory(metadata_links[i]), silent = TRUE)
+    if (inherits(response, "try-error") || response$status_code != 200L) next
 
-    return(NULL)
-  }
-
-
-  # parse url content to capture file names
-  release_page <- rawToChar(response$content)
-
-  # get only parquet files
-  if (isTRUE(using_github_server)) {
-    asset_pattern <- "/[^\"]+\\.parquet"
-    asset_urls <- unique(regmatches(release_page, gregexpr(asset_pattern, release_page))[[1]])
-  } else {
-    asset_pattern <- '(?<=href=")[^"]+\\.parquet(?=")'
+    release_page <- rawToChar(response$content)
+    asset_pattern <- if (i == 1L) {
+      "/[^\"]+\\.parquet"
+    } else {
+      '(?<=href=")[^"]+\\.parquet(?=")'
+    }
     asset_urls <- unique(regmatches(release_page, gregexpr(asset_pattern, release_page, perl = TRUE))[[1]])
+    if (length(asset_urls) > 0L) break
   }
 
-  if (length(asset_urls) == 0L | is.null(asset_urls)) {
+  if (length(asset_urls) == 0L) {
     cli::cli_alert_danger(metadata_failed)
     return(NULL)
   }
@@ -385,7 +370,8 @@ download_parquet <- function(filename_to_download,
   # if file already exists, open and return parquet
   if (isTRUE(cache) && file.exists(temp_full_file_path)) {
     temp_arrw <- geobr_open_dataset(temp_full_file_path)
-    return(temp_arrw)
+    if (!is.null(temp_arrw)) return(temp_arrw)
+    unlink(temp_full_file_path)
   }
 
   # download file otherwise
@@ -419,13 +405,14 @@ download_parquet <- function(filename_to_download,
     }
 
     # download file
-    try(silent=T,
+    response <- try(silent=T,
         req |>
           httr2::req_perform(path = temp_full_file_path)
         )
 
     # if url1 does not work, fallback to url2
-    if (!file.exists(temp_full_file_path)) {
+    if (inherits(response, "try-error") || !file.exists(temp_full_file_path)) {
+        unlink(temp_full_file_path)
 
         # prep request
         try(silent=T,
@@ -443,7 +430,7 @@ download_parquet <- function(filename_to_download,
         }
 
         # download file
-        try(silent=T,
+        response <- try(silent=T,
             req |>
               httr2::req_perform(path = temp_full_file_path)
         )
@@ -451,9 +438,10 @@ download_parquet <- function(filename_to_download,
 
 
   # Halt function if download failed
-  if (!file.exists(temp_full_file_path)) {
+  if (inherits(response, "try-error") || !file.exists(temp_full_file_path)) {
+    unlink(temp_full_file_path)
     cli::cli_alert_danger(message_failed)
-    invisible(NULL)
+    return(invisible(NULL))
   }
 
   # load parquet
