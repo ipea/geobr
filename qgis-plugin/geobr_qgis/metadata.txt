@@ -3,8 +3,8 @@ name=geobr
 qgisMinimumVersion=3.40
 qgisMaximumVersion=4.99
 description=Download official spatial data sets of Brazil as QGIS layers
-about=Exposes the geobr Python package as QGIS Processing algorithms. geobr's readers - states, municipalities, census tracts, biomes, indigenous lands, health facilities, schools, favelas and more - become algorithms you can run from the Processing Toolbox, chain in Model Builder, run in batch, or call from qgis_process. Data comes from IBGE and other official Brazilian sources and is returned in EPSG:4674 (SIRGAS 2000). REQUIRES the geobr Python package, which must be installed into the interpreter QGIS itself uses, not a system Python. On Windows, run: "C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user geobr. On Linux and macOS, use the Python that QGIS runs. This also pulls in duckdb and rapidfuzz, which QGIS does not bundle. Restart QGIS afterwards.
-version=0.1.0
+about=Exposes the geobr Python package as QGIS Processing algorithms. geobr's readers - states, municipalities, census tracts, biomes, indigenous lands, health facilities, schools, favelas and more - become algorithms you can run from the Processing Toolbox, chain in Model Builder, run in batch, or call from qgis_process. Data comes from IBGE and other official Brazilian sources and is returned in EPSG:4674 (SIRGAS 2000). REQUIRES geobr 2.0.0 or newer, installed into the interpreter QGIS itself uses, not a system Python. On Windows, run: "C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user "geobr>=2.0.0". On Linux and macOS, use the Python that QGIS runs. This also pulls in duckdb and rapidfuzz, which QGIS does not bundle. Restart QGIS afterwards.
+version=0.2.0
 author=Rafael H. M. Pereira, Ipea
 email=rafa.pereira.br@gmail.com
 repository=https://github.com/ipea/geobr
@@ -15,9 +15,19 @@ icon=icon.png
 experimental=True
 deprecated=False
 hasProcessingProvider=True
-external_deps=geobr
+external_deps=geobr>=2.0.0
 tags=brazil,ibge,boundaries,census,municipality,opendata,vector
-changelog=0.1.0 - First release
+changelog=0.2.0 - Built on geobr 2.0.0
+    Requires geobr 2.0.0 or newer.
+    Restored the algorithm help text, which geobr 2.0.0 broke by moving its
+    shared parameter documentation into an import-time decorator.
+    Health regions now offer the geometry_level control (municipality, micro,
+    macro), which geobr 2.0.0 fixed.
+    Reader arguments follow geobr 2.0.0's order, which now matches the R
+    package, so parameters appear in a different order than in 0.1.0.
+    Rejects code filters geobr would silently ignore, and mixed code lists it
+    would only partly apply.
+    0.1.0 - First release
     Exposes geobr, a computational package to download official spatial data sets
     of Brazil. The package covers a wide range of spatial data sets,
     available at various geographic scales and for various years with

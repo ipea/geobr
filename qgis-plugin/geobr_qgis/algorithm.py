@@ -1,13 +1,13 @@
 """The single Processing algorithm that fronts every geobr reader.
 
-One class serves all 31 readers. Its parameters are built from the reader's own
-signature, so a reader added to geobr shows up in QGIS with no change here.
+One class serves every reader geobr exports. Its parameters are built from the
+reader's own signature, so a reader added to geobr shows up in QGIS with no
+change here.
 """
 
 from __future__ import annotations
 
 import os
-import re
 import threading
 
 from qgis.core import (
@@ -22,17 +22,9 @@ from qgis.core import (
     QgsVectorFileWriter,
 )
 
+from .discovery import REQUIRED, validate_codes
 
-class _Required:
-    """Sentinel for a reader argument that has no default."""
-
-    def __repr__(self) -> str:  # pragma: no cover - debugging aid
-        return "REQUIRED"
-
-
-REQUIRED = _Required()
-
-PIP_COMMAND = "python -m pip install --user geobr"
+PIP_COMMAND = 'python -m pip install --user "geobr>=2.0.0"'
 
 # geobr keeps a module-global DuckDB connection and registers views by name
 # ("{geo}_{year}"). Two algorithms running at once - batch mode, or a model -
@@ -42,35 +34,31 @@ _GEOBR_LOCK = threading.Lock()
 # Arguments the plugin owns rather than the user. QGIS already provides the
 # equivalent: `feedback` replaces tqdm and the verbose flag, and the output
 # format is fixed because we always want a GeoDataFrame to write to disk.
-# Each is passed only if the reader actually declares it - read_comparable_areas
-# declares none of them and would otherwise raise TypeError.
+# `cache=True` is right under geobr 2.0.0: the cache is a per-session temp dir
+# deleted when the process exits, so repeated reads inside one QGIS session are
+# served from disk with no staleness risk.
+# Each is passed only if the reader actually declares it - not every reader
+# declares all four, and passing one that is absent would raise TypeError.
 _FORCED = {"output": "gpd", "show_progress": False, "verbose": False, "cache": True}
 
-# `macro` is deprecated in read_health_region, and actively harmful here:
-# parameterAsString returns "" for an unset optional, "" is not None, so the
-# reader's `if macro is not None` branch fires and silently overwrites the
-# user's geometry_level choice with "municipality".
+# `macro` is deprecated in read_health_region and string-typed here, so any
+# value the user types is truthy and silently overrides their geometry_level
+# choice. (An untouched field is not the hazard: _collect drops empty strings
+# before they reach the reader.)
 _SKIP = {"macro"}
 
-# Arguments suppressed for one specific reader. geobr's read_health_region
-# accepts geometry_level but ignores it: the micro/macro aggregation groups by
-# every column it does not explicitly exclude, and code_muni6 survives that
-# GROUP BY, so all three levels return one feature per municipality. Offering a
-# control that silently does nothing is worse than not offering it, so the
-# reader ships at its (correct) municipality level until geobr is fixed.
-_SKIP_PER_READER = {"read_health_region": {"geometry_level"}}
-
 _YEAR_ARGS = {"year", "date", "start_year", "end_year"}
+
+# Bounds for the numeric parameters. Without them the spin box opens on its
+# own minimum - a large negative integer, which validates - and geobr is asked
+# for an impossible year. 1872 is geobr's earliest data; `date` is YYYYMM.
+_YEAR_RANGE = (1872, 9999)
+_DATE_RANGE = (187201, 999912)
 
 _ENUM_ARGS = {
     "zone": ["urban", "rural"],
     "geometry_level": ["municipality", "micro", "macro"],
 }
-
-# geobr infers the filter column from the value's shape. Anything it cannot
-# match falls through to an *unfiltered* result rather than an error, so the
-# accepted forms are checked here before the call.
-_CODE_RE = re.compile(r"^(all|[A-Za-z]{2}|\d+)$")
 
 
 def apply_qgis_proxy() -> None:
@@ -129,21 +117,23 @@ class GeobrAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self._exposed = []
-        skipped = _SKIP | _SKIP_PER_READER.get(self._spec.name, set())
         for arg, default in self._spec.params:
-            if arg in _FORCED or arg in skipped:
+            if arg in _FORCED or arg in _SKIP:
                 continue
             key = arg.upper()
             label = arg.replace("_", " ").capitalize()
             required = default is REQUIRED
 
             if arg in _YEAR_ARGS:
+                low, high = _DATE_RANGE if arg == "date" else _YEAR_RANGE
                 self.addParameter(
                     QgsProcessingParameterNumber(
                         key,
                         label,
                         QgsProcessingParameterNumber.Integer,
                         defaultValue=None if required else default,
+                        minValue=low,
+                        maxValue=high,
                     )
                 )
                 kind = "int"
@@ -243,21 +233,15 @@ class GeobrAlgorithm(QgsProcessingAlgorithm):
 
     @staticmethod
     def _validate_code(arg, value):
-        """Check a code filter before geobr silently ignores it.
+        """Reject a code filter geobr would ignore or only partly apply.
 
-        ``read_filter_parquet_relation`` returns the *unfiltered* relation when a
-        value matches none of its patterns, so a typo would otherwise produce a
-        whole-country layer where one state was asked for.
+        The rules live in ``discovery.validate_codes`` so they can be tested
+        without a QGIS runtime; this only translates the failure.
         """
-        parts = [p.strip() for p in value.split(",") if p.strip()]
-        for part in parts:
-            if not _CODE_RE.match(part):
-                raise QgsProcessingException(
-                    f"Invalid value {part!r} for '{arg}'. Use 'all', a two-letter "
-                    "state abbreviation (RJ), or a numeric IBGE code (33, "
-                    "3304557). Separate several codes with commas."
-                )
-        return parts[0] if len(parts) == 1 else parts
+        try:
+            return validate_codes(arg, value)
+        except ValueError as exc:
+            raise QgsProcessingException(str(exc)) from exc
 
     def _explain(self, exc):
         """Turn geobr's failure into something a QGIS user can act on."""
@@ -273,7 +257,14 @@ class GeobrAlgorithm(QgsProcessingAlgorithm):
                 "With a working connection, run:\n"
                 "    python -c \"import duckdb; duckdb.connect().execute('INSTALL spatial')\""
             )
-        elif "connection" in lowered or "timed out" in lowered:
+        elif (
+            isinstance(exc, ConnectionError)
+            or "connection" in lowered
+            or "timed out" in lowered
+        ):
+            # geobr raises ConnectionError for both metadata and file downloads,
+            # and its own message does not always mention the network - the
+            # download path reports a possibly-corrupted file instead.
             text += (
                 "\n\nCheck your internet connection. If you are behind a proxy, "
                 "set it in Settings > Options > Network so the plugin can pass "

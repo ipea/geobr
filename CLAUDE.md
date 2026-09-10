@@ -2,7 +2,7 @@
 
 **Project:** geobr — download official spatial data sets of Brazil
 **Maintainer:** Rafael H. M. Pereira (Ipea) · **Repo:** `ipea/geobr` · **Default branch:** `master`
-**Packages:** R `r-package/` (v2.0.1, CRAN) · Python `python-package/` (v1.0.0, PyPI)
+**Packages:** R `r-package/` (v2.0.1, CRAN) · Python `python-package/` (v2.0.0, PyPI) · QGIS `qgis-plugin/` (v0.2.0)
 
 ---
 
@@ -29,7 +29,7 @@ release tag (data_release)
    → sniff the release's *.parquet asset names
    → parse each name into a metadata row: file_name → geo · year · simplified
    → filter by (geography, year, simplified) to pick one file
-   → build the download URL and fetch to the local cache (session temp dir in R, `~/.cache/geobr` in Python)
+   → build the download URL and fetch to the local cache (a per-session temp dir in both languages)
    → open with arrow/duckdb, filter, return sf / GeoDataFrame / duckdb relation
 ```
 
@@ -45,13 +45,16 @@ release tag (data_release)
 Because Python asks for `latest` first, it can serve a **newer data release than R** for the same
 package version. Keep this in mind whenever the two packages disagree about available years.
 
-**Caching differs by language, and this is the sharpest divergence between them.** R writes to
-the **per-session** temp dir (`fs::path_temp("geobr")`), so its cache dies with the R session.
-Python writes to a **persistent** user cache (`~/.cache/geobr`, or `$XDG_CACHE_HOME/geobr`,
-falling back to the system temp dir only if `mkdir` fails), which never expires and has no size
-cap. A stale Python file under a superseded data release therefore survives reboots — clear it
-first when R and Python disagree. Both cache the metadata table itself, so the sniff runs once
-per session. `cache = FALSE` forces a re-download.
+**Caching now agrees across the two languages.** R writes to the per-session temp dir
+(`fs::path_temp("geobr")`), so its cache dies with the R session. Since Python 2.0.0, Python does
+the same: `cache_dir()` is a `tempfile.mkdtemp(prefix="geobr_")` registered for `atexit` removal,
+plus a best-effort sweep of session caches older than 30 days left behind by processes that were
+killed (`python-package/geobr/_cache.py`). Both cache the metadata table itself, so the sniff runs
+once per session. `cache = FALSE` forces a re-download.
+
+Python **≤ 1.0.0** instead cached persistently in `~/.cache/geobr` (or `$XDG_CACHE_HOME/geobr`),
+with no expiry and no size cap. That directory is never written any more but is never cleaned up
+either, so it may still be sitting on a machine that once ran the old version.
 
 **The release tag is currently hardcoded in five places, in two formats** (`v2.0.0` and `data_v2.0.0`):
 `r-package/R/onLoad.R:7`, `r-package/R/utils.R:4` (dead — assigned, never read),
@@ -70,8 +73,9 @@ geobr/
 ├── .claude/                 # rules, skills, agents
 ├── r-package/               # R package (DESCRIPTION, R/, man/, tests/testthat/, vignettes/)
 ├── python-package/          # Python package (pyproject.toml, geobr/, tests/, helpers/)
+├── qgis-plugin/             # QGIS Processing plugin over the Python package
 ├── docs/                    # pkgdown site (generated — do not hand-edit)
-├── .github/workflows/       # R-CMD-check, Python-CMD-check, pkgdown, test-coverage
+├── .github/workflows/       # R-CMD-check, Python-CMD-check, qgis-plugin-check, pkgdown, test-coverage
 ├── quality_reports/         # plans, specs, session logs, audits, archive
 └── templates/               # session log, quality report, spec templates
 ```
@@ -104,7 +108,11 @@ cd python-package && uv run pytest -m network                 # hits the data se
 cd python-package && python helpers/diff_packages.py   # read_* present in R but not Python
 ```
 
-**Toolchain on this machine:** R 4.6.1 ✓ · `python` ✗ · `uv` ✗ · `gh` ✗ · `conda` ✗ · no `.venv`.
+**Toolchain on this machine:** R 4.6.1 ✓ · `python` 3.11.9 ✓ (bare CPython — **no `pytest`**, and
+PyPI is unreachable, so it cannot be installed) · `uv` ✗ · `gh` ✗ · `conda` ✗ · no `.venv`.
+The Python interpreter is enough to run standalone scripts and stdlib-only checks (e.g. the QGIS
+plugin's `ast` discovery layer), but not the `python-package` test suite, which needs pytest,
+geopandas and duckdb.
 **Network:** behind `cache.ipea.gov.br:3128`. Export `http_proxy`/`https_proxy` before any
 networked R command — libcurl ignores the WinINET setting that PowerShell honours. The
 sandboxed Bash tool has no outbound network at all; run networked commands via PowerShell.
@@ -118,7 +126,7 @@ Python must say `SKIPPED — no local Python` rather than emit a command that fa
 
 | | Rule |
 |---|---|
-| **Writes** | R: session temp dir only. Python: the persistent user cache `~/.cache/geobr`. Neither writes to the working directory or the package library. |
+| **Writes** | Session temp dir only, in both languages. Neither writes to the working directory or the package library. |
 | **Release tag** | Reference the named constant; never inline a version string in a new URL. |
 | **Network tests** | R: `skip_on_cran()` everywhere; `skip_if_offline()` deliberately **not** used, so the R suite needs a live connection locally (323 pass with the proxy set). Python: `@pytest.mark.network`; CI runs `-m "not network"`. |
 | **R deps** | `@importFrom` or `pkg::fun()` in `R/`. Never `library()`/`require()` in package code. |
@@ -126,6 +134,17 @@ Python must say `SKIPPED — no local Python` rather than emit a command that fa
 | **Public surface** | `read_*` is public in both packages. Python `_cache` / `_filter` / `_output` / `_duckdb_backend` are private. |
 | **Parity** | A new/changed `read_*` argument lands on both sides, with the same name and default. |
 | **Errors** | Actionable and typed: `cli::cli_abort()` in R, a real exception in Python. Never a silent empty result. |
+
+### QGIS plugin conventions
+
+- A submission ZIP has exactly one top-level directory, `geobr_qgis/`, and contains the plugin
+  files beneath it. Exclude `__pycache__`, `*.pyc`, `.git`, tests, and repository-only files.
+- ZIP member names must use forward slashes (`geobr_qgis/algorithm.py`). Never build the submission
+  archive with PowerShell `Compress-Archive` on Windows: it can store backslashes such as
+  `geobr_qgis\algorithm.py`, which the QGIS plugin repository rejects as non-conformant.
+- Build the archive with Python's `zipfile` module and explicit POSIX archive names. Before delivery,
+  inspect every `ZipInfo.filename` and fail if it contains `\\`, starts outside `geobr_qgis/`, or
+  names a generated/legacy file.
 
 ---
 
@@ -245,7 +264,7 @@ every reader delegates to `read_geobr_v2()`. Filtering is **DuckDB SQL**, not `d
 |---|---|---|---|
 | 1 | Sniff the release, build a metadata table | `download_metadata_v2()` — `utils.py:336` | GitHub **API** (`releases/latest`), not HTML scraping. Falls back to the pinned `GEOBR_DATA_RELEASE` only if `latest` yields no parquet assets. `@lru_cache(maxsize=1)` + a cached parquet. Same derived columns as R: `file_name` / `geo` / `year` / `simplified`, plus `download_url`. |
 | 2 | Filter the metadata to one row | `select_metadata_v2()` — `utils.py:389` | Returns a `pd.Series`. Raises `ValueError` listing available geographies/years. Takes a `zone` argument R lacks (census tracts). |
-| 3 | Download to the cache | `download_parquet()` — `utils.py:423` | Release URL then `IPEA_FALLBACK_BASE`. Raises `ConnectionError` on failure. **Cache is `~/.cache/geobr`, not a temp dir** — see below. |
+| 3 | Download to the cache | `download_parquet()` — `utils.py:423` | Release URL then `IPEA_FALLBACK_BASE`. Raises `ConnectionError` on failure. **Cache is a per-session temp dir** (`_cache.py`), as in R — see below. |
 | 4 | Filter rows | `read_filter_parquet_relation()` — `_duckdb_backend.py:476` | Registers the parquet as a DuckDB view, then builds a `WHERE` clause. Lazy relation. |
 | 5 | Convert to the output format | `convert_output()` — `_output.py:15` | `"gpd"` → WKB round-trip into a `GeoDataFrame` (+ `enforce_types`) · `"arrow"` → `to_arrow_table()` · `"duckdb"` → relation as-is. |
 
@@ -290,11 +309,11 @@ a default is a breaking change for existing users.
 
 ### Invariants and gotchas
 
-- **The cache is persistent and lives in the user's home** — `~/.cache/geobr`, or
-  `$XDG_CACHE_HOME/geobr`, falling back to `tempfile.gettempdir()/geobr` **only if `mkdir` fails**
-  (`_cache.py:9`). This is the sharpest divergence from R, whose cache dies with the session. It
-  never expires and has no size cap, so a stale file under a superseded data release persists across
-  sessions and reboots — the first thing to clear when Python and R disagree.
+- **The cache is per-session, as in R** — `cache_dir()` is a `tempfile.mkdtemp(prefix="geobr_")`
+  created once per process and removed by an `atexit` hook, with a 30-day sweep of caches abandoned
+  by processes that never ran `atexit` (`_cache.py:26-52`). A stale file therefore cannot outlive
+  the session. This changed in 2.0.0; **≤ 1.0.0 cached persistently in `~/.cache/geobr`**, which is
+  still the first thing to clear on a machine that ran the old version.
 - **An unmatched code returns everything, silently.** `read_filter_parquet_relation()` tries
   abbreviation → 7-digit `code_muni` → ≤2-digit `code_state` → other `code_*`; if nothing matches it
   returns the **unfiltered** relation, and there is no zero-row check. R's `filter_arrw()` aborts in

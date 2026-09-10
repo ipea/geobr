@@ -1,0 +1,51 @@
+on:
+  push:
+    paths:
+      - qgis-plugin/**
+      - python-package/geobr/**
+      - .github/workflows/qgis-plugin-check.yaml
+    branches:
+      - main
+      - master
+      - dev
+  pull_request:
+    paths:
+      - qgis-plugin/**
+      - python-package/geobr/**
+      - .github/workflows/qgis-plugin-check.yaml
+    branches:
+      - main
+      - master
+      - dev
+
+name: qgis-plugin-check
+
+# The `python-package/geobr/**` trigger is the point of this job. The plugin
+# derives its Processing parameters from geobr's *source* by `ast`, so a change
+# to geobr's signatures or docstrings can break the plugin without touching a
+# single file under qgis-plugin/. That must fail here.
+
+jobs:
+  qgis-plugin-check:
+    runs-on: ubuntu-latest
+    name: discovery (python 3.12)
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pytest
+        # geobr itself is deliberately NOT installed: the tests point discovery
+        # at this repo's python-package/geobr source tree.
+        run: python -m pip install --upgrade pip pytest
+
+      - name: Syntax-check the plugin
+        # The only check that reaches algorithm.py, provider.py and __init__.py
+        # at all, since importing them needs a QGIS runtime.
+        run: python -m compileall -q qgis-plugin/geobr_qgis
+
+      - name: Run discovery tests
+        run: python -m pytest qgis-plugin/tests -v

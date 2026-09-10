@@ -19,14 +19,15 @@ qgis_process run geobr:read_state -- YEAR=2020 CODE_STATE=RJ OUTPUT=/tmp/rj.gpkg
 
 ## Install
 
-**1 — the Python package.** The plugin does not vendor geobr; it calls the real one.
+**1 — the Python package.** The plugin does not vendor geobr; it calls the real one. It requires
+**geobr 2.0.0 or newer**.
 
 ```bash
-python -m pip install --user geobr
+python -m pip install --user "geobr>=2.0.0"
 ```
 
 Run this with *QGIS's* Python, not a system Python. On Windows that is
-`"C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user geobr`.
+`"C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user "geobr>=2.0.0"`.
 
 QGIS already ships geopandas, shapely, pyarrow, pandas and requests, so in practice pip only adds
 `duckdb` and `rapidfuzz` (both are hard requirements — geobr imports them at module scope, so
@@ -69,6 +70,13 @@ plugin. Reading the source rather than importing the package keeps QGIS startup 
 costs ~4 s warm and up to ~29 s cold because of pandas/geopandas/duckdb, so the real import is
 deferred until you actually run an algorithm.
 
+Help text comes from the same place. Since 2.0.0, geobr writes `{year}`-style tokens in its reader
+docstrings and substitutes them from a shared table when the package is imported — so reading the
+source alone would show the tokens. `discovery.py` reproduces that substitution, and a test
+(`tests/test_discovery.py`) fails if a future geobr changes it. That test suite runs in CI against
+geobr's source in this repo, so a signature or docstring change upstream breaks the plugin's build
+rather than a user's help panel.
+
 ## Filtering by code
 
 The `code_*` parameters accept what geobr accepts, and several values separated by commas:
@@ -81,10 +89,15 @@ The `code_*` parameters accept what geobr accepts, and several values separated 
 | `3304557` | a seven-digit municipality code |
 | `33,35` | several of the above |
 
-Anything else is rejected before the call. This matters: when geobr cannot match a code to a
-column it returns the data **unfiltered** rather than raising, so a typo would otherwise give you a
-whole-country layer where you asked for one state. The algorithm also reports the feature count in
-the log, so an unexpected fallthrough is visible.
+Malformed values are rejected before the call, and so are **mixed lists** like `RJ,33`. Both matter,
+because geobr fails quietly here rather than loudly: when it cannot match a code to a column it
+returns the data **unfiltered** rather than raising, so a typo would otherwise give you a
+whole-country layer where you asked for one state. And it picks the column from the *first* value
+alone, then applies the rest to that same column — so `RJ,33` would silently return just RJ.
+
+The check is a shape check, not a validity check: `ZZ` is a well-formed abbreviation and is passed
+through, returning zero features rather than being rejected up front. The algorithm reports the
+feature count in the log, so an unexpected result is visible either way.
 
 ## Known limitations
 
@@ -106,41 +119,31 @@ the log, so an unexpected fallthrough is visible.
   **every reader failed** with `AttributeError`. It surfaced only when the metadata cache had to be
   rebuilt, so a pre-existing `~/.cache/geobr` hid it. Fixed upstream in geobr by matching those
   literal strings with `regex=False`; verified on QGIS 4.2.1 and 3.42.1 from a cold cache.
-  **This requires a geobr newer than 1.0.0** — on 1.0.0 the plugin works on QGIS 4 only while a
-  cache built elsewhere survives. The version bounds are still unclaimed territory, so treat other
-  pandas-3 breakage as possible.
-- **`read_health_region` is offered at municipality level only.** geobr accepts a `geometry_level`
-  argument but ignores it: the `micro`/`macro` aggregation groups by every column it does not
-  explicitly exclude, and `code_muni6` survives that `GROUP BY`, so all three levels return one
-  feature per municipality (92 for RJ, where the data holds 9 health regions and 1 macroregion).
-  Rather than expose a control that silently does nothing, the plugin does not offer the parameter.
-  The municipality-level output is correct. This is a bug in geobr itself
-  (`geobr/read_health_region.py`), reproduced outside QGIS; the parameter returns once it is fixed.
+  This is one of the reasons the plugin requires **geobr ≥ 2.0.0**. The version bounds are still
+  unclaimed territory, so treat other pandas-3 breakage as possible.
+- **`zone` only applies to census tracts from 2007 and earlier.** Before 2010, urban and rural
+  tracts were separate data sets; from 2010 on they are one, and geobr ignores the argument
+  (`geobr/read_census_tract.py`). The control is still offered because it is real for the older
+  years, but it does nothing for 2010 and 2022.
 - **Codes are floating-point.** geobr deliberately types `code_muni`, `code_state` and friends as
   float (`geobr/constants.py`), so they arrive in GeoPackage as `Real` — `3304557.0`, not
   `3304557`. The plugin does not re-type them, because silently disagreeing with geobr's own output
   is worse than the cosmetic wart. Cast them in the field calculator if you need an integer join key.
 - **Downloads cannot be cancelled mid-request.** geobr fetches in one blocking call, so *Cancel*
   takes effect between stages, not during a transfer.
-- **`read_comparable_areas` is not exposed.** It is currently broken upstream, and it is also the
-  only reader still on geobr's legacy gpkg download path, whose `url_solver()` calls
-  `requests.get()` with **no timeout**. A Processing algorithm cannot be cancelled mid-request, so
-  on a network that black-holes connections that call would hang until QGIS is restarted. It is
-  excluded in `provider.py` (`_EXCLUDED_READERS`) and returns once geobr fixes it. Every other
-  reader uses the current parquet path.
-- **Downloads are cached per session.** As of geobr 1.0.1, the Python package stores downloads and
-  metadata in a fresh temp directory that is deleted when the Python process exits — the same
-  behavior as the R package. Source updates are picked up on the next QGIS start, with no action
-  needed. Within one session repeated reads are served from that session cache, but restarting QGIS
-  re-downloads whatever the session uses, and a single year of census tracts exceeds 350 MB.
+- **`read_comparable_areas` is not exposed.** It is the only reader still on geobr's legacy gpkg
+  download path, whose `url_solver()` calls `requests.get()` with **no timeout**. A Processing
+  algorithm cannot be cancelled mid-request, so on a network that black-holes connections that call
+  would hang until QGIS is restarted. It is excluded in `discovery.py` (`_EXCLUDED_READERS`) and
+  returns once geobr fixes it. Every other reader uses the current parquet path.
+- **Downloads are cached per session.** geobr 2.0.0 stores downloads and metadata in a fresh temp
+  directory that it deletes when the Python process exits — the same behavior as the R package.
+  Source updates are picked up on the next QGIS start, with no action needed. Within one session
+  repeated reads are served from that session cache, but restarting QGIS re-downloads whatever the
+  session uses, and a single year of census tracts exceeds 350 MB. The plugin does not expose
+  geobr's `cache` argument, because `cache=False` does not refresh the *metadata* — the thing that
+  actually goes stale.
 
-  geobr 1.0.0 instead cached persistently in `~/.cache/geobr` (or `$XDG_CACHE_HOME/geobr`), with no
-  expiry and no size cap, surviving restarts — so stale data went unnoticed unless the cache was
-  cleared by hand. Upgrading no longer uses that directory, but nothing removes it automatically
-  either; the **Clear geobr download cache** algorithm still deletes its contents. Tick *List files
-  only* on it first to see whether any legacy files remain. The plugin does not expose geobr's
-  `cache` argument, because `cache=False` does not refresh the *metadata* — the thing that actually
-  goes stale.
 - **Shapefile output truncates field names** to 10 characters. Prefer GeoPackage.
 
 ## Proxies
@@ -161,11 +164,19 @@ python -c "import duckdb; duckdb.connect().execute('INSTALL spatial')"
 ```
 geobr_qgis/
 ├── __init__.py    classFactory, plugin lifecycle, dependency probe
-├── provider.py    reader discovery (ast) + the Processing provider
+├── discovery.py   reader discovery (ast) + docstring rendering — imports no qgis
+├── provider.py    the Processing provider
 ├── algorithm.py   the one algorithm class that serves every reader
-├── cache.py       the "Clear geobr download cache" algorithm
 └── metadata.txt
+tests/
+├── conftest.py
+└── test_discovery.py   runs without QGIS, against python-package/geobr
 ```
+
+`discovery.py` is deliberately free of any `qgis` import: it is the only part of the plugin coupled
+to geobr's *source shape*, so it is the part most likely to break when geobr changes, and it has to
+be testable without a QGIS runtime. `.github/workflows/qgis-plugin-check.yaml` runs those tests on
+any change to `qgis-plugin/**` **or `python-package/geobr/**`.
 
 ## License
 
