@@ -69,10 +69,10 @@ class GeobrPlugin:
                 f"Install with:  {PIP_COMMAND}  - then restart QGIS."
             )
             # Logged as well as shown, so the instruction survives the banner.
-            QgsMessageLog.logMessage(message, "geobr", Qgis.Warning)
+            QgsMessageLog.logMessage(message, "geobr", Qgis.MessageLevel.Warning)
             if self.iface is not None:
                 self.iface.messageBar().pushMessage(
-                    "geobr", message, level=Qgis.Warning, duration=15
+                    "geobr", message, level=Qgis.MessageLevel.Warning, duration=15
                 )
 
     def unload(self):

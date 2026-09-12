@@ -56,3 +56,4 @@ python-package/.coverage
 
 # QGIS plugin build artifact (the repo must not contain zipped files)
 qgis-plugin/dist/
+quality_reports/

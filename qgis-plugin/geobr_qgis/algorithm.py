@@ -49,9 +49,12 @@ _SKIP = {"macro"}
 
 _YEAR_ARGS = {"year", "date", "start_year", "end_year"}
 
-# Bounds for the numeric parameters. Without them the spin box opens on its
-# own minimum - a large negative integer, which validates - and geobr is asked
-# for an impossible year. 1872 is geobr's earliest data; `date` is YYYYMM.
+# Bounds for the numeric parameters. 1872 is geobr's earliest data; `date` is
+# YYYYMM. A QGIS number widget cannot be blank unless the parameter is
+# optional, so a year with no default is declared optional to QGIS (the field
+# then opens empty, showing "Not set") and the requirement is enforced in
+# `checkParameterValues` / `_collect` instead. Without that, the spin box
+# opens on its minimum and every reader appears to default to 1872.
 _YEAR_RANGE = (1872, 9999)
 _DATE_RANGE = (187201, 999912)
 
@@ -117,6 +120,7 @@ class GeobrAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self._exposed = []
+        self._required_years = []
         for arg, default in self._spec.params:
             if arg in _FORCED or arg in _SKIP:
                 continue
@@ -130,12 +134,15 @@ class GeobrAlgorithm(QgsProcessingAlgorithm):
                     QgsProcessingParameterNumber(
                         key,
                         label,
-                        QgsProcessingParameterNumber.Integer,
+                        QgsProcessingParameterNumber.Type.Integer,
                         defaultValue=None if required else default,
+                        optional=required,
                         minValue=low,
                         maxValue=high,
                     )
                 )
+                if required:
+                    self._required_years.append((key, label))
                 kind = "int"
             elif arg in _ENUM_ARGS:
                 options = _ENUM_ARGS[arg]
@@ -172,8 +179,34 @@ class GeobrAlgorithm(QgsProcessingAlgorithm):
 
     # -- execution --------------------------------------------------------
 
+    def checkParameterValues(self, parameters, context):
+        missing = self._missing_year(parameters, context)
+        if missing:
+            return False, missing
+        return super().checkParameterValues(parameters, context)
+
+    def _missing_year(self, parameters, context):
+        """Message naming the first blank year the reader cannot do without.
+
+        The year parameters are optional to QGIS only so the field can open
+        empty; the reader still needs a value, and asking here is cheaper than
+        letting geobr raise a TypeError after loading.
+        """
+        for key, label in self._required_years:
+            if not self.parameterAsString(parameters, key, context).strip():
+                what = "a date as YYYYMM" if key == "DATE" else "a year"
+                return (
+                    f"{label} is required. Enter {what} that geobr offers for "
+                    "this data set (the help panel lists them)."
+                )
+        return None
+
     def processAlgorithm(self, parameters, context, feedback):
         apply_qgis_proxy()
+
+        missing = self._missing_year(parameters, context)
+        if missing:
+            raise QgsProcessingException(missing)
 
         feedback.pushInfo("Loading the geobr Python package...")
         try:
