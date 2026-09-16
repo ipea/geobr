@@ -1,6 +1,23 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
+# 2.0.1
+
+**Bug fixes**
+
+- Relaxed the `geopandas` and `shapely` upper bounds, which were exact
+  ceilings (`geopandas<=1.1.2`, `shapely<=2.1.0`) rather than major-version
+  bounds. Any environment shipping a newer patch release was declared
+  incompatible even though the code runs on it unchanged. QGIS 4.2.1 is such an
+  environment: it bundles geopandas 1.1.4 and shapely 2.1.2, so
+  `pip install geobr` there resolved the "conflict" by installing geopandas
+  1.1.2 and shapely 2.1.0 into the user site-packages, which precede QGIS's own
+  on `sys.path` and therefore shadowed the bundled copies for QGIS itself and
+  every other plugin. shapely is a compiled GEOS binding, so this was not a
+  harmless downgrade. Now `geopandas>=1.0.0,<2` and `shapely>=1.7.0,<3`,
+  matching the major-version style already used for `urllib3` and `lxml`.
+
+-------------------------------------------------------
 # 2.0.0
 
 **Bug fixes**

@@ -1,6 +1,6 @@
 [project]
 name = "geobr"
-version = "2.0.0"
+version = "2.0.1"
 description = "geobr: Download Official Spatial Data Sets of Brazil"
 readme = "README.md"
 requires-python = "<4.0,>=3.10"
@@ -15,8 +15,8 @@ authors = [
     {name = "Bernardo Furtado"},
 ]
 dependencies = [
-    "geopandas>=1.0.0,<=1.1.2",
-    "shapely>=1.7.0,<=2.1.0",
+    "geopandas>=1.0.0,<2",
+    "shapely>=1.7.0,<3",
     "requests<3.0.0,>=2.25.1",
     "urllib3>=1.26.0,<3.0.0",
     "lxml>=5.1.0,<7.0.0",
