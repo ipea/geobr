@@ -6,6 +6,7 @@
 
 - Requires duckdb (>= 1.5.1)
 - geobr now fallsback to ipea servers whenever users cannot access github servers.
+- `lookup_muni()`: fixed a SQL error when the fuzzy name match received a name with an apostrophe (e.g. "Santa Barbara d'Oest"). The fuzzy match now returns all candidate matches instead of recycling silently, and closes its DuckDB connection. Dropped the `glue` dependency.
 
 **Documentation**
 

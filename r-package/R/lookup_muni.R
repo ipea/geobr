@@ -101,9 +101,10 @@ lookup_muni <- function(year,
       if (nrow(lookup_filter) == 0) {
 
         conn <- duckdb::dbConnect(duckdb::duckdb())
+        on.exit(DBI::dbDisconnect(conn, shutdown = TRUE), add = TRUE)
         DBI::dbWriteTable(conn, name = "munis", value = df)
 
-        query <- glue::glue("
+        query <- "
           SELECT
             code_muni,
             name_muni_formatted,
@@ -116,18 +117,18 @@ lookup_muni <- function(year,
             SELECT
               code_muni,
               name_muni_formatted,
-              CAST(jaro_similarity('{x}', name_muni_formatted) AS NUMERIC(5,3)) AS similarity
+              CAST(jaro_similarity(?, name_muni_formatted) AS NUMERIC(5,3)) AS similarity
             FROM munis
           ) t
           WHERE similarity > 0.9
-        ")
+        "
 
-        df_prob <- DBI::dbGetQuery(conn, query)
+        df_prob <- DBI::dbGetQuery(conn, query, params = list(x))
 
         # filter code muni
         if (nrow(df_prob) > 0) {
           lookup_filter <- df |>
-            dplyr::filter(name_muni_formatted == df_prob$name_muni_formatted)
+            dplyr::filter(name_muni_formatted %in% df_prob$name_muni_formatted)
         }
       }
 

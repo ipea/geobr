@@ -51,7 +51,6 @@ Imports:
       duckdb (>= 1.5.1),
       duckspatial(>= 1.1.0),
       fs,
-      glue,
       httr2,
       methods,
       nanoarrow,

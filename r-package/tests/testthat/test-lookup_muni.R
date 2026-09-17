@@ -29,6 +29,11 @@ test_that("lookup_muni", {
   test_sf5 <- lookup_muni(name_muni="rio de janeira", year = 2022)
   expect_true(is(test_sf5, "data.frame"))
 
+  # probabilistic, name with apostrophe (regression: SQL quoting)
+  test_sf6 <- lookup_muni(name_muni = "Santa Barbara d'Oest", year = 2022)
+  expect_true(is(test_sf6, "data.frame"))
+  expect_true(3545803 %in% test_sf6$code_muni)
+
 })
 
 
