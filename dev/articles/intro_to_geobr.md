@@ -50,20 +50,27 @@ function.
 datasets <- list_geobr(wide = TRUE)
 
 head(datasets)
-#>                  Function                        geography           source
-#> 1             read_amazon            Brazil's Legal Amazon              MMA
-#> 2             read_biomes                           Biomes             IBGE
-#> 3       read_census_tract  Census tract (setor censitário)             IBGE
-#> 4 read_conservation_units Environmental Conservation Units              MMA
-#> 5            read_country                          Country             IBGE
-#> 6 read_disaster_risk_area              Disaster risk areas CEMADEN and IBGE
-#>                                                                                                                                                               year
-#> 1                                                                                                                                     2019, 2020, 2021, 2022, 2024
-#> 2                                                                                                                                                 2006, 2019, 2025
-#> 3                                                                                                                                                 2000, 2010, 2022
-#> 4                                                                                                                                                   202402, 202503
-#> 5 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025
-#> 6                                                                                                                                                             2010
+#>                  Function
+#> 1             read_amazon
+#> 2             read_biomes
+#> 3           read_capitals
+#> 4       read_census_tract
+#> 5   read_comparable_areas
+#> 6 read_conservation_units
+#>                                                                      geography
+#> 1                                                        Brazil's Legal Amazon
+#> 2                                                                       Biomes
+#> 3                                                               State capitals
+#> 4                                              Census tract (setor censitário)
+#> 5 Historically comparable municipalities, aka áreas mínimas comparáveis (AMCs)
+#> 6                                             Environmental Conservation Units
+#>   source                         year
+#> 1    MMA 2019, 2020, 2021, 2022, 2024
+#> 2   IBGE             2006, 2019, 2025
+#> 3   IBGE                         2010
+#> 4   IBGE             2000, 2010, 2022
+#> 5   IBGE        temporarily suspended
+#> 6    MMA               202402, 202503
 ```
 
 #### Basic syntax

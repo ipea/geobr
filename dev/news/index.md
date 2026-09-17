@@ -12,6 +12,27 @@
   apostrophe (e.g. “Santa Barbara d’Oest”). The fuzzy match now returns
   all candidate matches instead of recycling silently, and closes its
   DuckDB connection. Dropped the `glue` dependency.
+- [`cep_to_state()`](https://ipea.github.io/geobr/dev/reference/cep_to_state.md):
+  fixed the Minas Gerais CEP range, which was reversed so every MG CEP
+  raised “CEP not found”.
+- [`read_country()`](https://ipea.github.io/geobr/dev/reference/read_country.md),
+  [`read_region()`](https://ipea.github.io/geobr/dev/reference/read_region.md),
+  [`read_pop_arrangements()`](https://ipea.github.io/geobr/dev/reference/read_pop_arrangements.md)
+  and
+  [`read_urban_concentrations()`](https://ipea.github.io/geobr/dev/reference/read_urban_concentrations.md)
+  now return `NULL` when the metadata download fails, like the other
+  readers, instead of erroring.
+- [`read_capitals()`](https://ipea.github.io/geobr/dev/reference/read_capitals.md)
+  now passes `cache` and `verbose` on to
+  [`read_municipal_seat()`](https://ipea.github.io/geobr/dev/reference/read_municipal_seat.md).
+  Both arguments were documented but ignored, so `cache = FALSE` had no
+  effect and `verbose = FALSE` still printed a message.
+- [`list_geobr()`](https://ipea.github.io/geobr/dev/reference/list_geobr.md)
+  listed two functions that do not exist (`read_favelas`,
+  `read_quilombola_lands`) and omitted `read_capitals`. The catalogue
+  now matches the exported readers exactly. It also returns `NULL` when
+  the metadata download fails, and rejects a non-scalar `wide` instead
+  of silently returning long format.
 
 **Documentation**
 

@@ -50,6 +50,14 @@
 <li>geobr now fallsback to ipea servers whenever users cannot access github servers.</li>
 <li>
 <code><a href="../reference/lookup_muni.html">lookup_muni()</a></code>: fixed a SQL error when the fuzzy name match received a name with an apostrophe (e.g. “Santa Barbara d’Oest”). The fuzzy match now returns all candidate matches instead of recycling silently, and closes its DuckDB connection. Dropped the <code>glue</code> dependency.</li>
+<li>
+<code><a href="../reference/cep_to_state.html">cep_to_state()</a></code>: fixed the Minas Gerais CEP range, which was reversed so every MG CEP raised “CEP not found”.</li>
+<li>
+<code><a href="../reference/read_country.html">read_country()</a></code>, <code><a href="../reference/read_region.html">read_region()</a></code>, <code><a href="../reference/read_pop_arrangements.html">read_pop_arrangements()</a></code> and <code><a href="../reference/read_urban_concentrations.html">read_urban_concentrations()</a></code> now return <code>NULL</code> when the metadata download fails, like the other readers, instead of erroring.</li>
+<li>
+<code><a href="../reference/read_capitals.html">read_capitals()</a></code> now passes <code>cache</code> and <code>verbose</code> on to <code><a href="../reference/read_municipal_seat.html">read_municipal_seat()</a></code>. Both arguments were documented but ignored, so <code>cache = FALSE</code> had no effect and <code>verbose = FALSE</code> still printed a message.</li>
+<li>
+<code><a href="../reference/list_geobr.html">list_geobr()</a></code> listed two functions that do not exist (<code>read_favelas</code>, <code>read_quilombola_lands</code>) and omitted <code>read_capitals</code>. The catalogue now matches the exported readers exactly. It also returns <code>NULL</code> when the metadata download fails, and rejects a non-scalar <code>wide</code> instead of silently returning long format.</li>
 </ul><p><strong>Documentation</strong></p>
 <ul><li><p>Fixed the documentation of <code>code_muni</code> in <code><a href="../reference/read_statistical_grid.html">read_statistical_grid()</a></code>. It was pulled from the shared roxygen template, which states that <code>code_muni = "all"</code> is the default. In this function <code>code_muni</code> is required and has no default, deliberately, because loading the grid for the whole country is slow and may exhaust memory.</p></li>
 <li><p><code><a href="../reference/read_census_tract.html">read_census_tract()</a></code> now documents that <code>code_tract</code> is required and has no default, for the same reason. These two functions are the only readers that do not default to downloading the whole country.</p></li>
