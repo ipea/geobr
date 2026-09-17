@@ -22,6 +22,10 @@
   [`read_urban_concentrations()`](https://ipea.github.io/geobr/dev/reference/read_urban_concentrations.md)
   now return `NULL` when the metadata download fails, like the other
   readers, instead of erroring.
+- [`read_health_region()`](https://ipea.github.io/geobr/dev/reference/read_health_region.md)
+  now honours `output = "duckdb"` when `geometry_level` is `"micro"` or
+  `"macro"`. These levels aggregate geometries in memory, and the result
+  was returned as an `sf` whatever `output` asked for.
 - [`read_capitals()`](https://ipea.github.io/geobr/dev/reference/read_capitals.md)
   now passes `cache` and `verbose` on to
   [`read_municipal_seat()`](https://ipea.github.io/geobr/dev/reference/read_municipal_seat.md).

@@ -55,6 +55,8 @@
 <li>
 <code><a href="../reference/read_country.html">read_country()</a></code>, <code><a href="../reference/read_region.html">read_region()</a></code>, <code><a href="../reference/read_pop_arrangements.html">read_pop_arrangements()</a></code> and <code><a href="../reference/read_urban_concentrations.html">read_urban_concentrations()</a></code> now return <code>NULL</code> when the metadata download fails, like the other readers, instead of erroring.</li>
 <li>
+<code><a href="../reference/read_health_region.html">read_health_region()</a></code> now honours <code>output = "duckdb"</code> when <code>geometry_level</code> is <code>"micro"</code> or <code>"macro"</code>. These levels aggregate geometries in memory, and the result was returned as an <code>sf</code> whatever <code>output</code> asked for.</li>
+<li>
 <code><a href="../reference/read_capitals.html">read_capitals()</a></code> now passes <code>cache</code> and <code>verbose</code> on to <code><a href="../reference/read_municipal_seat.html">read_municipal_seat()</a></code>. Both arguments were documented but ignored, so <code>cache = FALSE</code> had no effect and <code>verbose = FALSE</code> still printed a message.</li>
 <li>
 <code><a href="../reference/list_geobr.html">list_geobr()</a></code> listed two functions that do not exist (<code>read_favelas</code>, <code>read_quilombola_lands</code>) and omitted <code>read_capitals</code>. The catalogue now matches the exported readers exactly. It also returns <code>NULL</code> when the metadata download fails, and rejects a non-scalar <code>wide</code> instead of silently returning long format.</li>
