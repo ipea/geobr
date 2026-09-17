@@ -48,6 +48,8 @@
 <p><strong>Bug fixes</strong></p>
 <ul><li>Requires duckdb (&gt;= 1.5.1)</li>
 <li>geobr now fallsback to ipea servers whenever users cannot access github servers.</li>
+<li>
+<code><a href="../reference/lookup_muni.html">lookup_muni()</a></code>: fixed a SQL error when the fuzzy name match received a name with an apostrophe (e.g. “Santa Barbara d’Oest”). The fuzzy match now returns all candidate matches instead of recycling silently, and closes its DuckDB connection. Dropped the <code>glue</code> dependency.</li>
 </ul><p><strong>Documentation</strong></p>
 <ul><li><p>Fixed the documentation of <code>code_muni</code> in <code><a href="../reference/read_statistical_grid.html">read_statistical_grid()</a></code>. It was pulled from the shared roxygen template, which states that <code>code_muni = "all"</code> is the default. In this function <code>code_muni</code> is required and has no default, deliberately, because loading the grid for the whole country is slow and may exhaust memory.</p></li>
 <li><p><code><a href="../reference/read_census_tract.html">read_census_tract()</a></code> now documents that <code>code_tract</code> is required and has no default, for the same reason. These two functions are the only readers that do not default to downloading the whole country.</p></li>
