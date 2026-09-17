@@ -140,3 +140,19 @@ behind geobr is updated online. The rule: what comes from geobr's *source* (sign
 read statically; what comes from the *data release* (available years) must be asked of geobr at run
 time via `download_metadata_v2()`. Keep that fetch off the QGIS startup path: only instances made by
 `createInstance()` (dialogs, batch, models, `qgis_process`) fetch; the registered prototype never does.
+
+[LEARN:toolchain] "No pytest, no uv, PyPI unreachable" was stale (fixed 2026-09-16). pip and uv reach
+PyPI *directly*; it is the Ipea proxy that times out for them. `uv` and `pytest` are `pip --user`
+installs in `%APPDATA%\Python\Python311\Scripts` (not on PATH — prepend it before calling `uv`).
+`uv sync --frozen` + `uv run pytest -n 2 -m "not network"` runs the offline suite locally in ~3.5 min.
+
+[LEARN:duckdb] DuckDB's core `jaro_similarity()` returns the same scores as rapidfuzz's
+`Jaro.similarity` (verified to 3 decimals), so fuzzy matching needs no extra dependency in either
+language. Bind the user string with `?` (Python) / `params =` (R); never interpolate it.
+
+[LEARN:toolchain] The Ipea proxy is not always live. On 2026-09-16 `cache.ipea.gov.br:3128` refused TCP
+while github.com and www.ipea.gov.br answered directly on 443. With `http_proxy`/`https_proxy` exported,
+every libcurl call (R `curl`, `httr2`) timed out, *including the Ipea fallback*, so `read_*()` returned
+NULL and looked like a package bug. Probe first: `Test-NetConnection cache.ipea.gov.br -Port 3128`.
+If it fails, run networked R **without** the proxy vars. The Ipea fallback in `download_metadata2()`
+and `download_parquet()` works (verified: 200 from the data_v2.0.0 listing when reached directly).

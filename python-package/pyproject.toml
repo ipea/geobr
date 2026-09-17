@@ -1,6 +1,6 @@
 [project]
 name = "geobr"
-version = "2.0.1"
+version = "2.0.2"
 description = "geobr: Download Official Spatial Data Sets of Brazil"
 readme = "README.md"
 requires-python = "<4.0,>=3.10"
@@ -23,7 +23,6 @@ dependencies = [
     "html5lib==1.1",
     "pyarrow>=15.0.0",
     "duckdb>=1.5.3",
-    "rapidfuzz>=3.0",
 ]
 classifiers = [
     "Intended Audience :: Science/Research",

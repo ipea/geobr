@@ -1,6 +1,23 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
+# 2.0.2
+
+**Dependencies**
+
+- Dropped `rapidfuzz`. The fuzzy name match in `lookup_muni()` now runs inside
+  DuckDB with its built-in `jaro_similarity()`, the same metric and scale the
+  `rapidfuzz` implementation used (threshold unchanged at 0.9), and the same
+  approach the R package takes. The user string is bound as a SQL parameter, so
+  names with apostrophes (e.g. "Santa Bárbara d'Oeste") are matched safely.
+
+**Behaviour change**
+
+- `lookup_muni(name_muni=...)` fuzzy hits now return every municipality tied at
+  the best score rather than an arbitrary first one, consistent with how an
+  exact-name match already returns all homonyms (e.g. the several "Bom Jesus").
+
+-------------------------------------------------------
 # 2.0.1
 
 **Bug fixes**

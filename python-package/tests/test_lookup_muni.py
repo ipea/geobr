@@ -71,3 +71,42 @@ def test_lookup_no_name_found(mock_seat, monkeypatch):
     _patch_seat(monkeypatch, mock_seat)
     with pytest.raises(ValueError, match="valid municipality name"):
         lookup_muni(year=2010, name_muni='Brasília')
+
+
+def test_lookup_fuzzy_name_with_apostrophe(monkeypatch):
+    # The user string is bound as a SQL parameter; an apostrophe must not break
+    # the DuckDB query (it does break the glue-interpolated R version).
+    seat = gpd.GeoDataFrame(
+        {
+            "code_muni": [3548500, 3550308],
+            "name_muni": ["Santa Bárbara d'Oeste", "São Paulo"],
+            "abbrev_state": ["SP", "SP"],
+            "code_state": [35, 35],
+        },
+        geometry=[Point(0, 0)] * 2,
+        crs="EPSG:4674",
+    )
+    _patch_seat(monkeypatch, seat)
+    out = lookup_muni(name_muni="Santa Barbara dOeste", year=2010)
+    assert len(out) == 1
+    assert out.iloc[0]["code_muni"] == 3548500
+    assert "_fmt" not in out.columns
+
+
+def test_lookup_fuzzy_name_returns_all_tied_homonyms(monkeypatch):
+    # Several municipalities share a name (e.g. Bom Jesus in PI, RN, RS, ...).
+    # A fuzzy hit must return every row tied at the best score, as the exact
+    # match path already does, instead of silently picking one.
+    seat = gpd.GeoDataFrame(
+        {
+            "code_muni": [2201919, 2401909, 4302204],
+            "name_muni": ["Bom Jesus", "Bom Jesus", "Bom Jesus do Sul"],
+            "abbrev_state": ["PI", "RN", "RS"],
+            "code_state": [22, 24, 43],
+        },
+        geometry=[Point(0, 0)] * 3,
+        crs="EPSG:4674",
+    )
+    _patch_seat(monkeypatch, seat)
+    out = lookup_muni(name_muni="Bom Jesuss", year=2010)
+    assert sorted(out["code_muni"]) == [2201919, 2401909]

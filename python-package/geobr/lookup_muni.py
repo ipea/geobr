@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import duckdb
 import pandas as pd
-from rapidfuzz.distance import Jaro
 
 from geobr import utils
 
@@ -11,15 +11,28 @@ def _format_name(name: str) -> str:
     return utils.strip_accents(name)
 
 
-def _fuzzy_match_name(df: pd.DataFrame, name: str, threshold: float = 0.9) -> pd.DataFrame:
-    formatted = df["name_muni"].apply(_format_name)
-    target = _format_name(name)
-    scores = formatted.apply(lambda x: Jaro.similarity(target, x))
-    matches = df[scores > threshold]
-    if len(matches) == 0:
-        return matches
-    best_idx = scores.idxmax()
-    return df.loc[[best_idx]]
+def _fuzzy_match_name(df: pd.DataFrame, target: str, threshold: float = 0.9) -> pd.DataFrame:
+    """Rows tied at the best Jaro similarity to ``target`` on the ``_fmt`` column.
+
+    Uses DuckDB's built-in ``jaro_similarity`` (same metric and scale as the
+    former rapidfuzz implementation), mirroring the R package. The user string
+    is bound as a parameter, never interpolated into the SQL.
+    """
+    munis = df.assign(_pos=range(len(df)))
+    con = duckdb.connect()
+    try:
+        con.register("munis", munis)
+        rows = con.execute(
+            """
+            SELECT _pos, jaro_similarity(?, _fmt) AS sim
+            FROM munis
+            QUALIFY sim > ? AND sim = max(sim) OVER ()
+            """,
+            [target, threshold],
+        ).fetchall()
+    finally:
+        con.close()
+    return df.iloc[[pos for pos, _ in rows]]
 
 
 def lookup_muni(
@@ -74,15 +87,15 @@ def lookup_muni(
             print(f"Returning results for municipality {out['name_muni'].iloc[0]}")
         return out
 
-    formatted_target = _format_name(name_muni)
+    target = _format_name(name_muni)
     df["_fmt"] = df["name_muni"].apply(_format_name)
-    out = df[df["_fmt"] == formatted_target].drop(columns="_fmt", errors="ignore")
+    out = df[df["_fmt"] == target]
 
     if len(out) == 0:
-        out = _fuzzy_match_name(df.drop(columns="_fmt", errors="ignore"), name_muni)
+        out = _fuzzy_match_name(df, target)
         if len(out) == 0:
             raise ValueError("Please insert a valid municipality name.")
 
     if verbose:
         print(f"Returning results for municipality {out['name_muni'].iloc[0]}")
-    return out.drop(columns="_fmt", errors="ignore")
+    return out.drop(columns="_fmt")

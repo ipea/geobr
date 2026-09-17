@@ -2,7 +2,7 @@
 
 **Project:** geobr — download official spatial data sets of Brazil
 **Maintainer:** Rafael H. M. Pereira (Ipea) · **Repo:** `ipea/geobr` · **Default branch:** `master`
-**Packages:** R `r-package/` (v2.0.1, CRAN) · Python `python-package/` (v2.0.1, PyPI) · QGIS `qgis-plugin/` (v0.3.1)
+**Packages:** R `r-package/` (v2.0.1, CRAN) · Python `python-package/` (v2.0.2, PyPI) · QGIS `qgis-plugin/` (v0.3.1)
 
 ---
 
@@ -88,10 +88,13 @@ re-document; never hand-edit the outputs.
 ## Commands
 
 ```bash
-# --- proxy: REQUIRED before any networked R work on this machine ---
-# (WinINET has it; libcurl does not. Without these, every read_*() times out.)
-$env:http_proxy  = "http://cache.ipea.gov.br:3128"   # PowerShell
+# --- proxy: probe FIRST, then decide (the proxy is not always live) ---
+Test-NetConnection cache.ipea.gov.br -Port 3128 -InformationLevel Quiet   # PowerShell
+# True  -> export the proxy (WinINET has it; libcurl does not):
+$env:http_proxy  = "http://cache.ipea.gov.br:3128"
 $env:https_proxy = "http://cache.ipea.gov.br:3128"
+# False -> run WITHOUT the vars. A dead proxy in the env makes every libcurl call time out,
+#          including geobr's Ipea fallback, so read_*() returns NULL and looks like a bug.
 
 # --- R (runs locally: R 4.6.1) ---
 Rscript -e 'devtools::document("r-package")'          # regenerate man/ + NAMESPACE
@@ -99,7 +102,7 @@ Rscript -e 'devtools::test("r-package")'              # testthat suite
 Rscript -e 'devtools::check("r-package", args="--as-cran")'   # release gate (slow)
 Rscript -e 'covr::package_coverage("r-package")'   # covr NOT installed here — install first
 
-# --- Python (NOT available on this machine — see below) ---
+# --- Python (uv + pytest installed 2026-09-16; PyPI reachable WITHOUT the proxy) ---
 cd python-package && uv sync --frozen
 cd python-package && uv run pytest -n 2 -m "not network"      # offline suite, mirrors CI
 cd python-package && uv run pytest -m network                 # hits the data server
@@ -108,17 +111,19 @@ cd python-package && uv run pytest -m network                 # hits the data se
 cd python-package && python helpers/diff_packages.py   # read_* present in R but not Python
 ```
 
-**Toolchain on this machine:** R 4.6.1 ✓ · `python` 3.11.9 ✓ (bare CPython — **no `pytest`**, and
-PyPI is unreachable, so it cannot be installed) · `uv` ✗ · `gh` ✗ · `conda` ✗ · no `.venv`.
-The Python interpreter is enough to run standalone scripts and stdlib-only checks (e.g. the QGIS
-plugin's `ast` discovery layer), but not the `python-package` test suite, which needs pytest,
-geopandas and duckdb.
-**Network:** behind `cache.ipea.gov.br:3128`. Export `http_proxy`/`https_proxy` before any
-networked R command — libcurl ignores the WinINET setting that PowerShell honours. The
-sandboxed Bash tool has no outbound network at all; run networked commands via PowerShell.
-Python work here is **edit-and-CI**: changes are reviewed statically and verified by
-`.github/workflows/Python-CMD-check.yaml` (ubuntu/macOS/windows × py3.10–3.13). A skill that needs
-Python must say `SKIPPED — no local Python` rather than emit a command that fails.
+**Toolchain on this machine:** R 4.6.1 ✓ · `python` 3.11.9 ✓ · `uv` 0.12 ✓ and `pytest` ✓
+(pip `--user` installs, on `C:\Users\rafap\AppData\Roaming\Python\Python311\Scripts`, which is
+**not on PATH** — prepend it in PowerShell before calling `uv`) · `gh` ✗ · `conda` ✗.
+`uv sync --frozen` creates `python-package/.venv` (Python 3.10) and `uv run pytest` runs the suite;
+the offline suite takes ~3.5 min. pip and uv reach PyPI **directly**; routing them through the
+Ipea proxy times out.
+**Network:** sometimes behind `cache.ipea.gov.br:3128`, sometimes direct (2026-09-16: port 3128
+dead, github.com and ipea.gov.br reachable on 443). Probe the proxy port first; export
+`http_proxy`/`https_proxy` only if it answers — libcurl ignores the WinINET setting that
+PowerShell honours, and a dead proxy in the env times out everything. The sandboxed Bash tool
+has no outbound network at all; run networked commands via PowerShell.
+Python changes are verified locally with `uv run pytest` (see above) and again by
+`.github/workflows/Python-CMD-check.yaml` (ubuntu/macOS/windows × py3.10–3.13).
 
 ---
 
