@@ -11,6 +11,10 @@
   approach the R package takes. The user string is bound as a SQL parameter, so
   names with apostrophes (e.g. "Santa Bárbara d'Oeste") are matched safely.
 
+- Dropped the unused `lxml` and `html5lib` dependencies. They supported the
+  former `pandas.read_html()` implementation of `list_geobr()`, which now builds
+  its catalog from geobr's release metadata instead of scraping HTML.
+
 **Behaviour change**
 
 - `lookup_muni(name_muni=...)` fuzzy hits now return every municipality tied at
