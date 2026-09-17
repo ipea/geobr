@@ -133,3 +133,10 @@ not only in the conversation.
 [LEARN:workflow] Verify claims by running the thing, not by reading it. Every architecture claim in
 CLAUDE.md's R section was confirmed by executing the functions; the Python section is explicitly
 marked static-only because no interpreter exists here. Keep that distinction visible in what you write.
+
+[LEARN:qgis-plugin] **Never freeze upstream data facts into the plugin.** A first draft (2026-09-16) hardcoded
+the newest year per geography in `discovery.py` with a regeneration script; rejected because the data
+behind geobr is updated online. The rule: what comes from geobr's *source* (signatures, docstrings) may be
+read statically; what comes from the *data release* (available years) must be asked of geobr at run
+time via `download_metadata_v2()`. Keep that fetch off the QGIS startup path: only instances made by
+`createInstance()` (dialogs, batch, models, `qgis_process`) fetch; the registered prototype never does.

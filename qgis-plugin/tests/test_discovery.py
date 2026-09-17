@@ -138,3 +138,242 @@ def test_accepted_codes(value, expected):
 def test_rejected_codes(value, reason):
     with pytest.raises(ValueError):
         discovery.validate_codes("code_state", value)
+
+
+# -- layer naming -----------------------------------------------------------
+#
+# One algorithm class serves every reader, so without a name derived from the
+# call, every run lands in the QGIS legend under the same name and a second run
+# cannot be told from the first. The geography comes from the literal each
+# reader passes to `read_geobr_v2`, which is what `select_metadata_v2` matches
+# against the metadata's `geo` column - the only one of the three copies geobr
+# carries that cannot drift, because it is the one the reader calls with.
+
+#: The readers with no single geography literal of their own, which fall back to
+#: their own name. Small and individually justified, unlike a full geography
+#: table - see the tests below for why each is here.
+STEM_FALLBACKS = {"read_capitals", "read_pop_arrangements", "read_urban_concentrations"}
+
+
+def _calls(spec):
+    """Every distinct reader call the plugin can produce, as `_collect` builds it.
+
+    A year is always present by the time `layer_name` sees the kwargs: it is
+    either required (and `_missing_year` rejects a blank one before anything is
+    downloaded) or defaulted, and `_collect` always reads it as an int.
+    """
+    base = {}
+    for arg, _ in spec.params:
+        if arg in ("year", "date"):
+            base[arg] = 202504 if arg == "date" else 2020
+
+    enums = [(arg, discovery.ENUM_ARGS[arg]) for arg, _ in spec.params
+             if arg in discovery.ENUM_ARGS]
+    assert len(enums) <= 1, f"{spec.name} takes two enum arguments; widen this"
+    if not enums:
+        return [base]
+    arg, values = enums[0]
+    return [dict(base, **{arg: value}) for value in values]
+
+
+def test_every_reader_has_a_geography(specs):
+    assert all(spec.geo for spec in specs)
+
+
+def test_geography_shape(specs):
+    """A geography read from geobr matches how the metadata records it.
+
+    `download_metadata_v2` derives `geo` from the asset filename as `^([^_]+)`,
+    so a geography containing an underscore could never match a metadata row -
+    it would mean the extraction picked up the wrong literal. The readers that
+    deliberately fall back to their own name are the exception.
+    """
+    for spec in specs:
+        assert re.fullmatch(r"[a-z0-9_]+", spec.geo), spec.name
+        if spec.name not in STEM_FALLBACKS:
+            assert "_" not in spec.geo, spec.name
+
+
+@pytest.mark.parametrize(
+    "reader,geo",
+    [
+        ("read_favela", "favelas"),
+        ("read_polling_places", "pollingplaces"),
+        ("read_quilombola_land", "quilombolalands"),
+    ],
+)
+def test_keyword_geography_is_extracted(by_name, reader, geo):
+    """These three pass the geography by keyword; the other 26 pass it first.
+
+    An extraction rewritten as positional-only still finds 26 of 29 and looks
+    fine, so this is the test that has to catch it.
+    """
+    assert by_name[reader].geo == geo
+
+
+@pytest.mark.parametrize(
+    "reader,geo",
+    [("read_indigenous_land", "indigenouslands"), ("read_metro_area", "metroarea")],
+)
+def test_positional_geography_is_extracted(by_name, reader, geo):
+    """Anchored on the two that disagree with `_GEO_LOADERS`.
+
+    `_duckdb_backend._GEO_LOADERS` is a second copy of this mapping and says
+    `indigenousland` / `metropolitanarea`, which match no release asset. The
+    readers are right. This test is what fails if someone ever "simplifies" the
+    plugin by reading that table instead.
+    """
+    assert by_name[reader].geo == geo
+
+
+def test_capitals_falls_back_to_reader_stem(by_name):
+    """read_capitals composes read_municipal_seat rather than calling the pipeline.
+
+    It has no geography literal to find, and naming it `municipalseats` would be
+    a lie about which reader produced the layer.
+    """
+    assert by_name["read_capitals"].geo == "capitals"
+
+
+def test_aliased_geographies_are_separated(by_name):
+    """Two readers, one asset, two different layers.
+
+    Both pass `poparrangements`, and the release ships a single year of it, so
+    they would always collide - the exact complaint this naming answers. They
+    are not the same layer: read_pop_arrangements keeps only rows with a
+    non-null `code_pop_arrangement`.
+    """
+    assert by_name["read_pop_arrangements"].geo == "pop_arrangements"
+    assert by_name["read_urban_concentrations"].geo == "urban_concentrations"
+
+
+def test_layer_names_are_unique(specs):
+    """No two reader calls can produce the same layer name. The whole point.
+
+    Expanded over every `zone` / `geometry_level` choice, because those select a
+    different geometry under one geography: drop either from the name and two
+    unrelated layers collide again.
+    """
+    names = [discovery.layer_name(s.geo, call) for s in specs for call in _calls(s)]
+    assert len(names) == len(set(names))
+    assert len(names) > len(specs)  # the enum readers really did expand
+
+
+def test_layer_names_are_valid_identifiers(specs):
+    """Safe as a QGIS layer name and as a GeoPackage table name.
+
+    Never starts with a digit, no quoting or escaping needed, and never the
+    `gpkg_` prefix the GeoPackage spec reserves.
+    """
+    for spec in specs:
+        for call in _calls(spec):
+            name = discovery.layer_name(spec.geo, call)
+            assert re.fullmatch(r"[a-z][a-z0-9_]*", name), name
+            assert not name.startswith("gpkg_"), name
+
+
+@pytest.mark.parametrize(
+    "geo,kwargs,expected",
+    [
+        ("municipalities", {"year": 2020}, "municipalities_2020"),
+        # `date` readers carry YYYYMM, matching the asset name.
+        ("healthfacilities", {"date": 202504}, "healthfacilities_202504"),
+        ("censustracts", {"year": 2000, "zone": "urban"}, "censustracts_2000_urban"),
+        ("censustracts", {"year": 2000, "zone": "rural"}, "censustracts_2000_rural"),
+        (
+            "healthregions",
+            {"year": 2013, "geometry_level": "municipality"},
+            "healthregions_2013_municipality",
+        ),
+        (
+            "healthregions",
+            {"year": 2013, "geometry_level": "macro"},
+            "healthregions_2013_macro",
+        ),
+        # Unreachable through the algorithm, but the name must stay usable.
+        ("states", {}, "states"),
+    ],
+)
+def test_layer_name(geo, kwargs, expected):
+    assert discovery.layer_name(geo, kwargs) == expected
+
+
+def test_reader_spec_fields():
+    """`geo` and `dataset` are appended and defaulted, so positional construction still works."""
+    assert discovery.ReaderSpec._fields == ("name", "params", "doc", "geo", "dataset")
+    assert discovery.ReaderSpec("read_x", (), "").geo == ""
+    assert discovery.ReaderSpec("read_x", (), "").dataset == ""
+
+
+# --- available years --------------------------------------------------------
+
+
+def test_dataset_is_the_metadata_geography(specs, by_name):
+    """`dataset` is what geobr's metadata is keyed by: unrenamed, even for aliases."""
+    for spec in specs:
+        assert spec.dataset, spec.name
+    # The alias pair keeps geobr's name here while `geo` was split apart.
+    assert by_name["read_pop_arrangements"].dataset == "poparrangements"
+    assert by_name["read_urban_concentrations"].dataset == "poparrangements"
+    assert by_name["read_pop_arrangements"].geo != by_name["read_urban_concentrations"].geo
+    # Everywhere else the two agree.
+    assert all(
+        spec.dataset == spec.geo
+        for spec in specs
+        if spec.name not in ("read_pop_arrangements", "read_urban_concentrations")
+    )
+
+
+def test_available_years_from_metadata_rows():
+    """The shape `download_metadata_v2()` yields: floats, NaN for undated assets."""
+    nan = float("nan")
+    rows = [
+        ("states", 2020.0),
+        ("states", 2025.0),
+        ("states", 2020.0),  # the simplified twin of the same year
+        ("healthfacilities", 202604.0),
+        ("healthfacilities", 202504.0),
+        ("br", nan),
+        ("metadata", None),
+    ]
+    assert discovery.available_years(rows) == {
+        "states": [2020, 2025],
+        "healthfacilities": [202504, 202604],
+    }
+
+
+def test_available_years_of_nothing():
+    assert discovery.available_years([]) == {}
+
+
+@pytest.mark.parametrize(
+    "arg,expected",
+    [
+        # The one override: the argument name alone reads as a download mode
+        # rather than as a choice of geometry.
+        ("simplified", "Simplified geometry"),
+        # Everything else stays mechanical, so a new geobr argument needs no
+        # change here.
+        ("year", "Year"),
+        ("date", "Date"),
+        ("code_state", "Code state"),
+        ("geometry_level", "Geometry level"),
+        ("zone", "Zone"),
+    ],
+)
+def test_parameter_label(arg, expected):
+    assert discovery.parameter_label(arg) == expected
+
+
+def test_every_exposed_argument_has_a_label(specs):
+    """No reader argument renders blank or keeps an underscore in the UI."""
+    for spec in specs:
+        for arg, _ in spec.params:
+            label = discovery.parameter_label(arg)
+            assert label and "_" not in label, (spec.name, arg, label)
+
+
+def test_labels_only_override_real_arguments(specs):
+    """A typo in LABELS would silently never apply; catch it here instead."""
+    declared = {arg for spec in specs for arg, _ in spec.params}
+    assert set(discovery.LABELS) <= declared, set(discovery.LABELS) - declared

@@ -20,14 +20,18 @@ qgis_process run geobr:read_state -- YEAR=2020 CODE_STATE=RJ OUTPUT=/tmp/rj.gpkg
 ## Install
 
 **1 — the Python package.** The plugin does not vendor geobr; it calls the real one. It requires
-**geobr 2.0.0 or newer**.
+**geobr 2.0.1 or newer**.
 
 ```bash
-python -m pip install --user "geobr>=2.0.0"
+python -m pip install --user "geobr>=2.0.1"
 ```
 
 Run this with *QGIS's* Python, not a system Python. On Windows that is
-`"C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user "geobr>=2.0.0"`.
+`"C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user "geobr>=2.0.1"`.
+
+2.0.1 is a hard floor, not a preference: earlier releases pinned `geopandas<=1.1.2` and
+`shapely<=2.1.0`, which QGIS 4.2.1 exceeds, so pip satisfied those ceilings by downgrading
+QGIS's own copies (see *Known rough edges*).
 
 QGIS already ships geopandas, shapely, pyarrow, pandas and requests, so in practice pip only adds
 `duckdb` and `rapidfuzz` (both are hard requirements — geobr imports them at module scope, so
@@ -70,12 +74,44 @@ plugin. Reading the source rather than importing the package keeps QGIS startup 
 costs ~4 s warm and up to ~29 s cold because of pandas/geopandas/duckdb, so the real import is
 deferred until you actually run an algorithm.
 
+The year field is a drop-down of the years that data set offers, newest first and preselected,
+according to geobr itself. The years a data set offers exist nowhere but in the data release, which
+geobr lists at run time with `download_metadata_v2()`, so the plugin asks it. This is the one place
+the plugin touches geobr outside a run, and it is kept off the startup path: the first time a geobr
+dialog is opened in a session, the plugin imports geobr and fetches the listing (the same one the
+run needs, so nothing is fetched twice); later dialogs reuse it. The drop-down's values are the
+years themselves, not positions in the list, so `YEAR=2020` on the command line and in a saved
+model keeps meaning 2020 as the list grows. If geobr is missing or the fetch fails, the field falls
+back to a plain number box that opens empty and marked optional, a warning is logged, and the run
+itself reports the real error.
+
+The algorithm window is QGIS's own, handed back through `createCustomParametersWidget()` with one
+change: it opens at least 700 px wide (or 90% of the screen). QGIS reopens the window at the size
+it last had, and Processing's default is barely 500 px, half of it help panel. The floor applies
+only while the window opens; after that it resizes freely, and QGIS remembers the size as it does
+for any other algorithm. If that Processing internal ever moves, the plugin logs a warning and lets
+Processing build the window itself, so only the opening width is lost.
+
 Help text comes from the same place. Since 2.0.0, geobr writes `{year}`-style tokens in its reader
 docstrings and substitutes them from a shared table when the package is imported — so reading the
 source alone would show the tokens. `discovery.py` reproduces that substitution, and a test
 (`tests/test_discovery.py`) fails if a future geobr changes it. That test suite runs in CI against
 geobr's source in this repo, so a signature or docstring change upstream breaks the plugin's build
 rather than a user's help panel.
+
+## Layer names
+
+A layer arrives in the legend named after the data it holds, not after the algorithm:
+`municipalities_2020`, `states_2020`, `healthfacilities_202504`. The geography is the one geobr's
+own metadata uses, so the name matches the release asset (`municipalities_2020.parquet`) and the
+DuckDB view a geobr SQL query would address (`FROM municipalities_2020`).
+
+Arguments that select a *different geometry* rather than a subset of one are part of the name, so
+two such layers never collide: `censustracts_2000_urban` and `censustracts_2000_rural`, and
+`healthregions_2013_municipality` / `_micro` / `_macro`.
+
+This applies to the default *Create temporary layer* destination. If you type a filename, that
+filename names the layer, as it does everywhere else in QGIS.
 
 ## Filtering by code
 
@@ -112,15 +148,25 @@ feature count in the log, so an unexpected result is visible either way.
   rather than the QGIS version. **The QGIS desktop app is unaffected** — running geobr algorithms
   from the Processing Toolbox and then quitting QGIS 4.2.1 was confirmed clean by the maintainer,
   so this is a `qgis_process` teardown problem only.
-- **QGIS 4.2.1 ships a geo stack outside geobr's declared bounds** — geopandas 1.1.4 (geobr pins
-  `<=1.1.2`), shapely 2.1.2 (pins `<=2.1.0`) and pandas 3.0.3. This is not theoretical: pandas 3
-  makes strings Arrow-backed, so geobr's regex `str.contains()` dispatched to
+- **QGIS ships a geo stack newer than geobr once declared** — QGIS 4.2.1 has geopandas 1.1.4,
+  shapely 2.1.2 and pandas 3.0.3. Two separate problems came out of that, both fixed upstream.
+
+  *The version bounds.* geobr ≤ 2.0.0 pinned `geopandas<=1.1.2` and `shapely<=2.1.0` — exact
+  ceilings left by a Dependabot bump, not a compatibility finding. Because a user's
+  site-packages precedes QGIS's own on `sys.path`, `pip install geobr` met those ceilings by
+  installing older geopandas and shapely *over* QGIS's bundled copies, for QGIS itself and
+  every other plugin; shapely is a compiled GEOS binding, so that was not a harmless
+  downgrade. geobr 2.0.1 relaxed them to `geopandas>=1.0.0,<2` and `shapely>=1.7.0,<3`, and
+  against QGIS 4.2.1 all nine of geobr's requirements are now already satisfied, so pip adds
+  geobr alone. This is why the plugin requires **geobr ≥ 2.0.1**.
+
+  *The pandas 3 kernel.* pandas 3 makes strings Arrow-backed, so geobr's regex
+  `str.contains()` dispatched to
   `pyarrow.compute.match_substring_regex`, a kernel absent from QGIS's RE2-less pyarrow, and
   **every reader failed** with `AttributeError`. It surfaced only when the metadata cache had to be
   rebuilt, so a pre-existing `~/.cache/geobr` hid it. Fixed upstream in geobr by matching those
   literal strings with `regex=False`; verified on QGIS 4.2.1 and 3.42.1 from a cold cache.
-  This is one of the reasons the plugin requires **geobr ≥ 2.0.0**. The version bounds are still
-  unclaimed territory, so treat other pandas-3 breakage as possible.
+  geobr is not otherwise pandas-3 audited, so treat further pandas-3 breakage as possible.
 - **`zone` only applies to census tracts from 2007 and earlier.** Before 2010, urban and rural
   tracts were separate data sets; from 2010 on they are one, and geobr ignores the argument
   (`geobr/read_census_tract.py`). The control is still offered because it is real for the older
@@ -164,7 +210,7 @@ python -c "import duckdb; duckdb.connect().execute('INSTALL spatial')"
 ```
 geobr_qgis/
 ├── __init__.py    classFactory, plugin lifecycle, dependency probe
-├── discovery.py   reader discovery (ast) + docstring rendering — imports no qgis
+├── discovery.py   reader discovery (ast), docstring rendering, layer naming — imports no qgis
 ├── provider.py    the Processing provider
 ├── algorithm.py   the one algorithm class that serves every reader
 └── metadata.txt

@@ -21,6 +21,7 @@ import importlib.util
 import os
 import re
 import textwrap
+from collections import Counter
 from typing import NamedTuple
 
 
@@ -40,6 +41,8 @@ class ReaderSpec(NamedTuple):
     name: str
     params: tuple  # ((argument_name, default_or_REQUIRED), ...)
     doc: str
+    geo: str = ""  # names the layer; unique across readers
+    dataset: str = ""  # the geography as geobr's metadata names it
 
 
 #: Readers deliberately not exposed, despite being in geobr's ``__all__``.
@@ -49,6 +52,40 @@ class ReaderSpec(NamedTuple):
 #: lasts until QGIS is restarted. geobr's own docstring describes that download
 #: path as suspended.
 _EXCLUDED_READERS = {"read_comparable_areas"}
+
+
+#: Reader arguments offered as a fixed choice rather than free text.
+#:
+#: These are also exactly the arguments that change *which geometry* a reader
+#: returns rather than how it is filtered, which is why :func:`layer_name`
+#: appends their value. The two uses share one definition on purpose: a second
+#: hand-maintained copy of this set is how the two would drift apart.
+ENUM_ARGS = {
+    "zone": ["urban", "rural"],
+    "geometry_level": ["municipality", "micro", "macro"],
+}
+
+
+#: Parameter labels that the mechanical rule below gets wrong.
+#:
+#: Every other label is derived from the argument name, which is what keeps a
+#: reader geobr adds working with no change here. ``simplified`` is the one
+#: argument whose name does not say what the control does: on its own it reads
+#: as a mode the whole download runs in, when it only ever selects a
+#: generalised *geometry*.
+LABELS = {
+    "simplified": "Simplified geometry",
+}
+
+
+def parameter_label(arg):
+    """The QGIS label for a reader argument: an override, else the argument.
+
+    Kept beside :data:`ENUM_ARGS` and out of ``algorithm.py`` for the same
+    reason - it imports no ``qgis``, so the label a user sees is assertable in
+    a plain unit test.
+    """
+    return LABELS.get(arg, arg.replace("_", " ").capitalize())
 
 
 # geobr infers the filter column from the value's shape. Anything it cannot
@@ -113,6 +150,60 @@ def validate_codes(arg, value):
     return parts[0] if len(parts) == 1 else parts
 
 
+def available_years(rows):
+    """``{dataset: [years]}`` from geobr's metadata, sorted ascending.
+
+    ``rows`` is an iterable of ``(geo, year)`` pairs - the ``geo`` and ``year``
+    columns of ``geobr.utils.download_metadata_v2()``, zipped. That table is
+    built from the release's asset names at run time, so this is geobr's own
+    answer to "which years exist", not a copy of it. ``year`` is ``NaN`` for an
+    asset with no digits in its name; such rows are skipped.
+
+    Takes plain pairs rather than the DataFrame so this module stays free of
+    pandas and the tests stay free of geobr.
+    """
+    found = {}
+    for geo, year in rows:
+        try:
+            value = int(year)
+        except (TypeError, ValueError):
+            continue
+        found.setdefault(str(geo), set()).add(value)
+    return {geo: sorted(years) for geo, years in found.items()}
+
+
+def layer_name(geo, kwargs):
+    """The QGIS layer name for one reader call: ``geography_year[_level]``.
+
+    One algorithm class serves every reader, so the name has to come from the
+    call rather than the class. Built from the same pieces geobr names the data
+    with everywhere else - the release asset ``municipalities_2020*.parquet``
+    and the DuckDB view ``municipalities_2020`` - so the legend, the cache and
+    a geobr SQL query all read alike.
+
+    ``zone`` and ``geometry_level`` are appended because they select a
+    *different geometry* under one geography: ``zone`` picks a different asset
+    and ``geometry_level`` re-dissolves health regions to micro or macro. Two
+    such layers sharing a name is the bug this function exists to prevent, so
+    the value is appended whenever the reader takes the argument, default or
+    not - the same data must always reach the same name.
+
+    ``kwargs`` is the reader call as assembled by the algorithm, so this stays a
+    pure function of what geobr was actually asked for.
+    """
+    parts = [geo]
+    for key in ("year", "date"):
+        # The only two an exposed reader declares; `start_year`/`end_year`
+        # belong to read_comparable_areas, which _EXCLUDED_READERS removes.
+        if kwargs.get(key):
+            parts.append(str(kwargs[key]))
+            break
+    for key in ENUM_ARGS:
+        if kwargs.get(key):
+            parts.append(str(kwargs[key]))
+    return "_".join(parts)
+
+
 def _package_dir():
     """Locate the installed geobr package without importing it."""
     try:
@@ -172,6 +263,69 @@ def _signature(node):
     for arg, default in zip(node.args.kwonlyargs, node.args.kw_defaults):
         params.append((arg.arg, REQUIRED if default is None else literal(default)))
     return tuple(params)
+
+
+#: The shared pipeline every reader funnels through, and the parameter each one
+#: takes the geography in. ``select_metadata_v2`` matches that value against the
+#: metadata's ``geo`` column, so the literal in a reader's source *is* the
+#: metadata geography - and is the one mapping of the three geobr carries that
+#: cannot drift, because it is the one the reader actually calls with.
+_PIPELINE_CALLS = {"read_geobr_v2": "geography", "read_geobr_hybrid": "geography_v2"}
+
+
+def _stem(name):
+    """``read_municipality`` -> ``municipality``, the fallback geography."""
+    return name[len("read_") :]
+
+
+def _geography(node):
+    """The metadata geography a reader passes to the shared pipeline.
+
+    Returns "" when there is no single unambiguous literal, leaving the caller
+    to fall back to :func:`_stem`. That covers ``read_capitals``, which composes
+    ``read_municipal_seat`` instead of calling the pipeline at all, and a future
+    reader that called it twice: ``ast.walk`` is not source-ordered, so taking
+    "the first" of two would be arbitrary rather than wrong-but-stable.
+    """
+    found = set()
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call):
+            continue
+        keyword = _PIPELINE_CALLS.get(getattr(child.func, "id", None))
+        if keyword is None:
+            continue
+        # Positional in most readers, but read_favela, read_polling_places and
+        # read_quilombola_land pass it by keyword.
+        value = child.args[0] if child.args else None
+        if value is None:
+            value = next(
+                (kw.value for kw in child.keywords if kw.arg == keyword), None
+            )
+        if isinstance(value, ast.Constant) and isinstance(value.value, str):
+            found.add(value.value)
+    return found.pop() if len(found) == 1 else ""
+
+
+def _resolve_geography_clashes(specs):
+    """Fall back to the reader stem wherever two readers share a geography.
+
+    ``read_pop_arrangements`` and ``read_urban_concentrations`` both read the
+    ``poparrangements`` asset, of which one year exists, so they would *always*
+    collide - the exact complaint this naming is meant to answer. They are not
+    the same layer: ``read_pop_arrangements`` keeps only rows with a non-null
+    ``code_pop_arrangement``. Deriving the exception from the data rather than
+    listing it keeps this true for the next alias geobr introduces.
+
+    Only ``geo`` is renamed. ``dataset`` keeps geobr's name, which is what the
+    metadata is keyed by, so both aliases still find their years.
+    """
+    clashing = {
+        geo for geo, count in Counter(spec.geo for spec in specs).items() if count > 1
+    }
+    return [
+        spec._replace(geo=_stem(spec.name)) if spec.geo in clashing else spec
+        for spec in specs
+    ]
 
 
 def _shared_params(package_dir):
@@ -266,9 +420,12 @@ def discover_readers(package_dir=None):
             continue
         for node in tree.body:
             if isinstance(node, ast.FunctionDef) and node.name in wanted:
+                geo = _geography(node) or _stem(node.name)
                 found[node.name] = ReaderSpec(
                     name=node.name,
                     params=_signature(node),
                     doc=_render_doc(ast.get_docstring(node) or "", params),
+                    geo=geo,
+                    dataset=geo,
                 )
-    return [found[name] for name in sorted(found)]
+    return _resolve_geography_clashes([found[name] for name in sorted(found)])
