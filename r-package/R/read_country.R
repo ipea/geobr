@@ -35,6 +35,9 @@ read_country <- function(year,
     verbose = verbose
   )
 
+  # check if metadata download failed
+  if (is.null(temp_meta)) { return(invisible(NULL)) } # nocov
+
   # download file and open arrow dataset
   temp_arrw <- download_parquet(
     filename_to_download = temp_meta$file_name,

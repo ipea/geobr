@@ -17,6 +17,14 @@ test_that("read_capitals", {
   # check df output
   expect_true(is( read_capitals(output = "duckdb"), "duckspatial_df"))
 
+  # `verbose` must reach read_municipal_seat(): it used not to be forwarded,
+  # so verbose = FALSE still printed "Using year/date 2010"
+  expect_silent(read_capitals(verbose = FALSE, showProgress = FALSE))
+  expect_message(read_capitals(verbose = TRUE, showProgress = FALSE))
+
+  # `cache` must reach download_parquet() and still return the full result
+  expect_equal(nrow(read_capitals(cache = FALSE, verbose = FALSE, showProgress = FALSE)), 27)
+
 })
 
 

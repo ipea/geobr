@@ -37,6 +37,9 @@ read_pop_arrangements <- function(year,
     verbose = verbose
   )
 
+  # check if metadata download failed
+  if (is.null(temp_meta)) { return(invisible(NULL)) } # nocov
+
   # download files
   temp_arrw <- download_parquet(
     filename_to_download = temp_meta$file_name,

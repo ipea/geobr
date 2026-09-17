@@ -48,7 +48,7 @@ cep_to_state <- function(cep){
     list(state = "GO", range = c(72800000L, 72999999L)),
     list(state = "GO", range = c(73700000L, 76799999L)),
     list(state = "MA", range = c(65000000L, 65999999L)),
-    list(state = "MG", range = c(65999999L, 39999999L)),
+    list(state = "MG", range = c(30000000L, 39999999L)),
     list(state = "MS", range = c(79000000L, 79999999L)),
     list(state = "MT", range = c(78000000L, 78899999L)),
     list(state = "PA", range = c(66000000L, 68899999L)),

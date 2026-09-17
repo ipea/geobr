@@ -15,10 +15,13 @@
 #'
 list_geobr <- function(wide = TRUE){
 
-  checkmate::assert_logical(wide)
+  checkmate::assert_logical(wide, len = 1, any.missing = FALSE)
 
   # download metadata
   metadata <- download_metadata2()
+
+  # check if metadata download failed
+  if (is.null(metadata)) { return(invisible(NULL)) } # nocov
 
   # select cols
   tempdf <- metadata |>
@@ -35,7 +38,7 @@ list_geobr <- function(wide = TRUE){
       dplyr::summarise( year = paste0(year, collapse = ', '))
   }
 
-  datasets <- structure(list(
+  datasets <- data.frame(
   Function = c(
     "read_country",
     "read_region",
@@ -64,9 +67,10 @@ list_geobr <- function(wide = TRUE){
     "read_comparable_areas",
     "read_urban_concentrations",
     "read_pop_arrangements",
-    "read_favelas",
+    "read_favela",
     "read_polling_places",
-    "read_quilombola_lands"
+    "read_quilombola_land",
+    "read_capitals"
     ),
  geography = c(
    "Country",
@@ -98,7 +102,8 @@ list_geobr <- function(wide = TRUE){
    "Population arrangements (arranjos populacionais)",
    "Favelas and urban communities",
    "Voting places",
-   "Quilombola lands officialy recognized"
+   "Quilombola lands officialy recognized",
+   "State capitals"
  ),
  source = c(
    "IBGE",
@@ -130,7 +135,8 @@ list_geobr <- function(wide = TRUE){
    "IBGE",
    "IBGE",
    "TSE",
-   "Incra"
+   "Incra",
+   "IBGE"
    ),
 
  alias = c(
@@ -158,16 +164,15 @@ list_geobr <- function(wide = TRUE){
    "healthregions",
    "neighborhoods",
    "schools",
-   "read_comparable_areas",
+   "comparableareas",
    "poparrangements",
    "poparrangements",
    "favelas",
    "pollingplaces",
-   "quilombolalands"
- )
+   "quilombolalands",
+   "capitals"
  ),
- row.names = c(NA, 30L),
- class = "data.frame"
+ stringsAsFactors = FALSE
  )
 
   df <- dplyr::left_join(
@@ -179,10 +184,13 @@ list_geobr <- function(wide = TRUE){
     dplyr::arrange(alias) |>
     dplyr::select(-alias)
 
-  # AMCS temporarily suspended
+  # data sets whose year is not given by the metadata
   df <- df |>
     dplyr::mutate(
-      year = ifelse(Function=="read_comparable_areas", "temporarily suspended", year)
+      # AMCs temporarily suspended
+      year = ifelse(Function == "read_comparable_areas", "temporarily suspended", year),
+      # read_capitals() takes no year: it is built from the 2010 municipal seats
+      year = ifelse(Function == "read_capitals", "2010", year)
     )
 
   return(df)

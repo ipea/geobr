@@ -15,6 +15,8 @@ test_that("cep_to_state", {
   expect_equal( cep_to_state(cep = '69900000'), "AC")
   expect_equal( cep_to_state(cep = '69900-000'), "AC")
   expect_equal( cep_to_state(cep = '70233020'), "DF")
+  expect_equal( cep_to_state(cep = '30130-000'), "MG")
+  expect_equal( cep_to_state(cep = '39999999'), "MG")
 
 })
 

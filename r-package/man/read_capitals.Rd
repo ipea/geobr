@@ -32,8 +32,7 @@ An \verb{"sf" "data.frame"} OR an \code{ArrowObject}
 \description{
 This function downloads either a spatial \code{sf} object with the location of the
 municipal seats (sede dos municipios) of state capitals, or a \code{data.frame}
-with the names and codes of state capitals. Data downloaded for the latest
-available year.
+with the names and codes of state capitals. Data downloaded for year 2010.
 }
 \examples{
 \dontshow{if (identical(tolower(Sys.getenv("NOT_CRAN")), "true")) withAutoprint(\{ # examplesIf}
