@@ -33,23 +33,62 @@ def read_municipality(
 
     """
 
-    relation = read_geobr_v2(
+    if output == "duckdb":
+        relation = read_geobr_v2(
+            "municipalities",
+            year,
+            code=code_muni,
+            simplified=simplified,
+            output="duckdb",
+            show_progress=show_progress,
+            cache=cache,
+            verbose=verbose,
+        )
+
+        conn = duckdb_connection()
+
+        if not keep_areas_operacionais and "code_muni" in relation.columns:
+            exclude_codes = ", ".join([f"'{c}'" for c in _RS_OPERATIONAL_CODES])
+            relation = conn.sql(
+                f"SELECT * FROM relation WHERE CAST(code_muni AS BIGINT) NOT IN ({exclude_codes})"
+            )
+
+        return relation
+
+    if output == "arrow":
+        # Filter on the Arrow table directly: decoding WKB to shapely only to
+        # re-encode it would cost seconds on the full-resolution file.
+        import pyarrow as pa
+        import pyarrow.compute as pc
+
+        table = read_geobr_v2(
+            "municipalities",
+            year,
+            code=code_muni,
+            simplified=simplified,
+            output="arrow",
+            show_progress=show_progress,
+            cache=cache,
+            verbose=verbose,
+        )
+        if not keep_areas_operacionais and "code_muni" in table.column_names:
+            codes = pa.array([float(c) for c in _RS_OPERATIONAL_CODES], type=pa.float64())
+            is_operational = pc.is_in(pc.cast(table["code_muni"], pa.float64()), value_set=codes)
+            table = table.filter(pc.fill_null(pc.invert(is_operational), True))
+        return table
+
+    gdf = read_geobr_v2(
         "municipalities",
         year,
         code=code_muni,
         simplified=simplified,
-        output="duckdb",
+        output="gpd",
         show_progress=show_progress,
         cache=cache,
         verbose=verbose,
     )
 
-    conn = duckdb_connection()
+    if not keep_areas_operacionais and "code_muni" in gdf.columns:
+        gdf = gdf[~gdf["code_muni"].isin(_RS_OPERATIONAL_CODES)]
 
-    if not keep_areas_operacionais and "code_muni" in relation.columns:
-        exclude_codes = ", ".join([f"'{c}'" for c in _RS_OPERATIONAL_CODES])
-        relation = conn.sql(
-            f"SELECT * FROM relation WHERE CAST(code_muni AS BIGINT) NOT IN ({exclude_codes})"
-        )
-
-    return convert_output(relation, output, conn)
+    return convert_output(gdf, output)

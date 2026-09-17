@@ -6,7 +6,8 @@ import re
 import warnings
 from pathlib import Path
 from typing import Any, Optional, Union
-import duckdb
+
+from geobr._filter import INVALID_CODE_MESSAGE
 
 _CONN: Optional[Any] = None
 _LAST_REGISTERED: dict[tuple[int, str], tuple[str, int]] = {}
@@ -182,6 +183,17 @@ def _setup_connection(conn) -> None:
 
 
 def _create_connection():
+    # duckdb is an optional extra: the readers run on pyarrow/geopandas, and
+    # only the SQL interface and ``output="duckdb"`` need it. Importing here,
+    # rather than at module load, is what keeps ``import geobr`` working
+    # without it.
+    try:
+        import duckdb
+    except ImportError as exc:
+        raise ImportError(
+            "DuckDB features (query(), session(), output=\"duckdb\") need the "
+            "optional dependency: pip install geobr[duckdb]"
+        ) from exc
     conn = duckdb.connect()
     _setup_connection(conn)
     return conn
@@ -533,19 +545,28 @@ def read_filter_parquet_relation(
     codes = filter_code if isinstance(filter_code, (list, tuple)) else [filter_code]
     code = codes[0]
 
+    def _require_rows(filtered):
+        # A code that matches nothing is an error, as in R's filter_arrw() —
+        # never a silent empty relation.
+        if filtered.aggregate("count(*)").fetchone()[0] == 0:
+            raise ValueError(INVALID_CODE_MESSAGE)
+        return filtered
+
     if isinstance(code, str) and len(code) == 2 and code.isalpha():
         codes_sql = ", ".join([f"'{c}'" for c in codes])
-        return connection.sql(f"SELECT * FROM {source} WHERE abbrev_state IN ({codes_sql})")
+        return _require_rows(
+            connection.sql(f"SELECT * FROM {source} WHERE abbrev_state IN ({codes_sql})")
+        )
     if str(code).isdigit() and len(str(code)) == 7:
         codes_sql = ", ".join(map(str, codes))
-        return connection.sql(
+        return _require_rows(connection.sql(
             f"SELECT * FROM {source} WHERE CAST(code_muni AS BIGINT) IN ({codes_sql})"
-        )
+        ))
     if str(code).isdigit() and len(str(code)) <= 2:
         codes_sql = ", ".join(map(str, codes))
-        return connection.sql(
+        return _require_rows(connection.sql(
             f"SELECT * FROM {source} WHERE CAST(code_state AS INTEGER) IN ({codes_sql})"
-        )
+        ))
 
     rel = connection.sql(f"SELECT * FROM {source}")
 
@@ -556,9 +577,12 @@ def read_filter_parquet_relation(
             if len_alvo == len(str(code)):
                 filter_col = code_col
                 codes_sql = ", ".join(map(str, codes))
-                return connection.sql(f"SELECT * FROM {source} WHERE CAST({filter_col} AS INTEGER) IN ({codes_sql})")
+                return _require_rows(connection.sql(
+                    f"SELECT * FROM {source} WHERE CAST({filter_col} AS INTEGER) IN ({codes_sql})"
+                ))
 
-    return rel
+    # No column resolves: an error, never the unfiltered relation.
+    raise ValueError(INVALID_CODE_MESSAGE)
 
 
 class GeoBrDuckDB:

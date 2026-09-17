@@ -13,8 +13,8 @@ from io import StringIO
 
 from geobr.constants import DataTypes
 from geobr._cache import cached_path, is_cached
-from geobr._duckdb_backend import read_filter_parquet_relation, duckdb_connection
-from geobr._output import convert_output
+from geobr._filter import INVALID_CODE_MESSAGE, parquet_filters
+from geobr._output import ALLOWED_OUTPUTS
 
 MIRRORS = ["https://github.com/ipea/geobr/releases/download/v1.7.0/"]
 GEOBR_DATA_RELEASE = "v2.0.0"
@@ -473,7 +473,19 @@ def read_geobr_v2(
     view_name: Optional[str] = None,
     zone=None,
 ):
-    """Shared v2 read pipeline: metadata -> parquet -> filter -> convert output."""
+    """Shared v2 read pipeline: metadata -> parquet -> filter -> output.
+
+    The engine is chosen by ``output``, never by what happens to be installed:
+    ``"gpd"`` and ``"arrow"`` read the parquet with pyarrow, pushing the code
+    filter down so only matching rows are decoded; ``"duckdb"`` returns a lazy
+    DuckDB relation over a ``{geography}_{year}`` view and needs
+    ``pip install geobr[duckdb]``.
+    """
+    if output not in ALLOWED_OUTPUTS:
+        raise ValueError(
+            f"`output` must be one of: {list(ALLOWED_OUTPUTS)}. Got: {output!r}"
+        )
+
     row = select_metadata_v2(geography, year, simplified=simplified, verbose=verbose, zone=zone)
     path = download_parquet(
         row["file_name"],
@@ -481,23 +493,36 @@ def read_geobr_v2(
         show_progress=show_progress,
         cache=cache,
     )
-    if view_name is None:
-        view_name = f"{geography}_{year}"
 
-    conn = connection or duckdb_connection()
+    if output == "duckdb":
+        from geobr._duckdb_backend import duckdb_connection, read_filter_parquet_relation
 
-    relation = read_filter_parquet_relation(
-        path,
-        filter_code=code,
-        connection=conn,
-        view_name=view_name,
-    )
+        conn = connection or duckdb_connection()
+        return read_filter_parquet_relation(
+            path,
+            filter_code=code,
+            connection=conn,
+            view_name=view_name or f"{geography}_{year}",
+        )
 
-    return convert_output(
-        relation,
-        output=output,
-        connection=conn,
-    )
+    # A code that matches nothing is an error, as in R's filter_arrw(); an empty
+    # *unfiltered* file is not a code problem, so the check needs a filter.
+    filters = parquet_filters(path, code)
+
+    if output == "arrow":
+        import pyarrow.parquet as pq
+
+        table = pq.read_table(path, filters=filters)
+        if filters and table.num_rows == 0:
+            raise ValueError(INVALID_CODE_MESSAGE)
+        return table
+
+    gdf = gpd.read_parquet(path, filters=filters)
+    if filters and len(gdf) == 0:
+        raise ValueError(INVALID_CODE_MESSAGE)
+    if gdf.crs is None:
+        gdf = gdf.set_crs("EPSG:4674")
+    return enforce_types(gdf)
 
 
 def _simplified_attempts(preferred: bool) -> list[bool]:

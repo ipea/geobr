@@ -1,9 +1,18 @@
-"""Spatial filtering helpers (port of R filter_arrw)."""
+"""Spatial filtering helpers (port of R filter_arrw).
+
+Three consumers share one column resolver, :func:`resolve_filter`:
+
+* :func:`filter_by_code` filters an in-memory GeoDataFrame (legacy gpkg path);
+* :func:`parquet_filters` builds the pyarrow ``filters`` that
+  ``read_geobr_v2`` pushes down into ``gpd.read_parquet`` / ``pq.read_table``;
+* ``_duckdb_backend.read_filter_parquet_relation`` keeps its own SQL twin of
+  the same rules for ``output="duckdb"``.
+"""
 
 from __future__ import annotations
 
 import re
-from typing import Any, Union
+from typing import Any, Callable, Iterable, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -15,6 +24,8 @@ ALL_ABBREV_STATE = [
     "AL", "SE", "BA", "MG", "ES", "RJ", "SP", "PR", "SC", "RS", "MS", "MT", "GO",
     "DF",
 ]
+
+INVALID_CODE_MESSAGE = "Invalid value to argument `code_` / `code_muni` / `code_state`."
 
 
 def _normalize_code(code: Any) -> Union[str, list]:
@@ -35,6 +46,70 @@ def _numbers_only(x: str) -> bool:
     return bool(re.fullmatch(r"\d+", str(x)))
 
 
+def code_length(values: pd.Series) -> Optional[int]:
+    """Digit count of the longest non-null code in ``values``.
+
+    The release parquet files store every ``code_*`` column as ``double``, so
+    ``str(3304.0)`` is six characters, not four. Measuring on the integer value
+    is what lets the digit-length heuristic in :func:`resolve_filter` match on
+    real data (the R side does the same through ``CAST(... AS BIGINT)``).
+    """
+    numeric = pd.to_numeric(values, errors="coerce").dropna()
+    if len(numeric):
+        return int(numeric.astype("int64").astype(str).str.len().max())
+    text = values.dropna().astype(str)
+    return int(text.str.len().max()) if len(text) else None
+
+
+def resolve_filter(
+    columns: Iterable[str],
+    code: Any,
+    max_code_len: Callable[[str], Optional[int]],
+) -> tuple[str, list]:
+    """Which column a ``code`` filter applies to, and the values to match.
+
+    Mirrors R ``filter_arrw()``: a two-letter abbreviation filters
+    ``abbrev_state``; a one/two-digit state code filters ``code_state``; a
+    seven-digit code filters ``code_muni``; any other code of more than three
+    digits filters the first other ``code_*`` column whose longest value has the
+    same number of digits (``max_code_len`` measures that, per column, so the
+    caller decides how to read the data).
+
+    Returns ``(column, codes)``; numeric branches return ``int`` values.
+    Raises ``ValueError`` when nothing resolves. ``"all"`` is the caller's job.
+    """
+    codes = _normalize_code(code)
+    if codes == "all":
+        raise ValueError("resolve_filter() does not handle 'all'; the caller must.")
+    if not isinstance(codes, list):
+        codes = [codes]
+    columns = list(columns)
+
+    if all(c in ALL_ABBREV_STATE for c in codes):
+        if "abbrev_state" in columns:
+            return "abbrev_state", codes
+    elif all(
+        _numbers_only(c) and len(c) <= 2
+        and (c.zfill(2) in ALL_CODE_STATE or c in ALL_CODE_STATE)
+        for c in codes
+    ):
+        if "code_state" in columns:
+            return "code_state", [int(c) for c in codes]
+    elif all(_numbers_only(c) and len(c) == 7 for c in codes):
+        if "code_muni" in columns:
+            return "code_muni", [int(c) for c in codes]
+    elif all(_numbers_only(c) and len(c) > 3 for c in codes):
+        candidates = [
+            c for c in columns
+            if c.startswith("code_") and c not in ("code_state", "code_muni")
+        ]
+        for column in candidates:
+            if max_code_len(column) == len(codes[0]):
+                return column, [int(c) for c in codes]
+
+    raise ValueError(INVALID_CODE_MESSAGE)
+
+
 def filter_by_code(
     gdf: gpd.GeoDataFrame,
     code: Any = "all",
@@ -49,56 +124,69 @@ def filter_by_code(
     if code == "all" or code is None:
         return gdf
 
-    codes = _normalize_code(code)
-    if not isinstance(codes, list):
-        codes = [codes]
+    column, codes = resolve_filter(gdf.columns, code, lambda col: code_length(gdf[col]))
 
-    filter_col = None
-
-    if all(c in ALL_ABBREV_STATE for c in codes):
-        if "abbrev_state" in gdf.columns:
-            filter_col = "abbrev_state"
-    elif all(
-        _numbers_only(str(c)) and len(str(c)) <= 2
-        and (str(c).zfill(2) in ALL_CODE_STATE or str(c) in ALL_CODE_STATE)
-        for c in codes
-    ):
-        if "code_state" in gdf.columns:
-            filter_col = "code_state"
-            codes = [int(c) if str(c).isdigit() else c for c in codes]
-    elif all(_numbers_only(str(c)) and len(str(c)) == 7 for c in codes):
-        if "code_muni" in gdf.columns:
-            filter_col = "code_muni"
-            codes = [int(c) for c in codes]
-    elif all(_numbers_only(c) and len(str(c)) > 3 for c in codes):
-        code_cols = [c for c in gdf.columns if c.startswith("code_") and c not in ["code_state", "code_muni"]]
-        if code_cols:
-            for code_col in code_cols:
-                if gdf[code_col].astype(str).str.len().max() == len(str(codes[0])):
-                    filter_col = code_col
-
-    if filter_col is None:
-        raise ValueError("Invalid value to argument `code_` / `code_muni` / `code_state`.")
-
-    if filter_col == "code_state":
+    if column == "abbrev_state":
+        result = gdf[gdf[column].isin(codes)]
+    elif column == "code_state":
         gdf = gdf.copy()
-        gdf[filter_col] = pd.to_numeric(gdf[filter_col], errors="coerce")
-        codes_num = [int(c) for c in codes]
-        result = gdf[gdf[filter_col].isin(codes_num)]
-    elif filter_col == "code_muni":
+        gdf[column] = pd.to_numeric(gdf[column], errors="coerce")
+        result = gdf[gdf[column].isin(codes)]
+    elif column == "code_muni":
         gdf = gdf.copy()
-        gdf[filter_col] = pd.to_numeric(gdf[filter_col], errors="coerce").astype("Int64")
-        codes_num = [int(c) for c in codes]
-        result = gdf[gdf[filter_col].isin(codes_num)]
+        gdf[column] = pd.to_numeric(gdf[column], errors="coerce").astype("Int64")
+        result = gdf[gdf[column].isin(codes)]
         if len(result) == 0:
-            result = gdf[gdf[filter_col].astype(str).isin([str(c) for c in codes_num])]
+            result = gdf[gdf[column].astype(str).isin([str(c) for c in codes])]
     else:
-        result = gdf[gdf[filter_col].isin(codes)]
+        numeric = pd.to_numeric(gdf[column], errors="coerce")
+        result = gdf[numeric.isin(codes)]
         if len(result) == 0:
-            codes_num = [int(c) for c in codes]
-            result = gdf[gdf[filter_col].astype(str).isin([str(c) for c in codes_num])]
+            result = gdf[gdf[column].astype(str).isin([str(c) for c in codes])]
 
     if len(result) == 0:
-        raise ValueError("Invalid value to argument `code_` / `code_muni` / `code_state`.")
+        raise ValueError(INVALID_CODE_MESSAGE)
 
     return result
+
+
+def parquet_filters(path, code: Any) -> Optional[list]:
+    """pyarrow ``filters`` for ``code`` against the parquet at ``path``.
+
+    ``None`` for ``"all"``. The column is resolved from the file's schema; on the
+    digit-length branch only the candidate ``code_*`` columns are read to measure
+    lengths (columnar, cheap). Values are typed from the schema field: pyarrow
+    will not compare a ``string`` list against a ``double`` column, and older
+    files (health facilities) carry string code columns.
+    """
+    if code == "all" or code is None:
+        return None
+
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    schema = pq.read_schema(path)
+    candidates = [
+        n for n in schema.names
+        if n.startswith("code_") and n not in ("code_state", "code_muni")
+    ]
+    lengths: dict[str, Optional[int]] = {}
+
+    def max_code_len(column: str) -> Optional[int]:
+        if not lengths:
+            table = pq.read_table(path, columns=candidates)
+            for name in candidates:
+                lengths[name] = code_length(table.column(name).to_pandas())
+        return lengths.get(column)
+
+    column, codes = resolve_filter(schema.names, code, max_code_len)
+
+    field_type = schema.field(column).type
+    if pa.types.is_string(field_type) or pa.types.is_large_string(field_type):
+        codes = [str(c) for c in codes]
+    elif pa.types.is_floating(field_type):
+        codes = [float(c) for c in codes]
+    elif pa.types.is_integer(field_type):
+        codes = [int(c) for c in codes]
+
+    return [(column, "in", codes)]

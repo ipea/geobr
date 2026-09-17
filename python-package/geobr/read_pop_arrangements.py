@@ -27,21 +27,50 @@ def read_pop_arrangements(
     {verbose}
 
     """
-    relation = read_geobr_v2(
+    if output == "duckdb":
+        relation = read_geobr_v2(
+            "poparrangements",
+            year,
+            code=code_state,
+            simplified=simplified,
+            output="duckdb",
+            show_progress=show_progress,
+            cache=cache,
+            verbose=verbose,
+        )
+
+        conn = duckdb_connection()
+
+        return conn.sql(
+            "SELECT * FROM relation WHERE code_pop_arrangement IS NOT NULL"
+        )
+
+    if output == "arrow":
+        import pyarrow.compute as pc
+
+        table = read_geobr_v2(
+            "poparrangements",
+            year,
+            code=code_state,
+            simplified=simplified,
+            output="arrow",
+            show_progress=show_progress,
+            cache=cache,
+            verbose=verbose,
+        )
+        return table.filter(pc.is_valid(table["code_pop_arrangement"]))
+
+    gdf = read_geobr_v2(
         "poparrangements",
         year,
         code=code_state,
         simplified=simplified,
-        output="duckdb",
+        output="gpd",
         show_progress=show_progress,
         cache=cache,
         verbose=verbose,
     )
 
-    conn = duckdb_connection()
+    gdf = gdf[gdf["code_pop_arrangement"].notna()]
 
-    relation = conn.sql(
-        "SELECT * FROM relation WHERE code_pop_arrangement IS NOT NULL"
-    )
-
-    return convert_output(relation, output, conn)
+    return convert_output(gdf, output)

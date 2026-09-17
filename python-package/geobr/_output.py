@@ -1,10 +1,15 @@
-"""Convert downloaded geobr parquet data to requested output format."""
+"""Convert an in-memory GeoDataFrame to the requested output format.
+
+``"duckdb"`` never reaches this module: ``read_geobr_v2`` returns the lazy
+relation itself, and readers that post-process keep their SQL body for that
+output. ``ALLOWED_OUTPUTS`` still lists it so callers can validate ``output``
+in one place, before any download.
+"""
 
 from __future__ import annotations
 
-from typing import Literal, Optional
+from typing import Literal
 
-import duckdb
 import geopandas as gpd
 
 OutputType = Literal["gpd", "duckdb", "arrow"]
@@ -12,45 +17,27 @@ OutputType = Literal["gpd", "duckdb", "arrow"]
 ALLOWED_OUTPUTS = ("gpd", "duckdb", "arrow")
 
 
-def convert_output(
-    relation: duckdb.DuckDBPyRelation,
-    output: OutputType = "gpd",
-    connection: object = None,
-) -> object:
-    """Load parquet and return in the requested format.
+def convert_output(gdf: gpd.GeoDataFrame, output: OutputType = "gpd") -> object:
+    """Return ``gdf`` as a GeoDataFrame (``"gpd"``) or an Arrow table (``"arrow"``).
 
-    Parameters
-    ----------
-    relation: a duckdb relation
-    output : ``"gpd"`` (default), ``"duckdb"``, or ``"arrow"``
-    filter_code : passed to ``filter_by_code`` when output is ``"gpd"``
+    ``"arrow"`` encodes the geometry column as WKB binary, the same shape the
+    DuckDB path produced.
     """
     if output not in ALLOWED_OUTPUTS:
         raise ValueError(
             f"`output` must be one of: {list(ALLOWED_OUTPUTS)}. Got: {output!r}"
         )
-
     if output == "duckdb":
-        return relation
-
-    query = """
-            SELECT 
-                * EXCLUDE(geometry),
-                ST_AsWKB(geometry) AS geometry
-            FROM relation
-        """
-    
-    non_geo_relation = connection.sql(query)
+        raise ValueError(
+            'output="duckdb" is served by read_geobr_v2() directly; '
+            "convert_output() only handles in-memory frames."
+        )
 
     if output == "gpd":
-        crs = "EPSG:4674"
-        if "geometry" in relation.columns:
-            crs =  relation.select("ST_CRS(geometry)").limit(1).fetchone()[0]
-        df = non_geo_relation.df()
-        df["geometry"] = df["geometry"].apply(bytes)
-        gdf = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkb(df['geometry']), crs=crs)
         from geobr.utils import enforce_types
+
         return enforce_types(gdf)
 
-    if output == "arrow":
-        return non_geo_relation.to_arrow_table()
+    import pyarrow as pa
+
+    return pa.table(gdf.to_arrow(geometry_encoding="WKB"))

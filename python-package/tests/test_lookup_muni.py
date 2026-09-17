@@ -110,3 +110,36 @@ def test_lookup_fuzzy_name_returns_all_tied_homonyms(monkeypatch):
     _patch_seat(monkeypatch, seat)
     out = lookup_muni(name_muni="Bom Jesuss", year=2010)
     assert sorted(out["code_muni"]) == [2201919, 2401909]
+
+
+# --- pure-Python Jaro: pinned against DuckDB jaro_similarity() and rapidfuzz -------
+
+
+@pytest.mark.parametrize(
+    "a,b,expected",
+    [
+        # values computed with DuckDB 1.5.3 `jaro_similarity`, identical to 1e-10
+        ("rio de janeiro", "rio de janero", 0.9761904762),
+        ("bom jesus", "bom jesuss", 0.9666666667),
+        ("santa barbara doeste", "santa barbara d'oeste", 0.9841269841),
+        ("belo horizonte", "porto alegre", 0.5317460317),
+        ("martha", "marhta", 0.9444444444),  # the textbook example
+        ("dixon", "dicksonx", 0.7666666667),
+        ("sao paulo", "sao paulo", 1.0),
+        ("abc", "xyz", 0.0),
+        ("", "abc", 0.0),
+    ],
+)
+def test_jaro_pinned_values(a, b, expected):
+    from geobr.lookup_muni import _jaro
+
+    assert _jaro(a, b) == pytest.approx(expected, abs=1e-9)
+    assert _jaro(b, a) == pytest.approx(expected, abs=1e-9)  # symmetric
+
+
+def test_lookup_muni_does_not_import_duckdb():
+    import inspect
+
+    import geobr.lookup_muni as mod
+
+    assert "duckdb" not in inspect.getsource(mod)

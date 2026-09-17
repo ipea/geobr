@@ -47,7 +47,9 @@ jobs:
       - name: Install dependencies
         shell: bash
         working-directory: python-package
-        run: uv sync --frozen
+        # duckdb is an optional extra; the suite exercises both the DuckDB
+        # interface (with it) and, via a subprocess test, the readers without it.
+        run: uv sync --frozen --extra duckdb
 
       - name: Run tests with coverage
         shell: bash

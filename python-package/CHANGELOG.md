@@ -1,25 +1,71 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
-# 2.0.2
+# 2.1.0
+
+**DuckDB is now optional**
+
+- `pip install geobr` no longer installs `duckdb`. Every `read_*()` function
+  runs on pyarrow + geopandas, which QGIS and most geo environments already
+  ship: the parquet file is read with the code filter pushed down (only
+  matching rows are decoded), and the `read_health_region()` `micro`/`macro`
+  dissolve runs in shapely. The engine is chosen by the `output` argument,
+  never by what happens to be installed, so the same call returns the same
+  result on every machine.
+- The DuckDB interface is unchanged behind an extra: `pip install geobr[duckdb]`
+  restores `query()`, `session()`, `GeoBrDuckDB`, `register_dataset()`,
+  `to_geopandas()`, `duckdb_connection()` and `output="duckdb"`. Without the
+  extra those raise `ImportError` naming it.
+- Why: the QGIS plugin, whose users cannot install `duckdb` into QGIS's Python,
+  and the DuckDB extension download into `~/.duckdb` that the first read used
+  to trigger — a network dependency at run time, not only at install time.
+
+**Behaviour changes**
+
+- A `code_*` value that matches nothing now raises `ValueError` on every output
+  (`gpd`, `arrow` and `duckdb`), as the R package does. The DuckDB path used to
+  return an empty result silently — or the *unfiltered* file when the code
+  could not be mapped to a column.
+- Filtering by the other `code_*` columns (`code_meso`, `code_micro`,
+  `code_immediate`, `code_neighborhood`, ...) works again on the release files.
+  The digit-length match compared the string form of a float (`"3304.0"`) with
+  the code's digits, so it could never match.
+- `output` is validated before any download; a typo no longer costs a full file.
+- `output="arrow"` tables carry the parquet's native column types and its
+  GeoParquet metadata (they came through DuckDB's type mapping before).
+- `lookup_muni(name_muni=...)` fuzzy hits now return every municipality tied at
+  the best score rather than an arbitrary first one, consistent with how an
+  exact-name match already returns all homonyms (e.g. the several "Bom Jesus").
+
+**Performance** (measured old vs new on the same local files, fresh process each)
+
+- Every reader is faster: the DuckDB path paid ~0.2–0.3 s of fixed overhead per
+  call (connection + spatial extension + WKB round trip), so small reads are
+  3–8× faster (`read_municipality(2020, "RJ")` 0.21 s → 0.04 s) and full
+  reads of large files 1.2–1.3× faster. `output="arrow"` is 1.8–2.7× faster.
+- `read_health_region(geometry_level="micro"|"macro")` is ~2× faster (8.7 s →
+  4.2 s for all of Brazil at macro level): the per-group union runs in a thread
+  pool — `shapely.union_all` releases the GIL — with identical geometries.
+- **Peak memory is higher for filtered reads of large files** — e.g.
+  `read_municipality(2020, "RJ", simplified=False)` peaks at ~1.0 GB instead of
+  ~0.45 GB, `read_census_tract(2022, "AP")` at ~1.0 GB instead of ~0.35 GB.
+  The release files are written with a single 122 880-row row group, so the
+  parquet reader must decode a whole geometry column chunk before the filter
+  applies, whereas DuckDB streams 2 048-row vectors. Unfiltered reads are
+  within 1.2–1.6× of before. If memory is the constraint, install the extra
+  and use `read_*(..., output="duckdb")` followed by `geobr.to_geopandas()`,
+  which keeps the old profile. Smaller row groups in the data release would
+  remove the difference at the root.
 
 **Dependencies**
 
-- Dropped `rapidfuzz`. The fuzzy name match in `lookup_muni()` now runs inside
-  DuckDB with its built-in `jaro_similarity()`, the same metric and scale the
-  `rapidfuzz` implementation used (threshold unchanged at 0.9), and the same
-  approach the R package takes. The user string is bound as a SQL parameter, so
-  names with apostrophes (e.g. "Santa Bárbara d'Oeste") are matched safely.
+- Dropped `rapidfuzz`. `lookup_muni()`'s fuzzy name match is a pure-Python Jaro
+  similarity — the same metric and scale as before (threshold unchanged at
+  0.9); the tests pin it against DuckDB's `jaro_similarity()` to 1e-9.
 
 - Dropped the unused `lxml` and `html5lib` dependencies. They supported the
   former `pandas.read_html()` implementation of `list_geobr()`, which now builds
   its catalog from geobr's release metadata instead of scraping HTML.
-
-**Behaviour change**
-
-- `lookup_muni(name_muni=...)` fuzzy hits now return every municipality tied at
-  the best score rather than an arbitrary first one, consistent with how an
-  exact-name match already returns all homonyms (e.g. the several "Bom Jesus").
 
 -------------------------------------------------------
 # 2.0.1

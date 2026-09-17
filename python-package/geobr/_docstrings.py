@@ -159,9 +159,10 @@ simplified : bool, default True
 output : str, default "gpd"
     Type of object returned by the function. ``"gpd"``
     loads the data into memory as a geopandas ``GeoDataFrame``.
-    Alternatively, ``"duckdb"`` returns a lazy spatial relation backed by
-    DuckDB, and ``"arrow"`` returns an Arrow table. Both ``"duckdb"`` and
-    ``"arrow"`` support out-of-memory processing of large data sets.
+    Alternatively, ``"arrow"`` returns a pyarrow ``Table`` with the geometry
+    as WKB, and ``"duckdb"`` returns a lazy spatial relation backed by DuckDB
+    for out-of-memory processing of large data sets. ``"duckdb"`` requires the
+    optional dependency: ``pip install geobr[duckdb]``.
     """,
     "show_progress": """\
 show_progress : bool, default True

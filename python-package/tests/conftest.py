@@ -6,8 +6,6 @@ import pytest
 from pathlib import Path
 from shapely.geometry import Point
 
-from geobr._duckdb_backend import duckdb_connection, _reset_shared_connection
-
 
 @pytest.fixture
 def sample_gdf():
@@ -73,6 +71,11 @@ def patch_module_attr(monkeypatch, module_path: str, attr: str, value):
 
 @pytest.fixture
 def duckdb_conn():
+    # duckdb is an optional extra; every test that asks for this fixture is a
+    # DuckDB test and skips cleanly when the extra is not installed.
+    pytest.importorskip("duckdb")
+    from geobr._duckdb_backend import duckdb_connection, _reset_shared_connection
+
     _reset_shared_connection()
     conn = duckdb_connection()
     conn.execute("SET threads TO 1;")
