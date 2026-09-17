@@ -34,8 +34,8 @@ Run this with *QGIS's* Python, not a system Python. On Windows that is
 QGIS's own copies (see *Known rough edges*).
 
 QGIS already ships geopandas, shapely, pyarrow, pandas and requests, so in practice pip only adds
-`duckdb` and `rapidfuzz` (both are hard requirements — geobr imports them at module scope, so
-`import geobr` fails outright without them).
+`duckdb` (a hard requirement — geobr imports it at module scope, so `import geobr` fails
+outright without it; geobr 2.0.1 also pulled in `rapidfuzz`, later releases do not).
 
 **2 — the plugin.** Copy `geobr_qgis/` into your QGIS profile plugins directory and enable *geobr*
 in *Plugins → Manage and Install Plugins*.
@@ -142,7 +142,7 @@ feature count in the log, so an unexpected result is visible either way.
   (`Fatal Python error: PyEval_SaveThread ... the GIL is released`, exit `0xC0000409`). This is an
   upstream `duckdb`/embedded-CPython interaction, not a fault in the algorithm: it happens *after*
   the layer is written, and the output file is complete and correct. Isolated by bisection — every
-  other dependency (pandas, geopandas, pyarrow, pyogrio, rapidfuzz, numpy) finalizes cleanly, and
+  other dependency (pandas, geopandas, pyarrow, pyogrio, numpy) finalizes cleanly, and
   `duckdb` alone reproduces it. If you script geobr in CI, check for the output file rather than
   trusting the exit code. Reproduced identically on QGIS 3.42.1 and 4.2.1, so it tracks duckdb
   rather than the QGIS version. **The QGIS desktop app is unaffected** — running geobr algorithms

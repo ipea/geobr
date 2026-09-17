@@ -14,7 +14,7 @@ from .algorithm import PIP_COMMAND
 
 #: Modules geobr needs that QGIS does not ship. QGIS already provides
 #: geopandas, shapely, pyarrow, pandas and requests.
-DEPENDENCIES = ("geobr", "duckdb", "rapidfuzz")
+DEPENDENCIES = ("geobr", "duckdb")
 
 
 def classFactory(iface):
