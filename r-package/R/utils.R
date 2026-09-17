@@ -501,10 +501,15 @@ convert_output <- function(temp, output){ # nocov start
     temp <- arrow::as_arrow_table(stream)
   }
 
-  # # duckdb = do nothing
-  # if(output=="duckdb"){
-  #
-  # }
+  # duckdb
+  # A duckdb relation is already lazy and is returned untouched. An `sf` can
+  # reach this point when a reader post-processes the data before converting
+  # (e.g. the micro/macro aggregation in `read_health_region()`, which has to
+  # materialise to run `sfheaders::sf_remove_holes()`). Registering it back
+  # into duckdb keeps `output` honest, instead of silently returning an `sf`.
+  if(output=="duckdb" && inherits(temp, "sf")){
+    temp <- duckspatial::as_duckspatial_df(temp)
+  }
 
   return(temp)
 

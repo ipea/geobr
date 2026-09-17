@@ -9,6 +9,7 @@
 - `lookup_muni()`: fixed a SQL error when the fuzzy name match received a name with an apostrophe (e.g. "Santa Barbara d'Oest"). The fuzzy match now returns all candidate matches instead of recycling silently, and closes its DuckDB connection. Dropped the `glue` dependency.
 - `cep_to_state()`: fixed the Minas Gerais CEP range, which was reversed so every MG CEP raised "CEP not found".
 - `read_country()`, `read_region()`, `read_pop_arrangements()` and `read_urban_concentrations()` now return `NULL` when the metadata download fails, like the other readers, instead of erroring.
+- `read_health_region()` now honours `output = "duckdb"` when `geometry_level` is `"micro"` or `"macro"`. These levels aggregate geometries in memory, and the result was returned as an `sf` whatever `output` asked for.
 - `read_capitals()` now passes `cache` and `verbose` on to `read_municipal_seat()`. Both arguments were documented but ignored, so `cache = FALSE` had no effect and `verbose = FALSE` still printed a message.
 - `list_geobr()` listed two functions that do not exist (`read_favelas`, `read_quilombola_lands`) and omitted `read_capitals`. The catalogue now matches the exported readers exactly. It also returns `NULL` when the metadata download fails, and rejects a non-scalar `wide` instead of silently returning long format.
 

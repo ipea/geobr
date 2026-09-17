@@ -22,6 +22,21 @@ test_that("read_health_region", {
   testthat::expect_equal(unique(test_sf_micro$code_health_region) |> length(), 450)
   testthat::expect_equal(unique(test_sf_macro$code_health_macroregion) |> length(), 118)
 
+  # `output` must be honoured at every geometry_level. The micro/macro branch
+  # materialises to sf to aggregate, and used to return that sf even when the
+  # user asked for "duckdb".
+  for (lvl in c("micro", "macro")) {
+    d <- read_health_region(year = 2024, geometry_level = lvl, output = "duckdb")
+    a <- read_health_region(year = 2024, geometry_level = lvl, output = "arrow")
+    testthat::expect_true(duckspatial::is_duckspatial_df(d))
+    testthat::expect_false(is(d, "sf"))
+    testthat::expect_true(is(a, "ArrowObject"))
+
+    # the duckdb relation must carry the same data as the sf output
+    s_lvl <- read_health_region(year = 2024, geometry_level = lvl, output = "sf")
+    testthat::expect_equal(nrow(duckspatial::ddbs_collect(d)), nrow(s_lvl))
+  }
+
 })
 
 
