@@ -1,6 +1,19 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
+# dev
+
+**New features**
+
+- New function `read_addresses()`, which reads the geolocated addresses of the
+  National Registry of Addresses for Statistical Purposes (CNEFE), organized by
+  IBGE. Mirrors the R function of the same name. Like `read_statistical_grid()`,
+  its `code_muni` argument is required and has no default, because the data
+  covers roughly 111 million addresses in a single 1.2 GB file. The geography is
+  also registered in `_GEO_LOADERS` / `POINT_GEOGRAPHIES`, so it is reachable
+  from `query()` and `session()` too.
+
+-------------------------------------------------------
 # 2.0.2
 
 **Dependencies**

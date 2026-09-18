@@ -15,7 +15,6 @@
 #' @aliases geobr-package
 #'
 #' @importFrom utils "tail"
-#' @importFrom curl "has_internet"
 #' @importFrom methods is
 #'
 #' @keywords internal

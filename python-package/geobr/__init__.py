@@ -27,6 +27,7 @@ from .read_urban_concentrations import read_urban_concentrations
 from .read_schools import read_schools
 from .read_comparable_areas import read_comparable_areas
 from .read_statistical_grid import read_statistical_grid
+from .read_addresses import read_addresses
 from .read_capitals import read_capitals
 from .read_favela import read_favela
 from .read_polling_places import read_polling_places
@@ -73,6 +74,7 @@ __all__ = [
     "read_schools",
     "read_comparable_areas",
     "read_statistical_grid",
+    "read_addresses",
     "read_capitals",
     "read_favela",
     "read_polling_places",

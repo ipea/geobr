@@ -21,6 +21,7 @@ POINT_READERS = [
     ("read_health_facilities", {"date": 202004}),
     ("read_polling_places", {"year": 2022}),
     ("read_statistical_grid", {"year": 2010, "code_muni": "AP"}),
+    ("read_addresses", {"year": 2022, "code_muni": "AP"}),
 ]
 
 IDS = [name for name, _ in POINT_READERS]

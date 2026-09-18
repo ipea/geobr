@@ -128,6 +128,12 @@ _GEO_LOADERS: dict[str, dict[str, Any]] = {
         "gpkg": "comparable_areas",
         "read_fn": "read_comparable_areas",
     },
+    "cnefe": {
+        "v2": "cnefe",
+        "gpkg": None,
+        "read_fn": "read_addresses",
+        "v2_only": True,
+    },
 }
 
 # Geographies that are point layers: there is nothing to simplify, so the data
@@ -139,6 +145,7 @@ _GEO_LOADERS: dict[str, dict[str, Any]] = {
 # so upstream drift surfaces in CI rather than in a user's query.
 POINT_GEOGRAPHIES = frozenset(
     {
+        "cnefe",
         "healthfacilities",
         "municipalseats",
         "pollingplaces",

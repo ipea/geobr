@@ -48,6 +48,7 @@ reference:
     - read_pop_arrangements
   - title: "Miscellaneous"
   - contents:
+    - read_addresses
     - read_indigenous_land
     - read_quilombola_land
     - read_comparable_areas

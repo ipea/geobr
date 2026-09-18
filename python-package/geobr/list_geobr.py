@@ -19,7 +19,7 @@ _CATALOG = pd.DataFrame(
             "read_health_region", "read_neighborhood", "read_schools",
             "read_comparable_areas", "read_urban_concentrations",
             "read_pop_arrangements", "read_favela", "read_polling_places",
-            "read_quilombola_land",
+            "read_quilombola_land", "read_addresses",
         ],
         "geography": [
             "Country", "Region", "States", "Meso region", "Micro region",
@@ -32,12 +32,13 @@ _CATALOG = pd.DataFrame(
             "Schools", "Comparable municipalities (AMCs)",
             "Urban concentrations", "Population arrangements",
             "Favelas", "Polling places", "Quilombola lands",
+            "Addresses (CNEFE)",
         ],
         "source": [
             "IBGE", "IBGE", "IBGE", "IBGE", "IBGE", "IBGE", "IBGE", "IBGE", "IBGE",
             "IBGE", "IBGE", "IBGE", "IBGE", "IBGE", "MMA", "IBGE", "MMA",
             "CEMADEN/IBGE", "FUNAI", "IBGE", "CNES", "DataSUS", "IBGE", "INEP",
-            "IBGE", "IBGE", "IBGE", "IBGE", "TSE", "INCRA",
+            "IBGE", "IBGE", "IBGE", "IBGE", "TSE", "INCRA", "IBGE",
         ],
         "alias": [
             "country", "regions", "states", "mesoregions", "microregions",
@@ -47,7 +48,7 @@ _CATALOG = pd.DataFrame(
             "conservationunits", "disasterriskareas", "indigenouslands",
             "semiarid", "healthfacilities", "healthregions", "neighborhoods",
             "schools", "amc", "poparrangements", "poparrangements",
-            "favelas", "pollingplaces", "quilombolalands",
+            "favelas", "pollingplaces", "quilombolalands", "cnefe",
         ],
     }
 )
