@@ -19,7 +19,17 @@ qgis_process run geobr:read_state -- YEAR=2020 CODE_STATE=RJ OUTPUT=/tmp/rj.gpkg
 
 ## Install
 
-**1 — the Python package.** The plugin does not vendor geobr; it calls the real one. It requires
+**1 — the plugin.** Install *geobr* from *Plugins → Manage and Install Plugins*, or copy
+`geobr_qgis/` into your QGIS profile plugins directory (table below) and enable it there.
+
+The plugin declares [qpip](https://github.com/opengisch/qpip) as a **plugin dependency**, so the
+Plugin Manager offers to install it too. Accept: qpip reads this plugin's `requirements.txt` and
+installs **duckdb**, the engine geobr runs on, into your QGIS profile
+(`python/dependencies/<python version>`) the first time the plugin loads. This is the same
+mechanism QDuckDB uses, so the two plugins share one duckdb. If you install by copying files, add
+qpip from the Plugin Manager yourself, or put duckdb in the pip command of step 2.
+
+**2 — the Python package.** The plugin does not vendor geobr; it calls the real one. It requires
 **geobr 2.0.1 or newer**.
 
 ```bash
@@ -33,12 +43,12 @@ Run this with *QGIS's* Python, not a system Python. On Windows that is
 `shapely<=2.1.0`, which QGIS 4.2.1 exceeds, so pip satisfied those ceilings by downgrading
 QGIS's own copies (see *Known rough edges*).
 
-QGIS already ships geopandas, shapely, pyarrow, pandas and requests, so in practice pip only adds
-`duckdb` (a hard requirement — geobr imports it at module scope, so `import geobr` fails
-outright without it; geobr 2.0.1 also pulled in `rapidfuzz`, later releases do not).
-
-**2 — the plugin.** Copy `geobr_qgis/` into your QGIS profile plugins directory and enable *geobr*
-in *Plugins → Manage and Install Plugins*.
+QGIS already ships geopandas, shapely, pyarrow, pandas and requests, so in practice pip adds geobr
+itself (plus the small `rapidfuzz` wheel on geobr 2.0.1; later releases drop it). pip cannot see
+the duckdb that qpip installed, since qpip's directory is not a site-packages, so it installs a
+second copy under `--user`. That is harmless: both are the same wheel, and qpip's copy sits first
+on `sys.path` in the desktop app and, through the plugin's own fallback, in `qgis_process` too.
+Without qpip, that pip copy is simply the one that gets used.
 
 **QGIS 4 uses a different profile root than QGIS 3** (`QGIS4` instead of `QGIS3`), and nothing
 carries over between them — a plugin installed for QGIS 3 is invisible to QGIS 4. Replace
@@ -182,6 +192,16 @@ feature count in the log, so an unexpected result is visible either way.
   algorithm cannot be cancelled mid-request, so on a network that black-holes connections that call
   would hang until QGIS is restarted. It is excluded in `discovery.py` (`_EXCLUDED_READERS`) and
   returns once geobr fixes it. Every other reader uses the current parquet path.
+- **qpip does not run under `qgis_process`.** It needs the GUI, so headless QGIS never puts
+  `python/dependencies/<python version>` on `sys.path`. The plugin does it itself at load time
+  (`add_qpip_path()` in `__init__.py`), inserting at the front exactly as qpip does, so a
+  qpip-installed duckdb resolves identically in both. If qpip changes its layout, the fallback
+  finds nothing and a run reports duckdb as missing, with the by-hand pip command.
+- **Only self-contained wheels can go through qpip.** qpip installs with `pip --target`, which
+  makes pip ignore every package already installed and reinstall all dependencies into the profile
+  directory — at the front of `sys.path`. Listing geobr there would shadow QGIS's own geopandas,
+  shapely, pandas, numpy and pyarrow with PyPI wheels, the same failure described above for
+  geobr ≤ 2.0.0. So `requirements.txt` carries duckdb alone, and geobr stays a pip install.
 - **Downloads are cached per session.** geobr 2.0.0 stores downloads and metadata in a fresh temp
   directory that it deletes when the Python process exits — the same behavior as the R package.
   Source updates are picked up on the next QGIS start, with no action needed. Within one session
@@ -209,14 +229,16 @@ python -c "import duckdb; duckdb.connect().execute('INSTALL spatial')"
 
 ```
 geobr_qgis/
-├── __init__.py    classFactory, plugin lifecycle, dependency probe
-├── discovery.py   reader discovery (ast), docstring rendering, layer naming — imports no qgis
-├── provider.py    the Processing provider
-├── algorithm.py   the one algorithm class that serves every reader
-└── metadata.txt
+├── __init__.py       classFactory, plugin lifecycle, dependency probe, qpip path fallback
+├── discovery.py      reader discovery (ast), docstring rendering, layer naming — imports no qgis
+├── provider.py       the Processing provider
+├── algorithm.py      the one algorithm class that serves every reader
+├── requirements.txt  what qpip installs: duckdb only
+└── metadata.txt      declares plugin_dependencies=qpip
 tests/
 ├── conftest.py
-└── test_discovery.py   runs without QGIS, against python-package/geobr
+├── test_discovery.py   runs without QGIS, against python-package/geobr
+└── test_packaging.py   requirements.txt ↔ pyproject duckdb floor, metadata invariants
 ```
 
 `discovery.py` is deliberately free of any `qgis` import: it is the only part of the plugin coupled

@@ -17,8 +17,9 @@ import pytest
 
 import discovery
 
-# 31 read_* names in geobr's __all__, minus the one deliberate exclusion.
-EXPECTED_READER_COUNT = 30
+# 32 read_* names in geobr's __all__ (read_addresses joined in the 2.0.2 dev
+# cycle), minus the one deliberate exclusion.
+EXPECTED_READER_COUNT = 31
 
 TOKEN = re.compile(r"\{[a-z_]+\}")
 
