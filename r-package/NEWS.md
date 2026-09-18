@@ -1,5 +1,13 @@
 # geobr (development version)
 
+**New features**
+
+- New function `read_addresses()`, which reads the geolocated addresses of the
+  National Registry of Addresses for Statistical Purposes (CNEFE), organized by
+  IBGE. Like `read_statistical_grid()` and `read_census_tract()`, its
+  `code_muni` argument is required and has no default, because the data covers
+  roughly 111 million addresses.
+
 
 
 **Bug fixes**

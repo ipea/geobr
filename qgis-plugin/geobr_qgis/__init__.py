@@ -7,14 +7,64 @@ itself and neither would load.
 """
 
 import importlib.util
+import os
+import sys
 
 from qgis.core import Qgis, QgsApplication, QgsMessageLog
 
-from .algorithm import PIP_COMMAND
+from .algorithm import PIP_COMMAND, PIP_COMMAND_DUCKDB
 
 #: Modules geobr needs that QGIS does not ship. QGIS already provides
-#: geopandas, shapely, pyarrow, pandas and requests.
+#: geopandas, shapely, pyarrow, pandas and requests. The two come from
+#: different places: ``geobr`` is a pip install into QGIS's Python, ``duckdb``
+#: is listed in ``requirements.txt`` for the qpip plugin to install.
 DEPENDENCIES = ("geobr", "duckdb")
+
+
+def qpip_site_packages():
+    """Where qpip installs the packages listed in ``requirements.txt``.
+
+    Mirrors qpip's own layout - ``<profile>/python/dependencies/<major.minor>``,
+    one directory per Python version so a profile shared between QGIS builds
+    does not mix ABIs.
+    """
+    return os.path.join(
+        QgsApplication.qgisSettingsDirPath(),
+        "python",
+        "dependencies",
+        f"{sys.version_info.major}.{sys.version_info.minor}",
+    )
+
+
+def add_qpip_path():
+    """Put qpip's dependency directory on ``sys.path`` unless qpip already has.
+
+    qpip does this itself when it loads, ahead of every other plugin - but only
+    in the desktop app: it needs the GUI, so ``qgis_process`` never loads it,
+    and a duckdb that qpip installed would be invisible to a headless run.
+    Inserted at the front, as qpip does, so both paths agree on which duckdb
+    they import. Returns the directory, or ``None`` if it does not exist yet.
+    """
+    path = qpip_site_packages()
+    if not os.path.isdir(path):
+        return None
+    if path not in sys.path:
+        sys.path.insert(0, path)
+    return path
+
+
+def missing_message(missing):
+    """One instruction per missing piece, since each comes from a different place."""
+    parts = []
+    if "geobr" in missing:
+        parts.append(f"the geobr Python package (install with:  {PIP_COMMAND} )")
+    if "duckdb" in missing:
+        parts.append(
+            "duckdb, which the qpip plugin installs from geobr's requirements.txt "
+            "(install and enable qpip from the Plugin Manager, or run:  "
+            f"{PIP_COMMAND_DUCKDB} )"
+        )
+    return "geobr needs " + " and ".join(parts) + " - then restart QGIS."
 
 
 def classFactory(iface):
@@ -44,6 +94,7 @@ class GeobrPlugin:
     def __init__(self, iface):
         self.iface = iface
         self.provider = None
+        add_qpip_path()
 
     def initProcessing(self):
         """Register the provider.
@@ -64,10 +115,7 @@ class GeobrPlugin:
 
         missing = missing_dependencies()
         if missing:
-            message = (
-                f"geobr needs {', '.join(missing)}, which QGIS cannot find. "
-                f"Install with:  {PIP_COMMAND}  - then restart QGIS."
-            )
+            message = missing_message(missing)
             # Logged as well as shown, so the instruction survives the banner.
             QgsMessageLog.logMessage(message, "geobr", Qgis.MessageLevel.Warning)
             if self.iface is not None:

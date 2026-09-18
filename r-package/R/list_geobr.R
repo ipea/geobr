@@ -70,7 +70,8 @@ list_geobr <- function(wide = TRUE){
     "read_favela",
     "read_polling_places",
     "read_quilombola_land",
-    "read_capitals"
+    "read_capitals",
+    "read_addresses"
     ),
  geography = c(
    "Country",
@@ -103,7 +104,8 @@ list_geobr <- function(wide = TRUE){
    "Favelas and urban communities",
    "Voting places",
    "Quilombola lands officialy recognized",
-   "State capitals"
+   "State capitals",
+   "Addresses (CNEFE)"
  ),
  source = c(
    "IBGE",
@@ -136,6 +138,7 @@ list_geobr <- function(wide = TRUE){
    "IBGE",
    "TSE",
    "Incra",
+   "IBGE",
    "IBGE"
    ),
 
@@ -170,7 +173,8 @@ list_geobr <- function(wide = TRUE){
    "favelas",
    "pollingplaces",
    "quilombolalands",
-   "capitals"
+   "capitals",
+   "cnefe"
  ),
  stringsAsFactors = FALSE
  )

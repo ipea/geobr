@@ -69,9 +69,9 @@ code_muni : int, str or list, default "all"
     the function downloads all the data available in the country. 
     Municipality codes can be consulted with ``geobr.lookup_muni()``.
     """,
-    # `read_statistical_grid` takes code_muni as a required argument, so it
-    # cannot use the block above. (The R package documents this one with the
-    # shared `code_muni` template, which wrongly calls "all" the default.)
+    # `read_statistical_grid` and `read_addresses` take code_muni as a required
+    # argument, so they cannot use the block above. Both data sets are large
+    # enough that downloading the whole country has to be an explicit choice.
     "code_muni_required": """\
 code_muni : int, str or list
     Required. The 7-digit code of a municipality. If a two-digit state code or

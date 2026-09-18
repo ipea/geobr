@@ -27,6 +27,7 @@ import geobr
 # `showProgress` renamed to `show_progress`. Regenerate with:
 #     Rscript -e 'library(geobr); args(read_state)'
 R_ARGUMENT_ORDER = {
+    "read_addresses": ("year", "code_muni", "output", "show_progress", "cache", "verbose"),
     "read_amazon": ("year", "simplified", "output", "show_progress", "cache", "verbose"),
     "read_biomes": ("year", "simplified", "output", "show_progress", "cache", "verbose"),
     "read_capitals": ("year", "output", "show_progress", "cache", "verbose"),

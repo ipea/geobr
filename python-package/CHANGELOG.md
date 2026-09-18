@@ -1,7 +1,18 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
-# 2.0.2
+# 2.1.0
+
+**New features**
+
+- New function `read_addresses()`, which reads the geolocated addresses of the
+  National Registry of Addresses for Statistical Purposes (CNEFE), organized by
+  IBGE. Mirrors the R function of the same name. Like `read_statistical_grid()`,
+  its `code_muni` argument is required and has no default, because the data
+  covers roughly 111 million addresses in a single 1.2 GB file. The geography is
+  also registered in `_GEO_LOADERS` / `POINT_GEOGRAPHIES`, so it is reachable
+  from `query()` and `session()` too.
+
 
 **Dependencies**
 
@@ -20,6 +31,13 @@
 - `lookup_muni(name_muni=...)` fuzzy hits now return every municipality tied at
   the best score rather than an arbitrary first one, consistent with how an
   exact-name match already returns all homonyms (e.g. the several "Bom Jesus").
+
+  **Bug fixes**
+
+- Fixed the code filter in `read_filter_parquet_relation()`, the function behind
+  `read_*()`, `query()` and `session()`. An invalid
+  code now raises `ValueError`, the matching the behavior of the R
+  package. Closes [#452](https://github.com/ipea/geobr/issues/452).
 
 -------------------------------------------------------
 # 2.0.1

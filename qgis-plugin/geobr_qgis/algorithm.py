@@ -37,6 +37,11 @@ from .discovery import (
 
 PIP_COMMAND = 'python -m pip install --user "geobr>=2.0.1"'
 
+# duckdb normally arrives through the qpip plugin (see requirements.txt); this
+# is the by-hand alternative. The floor is geobr's own, checked by
+# tests/test_packaging.py against python-package/pyproject.toml.
+PIP_COMMAND_DUCKDB = 'python -m pip install --user "duckdb>=1.5.3"'
+
 # geobr keeps a module-global DuckDB connection and registers views by name
 # ("{geo}_{year}"). Two algorithms running at once - batch mode, or a model -
 # would share that connection and collide, so reader calls are serialised.
@@ -146,6 +151,25 @@ def years_on_offer():
                 Qgis.MessageLevel.Warning,
             )
     return _YEARS
+
+
+def import_failure(exc) -> str:
+    """Explain a failed ``import geobr`` in terms of what to install.
+
+    geobr imports duckdb at module scope, so a missing duckdb surfaces as an
+    ImportError from ``import geobr`` - and its fix is a different one.
+    """
+    if "duckdb" in str(exc).lower():
+        return (
+            "geobr is installed, but DuckDB, which it runs on, is not available "
+            "to QGIS.\nThe qpip plugin installs it from geobr's requirements.txt: "
+            "install and enable qpip from the Plugin Manager, then restart QGIS. "
+            f"Or install it by hand:\n    {PIP_COMMAND_DUCKDB}\n\n({exc})"
+        )
+    return (
+        "The 'geobr' Python package is not available to QGIS.\n"
+        f"Install it, then restart QGIS:\n    {PIP_COMMAND}\n\n({exc})"
+    )
 
 
 def apply_qgis_proxy() -> None:
@@ -367,10 +391,7 @@ class GeobrAlgorithm(QgsProcessingAlgorithm):
         try:
             import geobr
         except ImportError as exc:
-            raise QgsProcessingException(
-                "The 'geobr' Python package is not available to QGIS.\n"
-                f"Install it, then restart QGIS:\n    {PIP_COMMAND}\n\n({exc})"
-            ) from exc
+            raise QgsProcessingException(import_failure(exc)) from exc
 
         kwargs = self._collect(parameters, context)
         declared = {arg for arg, _ in self._spec.params}
