@@ -9,7 +9,11 @@ import geopandas as gpd
 import pandas as pd
 
 # Brazilian state codes and abbreviations (IBGE)
-ALL_CODE_STATE = [str(i).zfill(2) for i in range(11, 54) if i not in (20, 30, 40)]
+ALL_CODE_STATE = [
+    11, 12, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25,
+    26, 27, 28, 29, 31, 32, 33, 35, 41, 42, 43, 50,
+    51, 52, 53
+]
 ALL_ABBREV_STATE = [
     "RO", "AC", "AM", "RR", "PA", "AP", "TO", "MA", "PI", "CE", "RN", "PB", "PE",
     "AL", "SE", "BA", "MG", "ES", "RJ", "SP", "PR", "SC", "RS", "MS", "MT", "GO",
@@ -49,7 +53,7 @@ def filter_by_code(
     if code == "all" or code is None:
         return gdf
 
-    codes = _normalize_code(code)
+    codes = _normalize_code(code) # retorna str
     if not isinstance(codes, list):
         codes = [codes]
 
@@ -59,18 +63,17 @@ def filter_by_code(
         if "abbrev_state" in gdf.columns:
             filter_col = "abbrev_state"
     elif all(
-        _numbers_only(str(c)) and len(str(c)) <= 2
-        and (str(c).zfill(2) in ALL_CODE_STATE or str(c) in ALL_CODE_STATE)
-        for c in codes
+        _numbers_only(c) and len(c) == 2
+        and (int(c) in ALL_CODE_STATE) for c in codes
     ):
         if "code_state" in gdf.columns:
             filter_col = "code_state"
-            codes = [int(c) if str(c).isdigit() else c for c in codes]
-    elif all(_numbers_only(str(c)) and len(str(c)) == 7 for c in codes):
+            codes = [int(c) for c in codes]
+    elif all(_numbers_only(c) and len(c) == 7 for c in codes):
         if "code_muni" in gdf.columns:
             filter_col = "code_muni"
             codes = [int(c) for c in codes]
-    elif all(_numbers_only(c) and len(str(c)) > 3 for c in codes):
+    elif all(_numbers_only(c) and len(c) > 3 for c in codes):
         code_cols = [c for c in gdf.columns if c.startswith("code_") and c not in ["code_state", "code_muni"]]
         if code_cols:
             for code_col in code_cols:

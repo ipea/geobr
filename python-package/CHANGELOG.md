@@ -1,7 +1,7 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
-# dev
+# 2.1.0
 
 **New features**
 
@@ -13,8 +13,6 @@
   also registered in `_GEO_LOADERS` / `POINT_GEOGRAPHIES`, so it is reachable
   from `query()` and `session()` too.
 
--------------------------------------------------------
-# 2.0.2
 
 **Dependencies**
 
@@ -33,6 +31,13 @@
 - `lookup_muni(name_muni=...)` fuzzy hits now return every municipality tied at
   the best score rather than an arbitrary first one, consistent with how an
   exact-name match already returns all homonyms (e.g. the several "Bom Jesus").
+
+  **Bug fixes**
+
+- Fixed the code filter in `read_filter_parquet_relation()`, the function behind
+  `read_*()`, `query()` and `session()`. An invalid
+  code now raises `ValueError`, the matching the behavior of the R
+  package. Closes [#452](https://github.com/ipea/geobr/issues/452).
 
 -------------------------------------------------------
 # 2.0.1

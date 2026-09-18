@@ -8,6 +8,13 @@ from pathlib import Path
 from typing import Any, Optional, Union
 import duckdb
 
+from geobr._filter import (
+    ALL_CODE_STATE,
+    ALL_ABBREV_STATE,
+    _normalize_code,
+    _numbers_only
+)
+
 _CONN: Optional[Any] = None
 _LAST_REGISTERED: dict[tuple[int, str], tuple[str, int]] = {}
 _MAX_RESOLUTIONS = 10
@@ -534,38 +541,54 @@ def read_filter_parquet_relation(
         path_str = str(Path(path).resolve()).replace("'", "''")
         source = f"read_parquet('{path_str}')"
 
-    if filter_code == "all" or filter_code is None:
-        return connection.sql(f"SELECT * FROM {source}")
-
-    codes = filter_code if isinstance(filter_code, (list, tuple)) else [filter_code]
-    code = codes[0]
-
-    if isinstance(code, str) and len(code) == 2 and code.isalpha():
-        codes_sql = ", ".join([f"'{c}'" for c in codes])
-        return connection.sql(f"SELECT * FROM {source} WHERE abbrev_state IN ({codes_sql})")
-    if str(code).isdigit() and len(str(code)) == 7:
-        codes_sql = ", ".join(map(str, codes))
-        return connection.sql(
-            f"SELECT * FROM {source} WHERE CAST(code_muni AS BIGINT) IN ({codes_sql})"
-        )
-    if str(code).isdigit() and len(str(code)) <= 2:
-        codes_sql = ", ".join(map(str, codes))
-        return connection.sql(
-            f"SELECT * FROM {source} WHERE CAST(code_state AS INTEGER) IN ({codes_sql})"
-        )
-
     rel = connection.sql(f"SELECT * FROM {source}")
 
-    if str(code).isdigit() and len(str(code)) > 3:
-        code_cols = [c for c in rel.columns if c.startswith("code_") and c not in ["code_state", "code_muni"]]
-        for code_col in code_cols:
-            len_alvo = rel.aggregate(f"max(length(CAST(CAST({code_col} as BIGINT) as VARCHAR)))").fetchone()[0]
-            if len_alvo == len(str(code)):
-                filter_col = code_col
-                codes_sql = ", ".join(map(str, codes))
-                return connection.sql(f"SELECT * FROM {source} WHERE CAST({filter_col} AS INTEGER) IN ({codes_sql})")
+    if filter_code == "all" or filter_code is None:
+        return rel
 
-    return rel
+    rel_cols = rel.columns
+
+    codes = _normalize_code(filter_code) # retorna str
+    if not isinstance(codes, list):
+        codes = [codes]
+
+    filter_col = None
+
+    if all(c in ALL_ABBREV_STATE for c in codes) and "abbrev_state" in rel_cols:
+        filter_col = "abbrev_state"
+        codes_sql = ", ".join([f"'{c}'" for c in codes])
+
+    if all(
+        _numbers_only(c) and len(c) == 2 and (int(c) in ALL_CODE_STATE) for c in codes
+    ) and "code_state" in rel_cols:
+        filter_col = "code_state"
+        codes_sql = ", ".join(codes)
+    
+    if all(_numbers_only(c) and len(c) > 3 for c in codes):
+        code_cols = [c for c in rel_cols if c.startswith("code_") and c not in ["code_state", "code_muni"]]
+        if code_cols:
+            for code_col in code_cols:
+                len_alvo = rel.aggregate(f"max(length(CAST(CAST({code_col} as BIGINT) as VARCHAR)))").fetchone()[0]
+                if len_alvo == len(str(codes[0])):
+                    filter_col = code_col
+                    codes_sql = ", ".join(codes)
+                    break
+
+    # Evaluated last so a 7-digit municipality code resolves to `code_muni` even
+    # when another 7-digit `code_*` column is present, matching `filter_arrw()`.
+    if all(_numbers_only(c) and len(c) == 7 for c in codes) and "code_muni" in rel_cols:
+        filter_col = "code_muni"
+        codes_sql = ", ".join(codes)
+
+    if filter_col is None:
+        raise ValueError("Invalid value to argument `code_` / `code_muni` / `code_state`.")
+
+    filtered_rel = rel.filter(f"{filter_col} IN ({codes_sql})")
+
+    if filtered_rel.limit(1).fetchone() is None:
+        raise ValueError("Invalid value to argument `code_` / `code_muni` / `code_state`.")
+
+    return filtered_rel
 
 
 class GeoBrDuckDB:
