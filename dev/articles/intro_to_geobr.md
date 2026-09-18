@@ -50,27 +50,27 @@ function.
 datasets <- list_geobr(wide = TRUE)
 
 head(datasets)
-#>                  Function
-#> 1             read_amazon
-#> 2             read_biomes
-#> 3           read_capitals
-#> 4       read_census_tract
-#> 5   read_comparable_areas
-#> 6 read_conservation_units
+#>                Function
+#> 1           read_amazon
+#> 2           read_biomes
+#> 3         read_capitals
+#> 4     read_census_tract
+#> 5        read_addresses
+#> 6 read_comparable_areas
 #>                                                                      geography
 #> 1                                                        Brazil's Legal Amazon
 #> 2                                                                       Biomes
 #> 3                                                               State capitals
 #> 4                                              Census tract (setor censitário)
-#> 5 Historically comparable municipalities, aka áreas mínimas comparáveis (AMCs)
-#> 6                                             Environmental Conservation Units
+#> 5                                                            Addresses (CNEFE)
+#> 6 Historically comparable municipalities, aka áreas mínimas comparáveis (AMCs)
 #>   source                         year
 #> 1    MMA 2019, 2020, 2021, 2022, 2024
 #> 2   IBGE             2006, 2019, 2025
 #> 3   IBGE                         2010
 #> 4   IBGE             2000, 2010, 2022
-#> 5   IBGE        temporarily suspended
-#> 6    MMA               202402, 202503
+#> 5   IBGE                         2022
+#> 6   IBGE        temporarily suspended
 ```
 
 #### Basic syntax

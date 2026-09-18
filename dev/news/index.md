@@ -2,6 +2,18 @@
 
 ## geobr (development version)
 
+**New features**
+
+- New function
+  [`read_addresses()`](https://ipea.github.io/geobr/dev/reference/read_addresses.md),
+  which reads the geolocated addresses of the National Registry of
+  Addresses for Statistical Purposes (CNEFE), organized by IBGE. Like
+  [`read_statistical_grid()`](https://ipea.github.io/geobr/dev/reference/read_statistical_grid.md)
+  and
+  [`read_census_tract()`](https://ipea.github.io/geobr/dev/reference/read_census_tract.md),
+  its `code_muni` argument is required and has no default, because the
+  data covers roughly 111 million addresses.
+
 **Bug fixes**
 
 - Requires duckdb (\>= 1.5.1)
@@ -330,9 +342,7 @@ CRAN release: 2022-08-16
 
 - Started using package documentation templates with Roxygen
 - Reduced a lot of code redundancy
-- Important update tothe
-  [`check_connection()`](https://ipea.github.io/geobr/dev/reference/check_connection.md)
-  function
+- Important update tothe `check_connection()` function
 
 ## geobr v1.6.6
 
@@ -403,9 +413,8 @@ CRAN release: 2021-04-16
 
 **Minor changes**
 
-- Improved
-  [`check_connection()`](https://ipea.github.io/geobr/dev/reference/check_connection.md)
-  to fail gracefully. Return message, no error.
+- Improved `check_connection()` to fail gracefully. Return message, no
+  error.
 
 ## geobr v1.6.0
 

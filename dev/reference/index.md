@@ -76,6 +76,8 @@
 
 ## Miscellaneous
 
+- [`read_addresses()`](https://ipea.github.io/geobr/dev/reference/read_addresses.md)
+  : Download geolocated data of addresses in Brazil
 - [`read_indigenous_land()`](https://ipea.github.io/geobr/dev/reference/read_indigenous_land.md)
   : Download spatial data of indigenous lands in Brazil
 - [`read_quilombola_land()`](https://ipea.github.io/geobr/dev/reference/read_quilombola_land.md)

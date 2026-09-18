@@ -45,7 +45,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="geobr-development-version">geobr (development version)<a class="anchor" aria-label="anchor" href="#geobr-development-version"></a></h2>
-<p><strong>Bug fixes</strong></p>
+<p><strong>New features</strong></p>
+<ul><li>New function <code><a href="../reference/read_addresses.html">read_addresses()</a></code>, which reads the geolocated addresses of the National Registry of Addresses for Statistical Purposes (CNEFE), organized by IBGE. Like <code><a href="../reference/read_statistical_grid.html">read_statistical_grid()</a></code> and <code><a href="../reference/read_census_tract.html">read_census_tract()</a></code>, its <code>code_muni</code> argument is required and has no default, because the data covers roughly 111 million addresses.</li>
+</ul><p><strong>Bug fixes</strong></p>
 <ul><li>Requires duckdb (&gt;= 1.5.1)</li>
 <li>geobr now fallsback to ipea servers whenever users cannot access github servers.</li>
 <li>
@@ -173,7 +175,7 @@
 </ul><p><strong>Minor changes</strong></p>
 <ul><li>Started using package documentation templates with Roxygen</li>
 <li>Reduced a lot of code redundancy</li>
-<li>Important update tothe <code><a href="../reference/check_connection.html">check_connection()</a></code> function</li>
+<li>Important update tothe <code>check_connection()</code> function</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.6" id="geobr-v166">geobr v1.6.6<a class="anchor" aria-label="anchor" href="#geobr-v166"></a></h2>
@@ -217,7 +219,7 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.1" id="geobr-v161">geobr v1.6.1<a class="anchor" aria-label="anchor" href="#geobr-v161"></a></h2><p class="text-muted">CRAN release: 2021-04-16</p>
 <p><strong>Minor changes</strong></p>
-<ul><li>Improved <code><a href="../reference/check_connection.html">check_connection()</a></code> to fail gracefully. Return message, no error.</li>
+<ul><li>Improved <code>check_connection()</code> to fail gracefully. Return message, no error.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.0" id="geobr-v160">geobr v1.6.0<a class="anchor" aria-label="anchor" href="#geobr-v160"></a></h2>

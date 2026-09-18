@@ -7,7 +7,6 @@
 <url><loc>https://ipea.github.io/geobr/dev/index.html</loc></url>
 <url><loc>https://ipea.github.io/geobr/dev/news/index.html</loc></url>
 <url><loc>https://ipea.github.io/geobr/dev/reference/cep_to_state.html</loc></url>
-<url><loc>https://ipea.github.io/geobr/dev/reference/check_connection.html</loc></url>
 <url><loc>https://ipea.github.io/geobr/dev/reference/download_metadata2.html</loc></url>
 <url><loc>https://ipea.github.io/geobr/dev/reference/download_parquet.html</loc></url>
 <url><loc>https://ipea.github.io/geobr/dev/reference/filter_arrw.html</loc></url>
@@ -18,6 +17,7 @@
 <url><loc>https://ipea.github.io/geobr/dev/reference/list_geobr.html</loc></url>
 <url><loc>https://ipea.github.io/geobr/dev/reference/lookup_muni.html</loc></url>
 <url><loc>https://ipea.github.io/geobr/dev/reference/numbers_only.html</loc></url>
+<url><loc>https://ipea.github.io/geobr/dev/reference/read_addresses.html</loc></url>
 <url><loc>https://ipea.github.io/geobr/dev/reference/read_amazon.html</loc></url>
 <url><loc>https://ipea.github.io/geobr/dev/reference/read_biomes.html</loc></url>
 <url><loc>https://ipea.github.io/geobr/dev/reference/read_capitals.html</loc></url>
