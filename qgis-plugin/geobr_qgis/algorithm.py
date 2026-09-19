@@ -35,7 +35,7 @@ from .discovery import (
     validate_codes,
 )
 
-PIP_COMMAND = 'python -m pip install --user "geobr>=2.0.1"'
+PIP_COMMAND = 'python -m pip install --user "geobr>=2.1.0"'
 
 # duckdb normally arrives through the qpip plugin (see requirements.txt); this
 # is the by-hand alternative. The floor is geobr's own, checked by

@@ -88,15 +88,15 @@ def parameter_label(arg):
     return LABELS.get(arg, arg.replace("_", " ").capitalize())
 
 
-# geobr infers the filter column from the value's shape. Anything it cannot
-# match falls through to an *unfiltered* result rather than an error, so the
-# accepted forms are checked before the call.
+# geobr infers the filter column from the value's shape. Since 2.1.0 a value
+# it cannot match raises ValueError - but only after the parquet file has been
+# downloaded, so the accepted forms are checked here, before the call.
 #
 # Exactly three digits is excluded because geobr can never match it:
-# read_filter_parquet_relation tests for 2 digits, then 7, then `> 3`, so a
-# 3-digit value reaches the bare `return rel` and yields the whole country.
-# Four or more digits stays legal - those are how code_meso, code_micro,
-# code_immediate and code_weighting are filtered.
+# read_filter_parquet_relation tests for <= 2 digits, then 7, then `> 3`, so
+# a 3-digit value matches no column. Four or more digits stays legal - those
+# are how code_meso, code_micro, code_immediate and code_weighting are
+# filtered.
 CODE_RE = re.compile(r"^(all|[A-Za-z]{2}|\d{1,2}|\d{4,})$")
 
 
@@ -112,16 +112,15 @@ def code_shape(part):
 
 
 def validate_codes(arg, value):
-    """Check a code filter before geobr silently mis-applies it.
+    """Check a code filter before geobr downloads anything for it.
 
-    ``read_filter_parquet_relation`` returns the *unfiltered* relation when a
-    value matches none of its patterns, so a typo would otherwise produce a
-    whole-country layer where one state was asked for.
-
-    It also picks the column from ``codes[0]`` alone and interpolates the rest
-    into that column's ``WHERE``, so a mixed list like ``RJ,33`` silently
-    returns only RJ. Such a list is rejected here rather than under-filtered
-    there.
+    geobr 2.1.0's ``read_filter_parquet_relation`` raises ``ValueError`` for a
+    value that matches none of its patterns, for a mixed list like ``RJ,33``
+    (it requires *every* value to fit one column), and for a filter that
+    matches no row - but it runs after the download, and its message does not
+    say which value was wrong. This check runs first and does. (geobr <= 2.0.1
+    returned the whole country unfiltered instead, and applied a mixed list to
+    the column chosen from its first value alone.)
 
     Returns the value to hand to geobr - a bare string for one code, a list for
     several. Raises ``ValueError`` with a message meant for the user; the
@@ -143,8 +142,7 @@ def validate_codes(arg, value):
     if len(shapes) > 1:
         raise ValueError(
             f"Mixed code types in '{arg}': {value!r}. geobr filters on a "
-            "single column, chosen from the first value, so a mixed list "
-            "would silently return only part of what you asked for. Use "
+            "single column, so every value must be of the same kind. Use "
             f"one type at a time - here it saw {', '.join(sorted(shapes))}."
         )
     return parts[0] if len(parts) == 1 else parts

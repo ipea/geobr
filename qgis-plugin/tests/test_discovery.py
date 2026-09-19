@@ -17,8 +17,8 @@ import pytest
 
 import discovery
 
-# 32 read_* names in geobr's __all__ (read_addresses joined in the 2.0.2 dev
-# cycle), minus the one deliberate exclusion.
+# 32 read_* names in geobr 2.1.0's __all__ (read_addresses joined in 2.1.0),
+# minus the one deliberate exclusion.
 EXPECTED_READER_COUNT = 31
 
 TOKEN = re.compile(r"\{[a-z_]+\}")
@@ -102,10 +102,10 @@ def test_missing_package_is_survivable():
 
 # -- code filter validation -------------------------------------------------
 #
-# geobr fails quietly here: an unmatched code returns the relation UNFILTERED
-# (`_duckdb_backend.py`, the bare `return rel`), and a comma list is dispatched
-# on `codes[0]` alone. Both would hand the user a wrong layer with no error, so
-# these are the cases the plugin has to catch itself.
+# geobr 2.1.0 raises ValueError for an unmatched code, a mixed list, or a
+# filter matching no row (`_duckdb_backend.py`) - but only after downloading
+# the file, and without naming the offending value. The plugin catches these
+# before the download and says which value is wrong.
 
 
 @pytest.mark.parametrize(

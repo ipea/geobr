@@ -3,7 +3,7 @@ name=geobr
 qgisMinimumVersion=3.40
 qgisMaximumVersion=4.99
 description=Download official spatial data sets of Brazil as QGIS layers
-about=Easy access to official spatial data sets of Brazil. The plugin offers a wide range of official spatial data sets available at various geographic scales and for various years with harmonized attributes, projection and fixed topology. This includes states, municipalities, census tracts, biomes, indigenous lands, health facilities, schools, favelas and more. All original data sets come from IBGE and other official Brazilian sources and are returned in EPSG:4674 (SIRGAS 2000). This QGIS plugin is built on top of the geobr Python library, which integrates seamlessly with DuckDB and geopandas, and can be used from the Processing Toolbox, chained in Model Builder, run in batch, or called from qgis_process. REQUIRES geobr 2.0.1 or newer, installed into the interpreter QGIS itself uses, not a system Python. On Windows, run: "C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user "geobr>=2.0.1". On Linux and macOS, use the Python that QGIS runs. Restart QGIS afterwards. DuckDB, the engine geobr runs on, is installed for you by the qpip plugin, which QGIS offers to install alongside this one; if you skip qpip, add "duckdb>=1.5.3" to the same pip command.
+about=Easy access to official spatial data sets of Brazil. The plugin offers a wide range of official spatial data sets available at various geographic scales and for various years with harmonized attributes, projection and fixed topology. This includes states, municipalities, census tracts, biomes, indigenous lands, health facilities, schools, favelas and more. All original data sets come from IBGE and other official Brazilian sources and are returned in EPSG:4674 (SIRGAS 2000). This QGIS plugin is built on top of the geobr Python library, which integrates seamlessly with DuckDB and geopandas, and can be used from the Processing Toolbox, chained in Model Builder, run in batch, or called from qgis_process. REQUIRES geobr 2.1.0 or newer, installed into the interpreter QGIS itself uses, not a system Python. On Windows, run: "C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user "geobr>=2.1.0". On Linux and macOS, use the Python that QGIS runs. Restart QGIS afterwards. DuckDB, the engine geobr runs on, is installed for you by the qpip plugin, which QGIS offers to install alongside this one; if you skip qpip, add "duckdb>=1.5.3" to the same pip command.
 version=0.4.0
 author=Rafael H. M. Pereira, Ipea
 email=rafa.pereira.br@gmail.com
@@ -16,7 +16,7 @@ experimental=False
 deprecated=False
 hasProcessingProvider=True
 plugin_dependencies=qpip
-external_deps=geobr>=2.0.1
+external_deps=geobr>=2.1.0
 tags=brazil,ibge,ipea,boundaries,census,municipality,opendata,official data,vector
 changelog=0.4.0 - duckdb through qpip
     The plugin now declares the qpip plugin as a dependency and ships a
@@ -31,6 +31,12 @@ changelog=0.4.0 - duckdb through qpip
     therefore also works from qgis_process.
     The startup warning and the run-time error now say which of the two
     pieces is missing and where each one comes from.
+    Requires geobr 2.1.0 or newer, which drops the rapidfuzz dependency, so
+    pip now adds nothing but geobr itself on top of what QGIS ships. geobr
+    2.1.0 also brings the new Addresses algorithm (CNEFE 2022 geolocated
+    addresses, per municipality) and raises an error on an invalid code
+    filter instead of returning the whole country; the plugin still checks
+    codes up front, which spares the download.
     0.3.1 - Layer names
     Layers are now named after the data they hold - municipalities_2020,
     healthfacilities_202504, censustracts_2000_urban,

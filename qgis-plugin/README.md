@@ -30,21 +30,23 @@ mechanism QDuckDB uses, so the two plugins share one duckdb. If you install by c
 qpip from the Plugin Manager yourself, or put duckdb in the pip command of step 2.
 
 **2 — the Python package.** The plugin does not vendor geobr; it calls the real one. It requires
-**geobr 2.0.1 or newer**.
+**geobr 2.1.0 or newer**.
 
 ```bash
-python -m pip install --user "geobr>=2.0.1"
+python -m pip install --user "geobr>=2.1.0"
 ```
 
 Run this with *QGIS's* Python, not a system Python. On Windows that is
-`"C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user "geobr>=2.0.1"`.
+`"C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user "geobr>=2.1.0"`.
 
-2.0.1 is a hard floor, not a preference: earlier releases pinned `geopandas<=1.1.2` and
-`shapely<=2.1.0`, which QGIS 4.2.1 exceeds, so pip satisfied those ceilings by downgrading
-QGIS's own copies (see *Known rough edges*).
+The floor is a hard one, not a preference. Releases before 2.0.1 pinned `geopandas<=1.1.2` and
+`shapely<=2.1.0`, which QGIS 4.2.1 exceeds, so pip satisfied those ceilings by downgrading QGIS's
+own copies (see *Known limitations*). 2.1.0 is the first release whose only dependency QGIS does
+not ship is duckdb: it dropped `rapidfuzz`, `lxml` and `html5lib`. It also adds `read_addresses`
+and makes an invalid code filter raise instead of returning the whole country.
 
 QGIS already ships geopandas, shapely, pyarrow, pandas and requests, so in practice pip adds geobr
-itself (plus the small `rapidfuzz` wheel on geobr 2.0.1; later releases drop it). pip cannot see
+itself and nothing else. pip cannot see
 the duckdb that qpip installed, since qpip's directory is not a site-packages, so it installs a
 second copy under `--user`. That is harmless: both are the same wheel, and qpip's copy sits first
 on `sys.path` in the desktop app and, through the plugin's own fallback, in `qgis_process` too.
@@ -135,11 +137,12 @@ The `code_*` parameters accept what geobr accepts, and several values separated 
 | `3304557` | a seven-digit municipality code |
 | `33,35` | several of the above |
 
-Malformed values are rejected before the call, and so are **mixed lists** like `RJ,33`. Both matter,
-because geobr fails quietly here rather than loudly: when it cannot match a code to a column it
-returns the data **unfiltered** rather than raising, so a typo would otherwise give you a
-whole-country layer where you asked for one state. And it picks the column from the *first* value
-alone, then applies the rest to that same column — so `RJ,33` would silently return just RJ.
+Malformed values are rejected before the call, and so are **mixed lists** like `RJ,33`. geobr 2.1.0
+rejects both itself — an unmatched code, a mixed list, or a code that matches no row raises
+`ValueError` — but only *after* the file has been downloaded, and a single year of census tracts
+is over 350 MB. The plugin's check runs before anything is fetched and says which value is wrong
+and why. (geobr ≤ 2.0.1 was worse: it returned the data **unfiltered** for a code it could not
+match, and applied a mixed list to the column chosen from its first value alone.)
 
 The check is a shape check, not a validity check: `ZZ` is a well-formed abbreviation and is passed
 through, returning zero features rather than being rejected up front. The algorithm reports the
@@ -168,7 +171,8 @@ feature count in the log, so an unexpected result is visible either way.
   every other plugin; shapely is a compiled GEOS binding, so that was not a harmless
   downgrade. geobr 2.0.1 relaxed them to `geopandas>=1.0.0,<2` and `shapely>=1.7.0,<3`, and
   against QGIS 4.2.1 all nine of geobr's requirements are now already satisfied, so pip adds
-  geobr alone. This is why the plugin requires **geobr ≥ 2.0.1**.
+  geobr alone. This is why the plugin's floor was raised to 2.0.1, and to **2.1.0** once that
+  release also dropped `rapidfuzz`.
 
   *The pandas 3 kernel.* pandas 3 makes strings Arrow-backed, so geobr's regex
   `str.contains()` dispatched to
