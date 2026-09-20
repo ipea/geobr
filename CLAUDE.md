@@ -2,7 +2,7 @@
 
 **Project:** geobr — download official spatial data sets of Brazil
 **Maintainer:** Rafael H. M. Pereira (Ipea) · **Repo:** `ipea/geobr` · **Default branch:** `master`
-**Packages:** R `r-package/` (v2.0.1, CRAN) · Python `python-package/` (v2.0.2, PyPI) · QGIS `qgis-plugin/` (v0.3.1)
+**Source versions (working tree, 2026-09-18):** R `r-package/` v2.1.0 · Python `python-package/` v2.1.0 · QGIS `qgis-plugin/` v0.4.0
 
 ---
 

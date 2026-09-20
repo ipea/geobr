@@ -149,6 +149,7 @@ You can check all the data sets available with ``list_geobr()`
 
 ```{r eval=TRUE, message=FALSE, warning=FALSE, echo=FALSE}
 temp <- geobr::list_geobr() |> 
+  dplyr::arrange(Function) |> 
   dplyr::rename(
     `Geographies available` = geography,
     `Years available` = year,
