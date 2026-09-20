@@ -41,7 +41,7 @@ library(ggplot2)
 The geobr package currently covers 30 spatial data sets, including a
 variety of political-administrative and statistical areas used in
 Brazil. You can view what data sets are available using the
-[`list_geobr()`](https://ipeagit.github.io/geobr/reference/list_geobr.md)
+[`list_geobr()`](https://ipea.github.io/geobr/reference/list_geobr.md)
 function.
 
 ``` r
@@ -50,20 +50,27 @@ function.
 datasets <- list_geobr(wide = TRUE)
 
 head(datasets)
-#>                  Function                        geography           source
-#> 1             read_amazon            Brazil's Legal Amazon              MMA
-#> 2             read_biomes                           Biomes             IBGE
-#> 3       read_census_tract  Census tract (setor censitário)             IBGE
-#> 4 read_conservation_units Environmental Conservation Units              MMA
-#> 5            read_country                          Country             IBGE
-#> 6 read_disaster_risk_area              Disaster risk areas CEMADEN and IBGE
-#>                                                                                                                                                               year
-#> 1                                                                                                                                     2019, 2020, 2021, 2022, 2024
-#> 2                                                                                                                                                 2006, 2019, 2025
-#> 3                                                                                                                                                 2000, 2010, 2022
-#> 4                                                                                                                                                   202402, 202503
-#> 5 1872, 1900, 1911, 1920, 1933, 1940, 1950, 1960, 1970, 1980, 1991, 2000, 2001, 2010, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025
-#> 6                                                                                                                                                             2010
+#>                Function
+#> 1           read_amazon
+#> 2           read_biomes
+#> 3         read_capitals
+#> 4     read_census_tract
+#> 5        read_addresses
+#> 6 read_comparable_areas
+#>                                                                      geography
+#> 1                                                        Brazil's Legal Amazon
+#> 2                                                                       Biomes
+#> 3                                                               State capitals
+#> 4                                              Census tract (setor censitário)
+#> 5                                                            Addresses (CNEFE)
+#> 6 Historically comparable municipalities, aka áreas mínimas comparáveis (AMCs)
+#>   source                         year
+#> 1    MMA 2019, 2020, 2021, 2022, 2024
+#> 2   IBGE             2006, 2019, 2025
+#> 3   IBGE                         2010
+#> 4   IBGE             2000, 2010, 2022
+#> 5   IBGE                         2022
+#> 6   IBGE        temporarily suspended
 ```
 
 #### Basic syntax
@@ -280,13 +287,13 @@ ggplot() +
 
 Following the same steps as above, we can use together **geobr** with
 our sister package
-[**censobr**](https://ipeagit.github.io/censobr/index.html) to map the
+[**censobr**](https://ipea.github.io/censobr/index.html) to map the
 proportion of households connected to a sewage network in Brazilian
 municipalities
 
 First, we need to download households data from the Brazilian census
 using the
-[`read_households()`](https://ipeagit.github.io/censobr/reference/read_households.html)
+[`read_households()`](https://ipea.github.io/censobr/reference/read_households.html)
 function.
 
 ``` r
@@ -323,7 +330,7 @@ esg <- hs |>
 head(esg)
 #> # A tibble: 6 × 4
 #>   code_muni     rede  total cobertura
-#>       <int>    <dbl>  <dbl>     <dbl>
+#>       <dbl>    <dbl>  <dbl>     <dbl>
 #> 1   1100015     0     7443.   0      
 #> 2   1100023   182.   27654.   0.00660
 #> 3   1100031     0     1979.   0      

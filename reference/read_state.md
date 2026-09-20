@@ -6,7 +6,7 @@ Brazilian states
 
 ``` r
 read_state(
-  year = NULL,
+  year,
   code_state = "all",
   simplified = TRUE,
   output = "sf",

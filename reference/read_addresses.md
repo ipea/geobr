@@ -1,11 +1,26 @@
-# Download spatial data of IBGE's statistical grid
+# Download geolocated data of addresses in Brazil
 
-Official gridded population estimate of Brazil.
+This function reads the data of the National Registry of Addresses for
+Statistical Purposes (Cadastro Nacional de Enderecos para Fins
+Estatisticos, CNEFE), organized by the Brazilian Institute of Geography
+and Statistics (IBGE). The data brings the geographical coordinates (lat
+lon) of every address surveyed in the Population Census, along with the
+census tract and municipality each address belongs to, its postal code
+(CEP), the type of building (`cod_especie`) and the precision level of
+its coordinates (`nv_geo_coord`). More information available at
+<https://www.ibge.gov.br/estatisticas/sociais/populacao/38734-cadastro-nacional-de-enderecos-para-fins-estatisticos.html>.
+
+Note this is a very large data set: the 2022 CNEFE covers roughly 111
+million addresses in a single 1.2 GB file. The file is downloaded in
+full and only then filtered by `code_muni`, so the first call in an R
+session takes a long time even when a single municipality is requested.
+Subsequent calls reuse the cached file. Passing `output = "duckdb"`
+avoids loading the result into memory.
 
 ## Usage
 
 ``` r
-read_statistical_grid(
+read_addresses(
   year,
   code_muni,
   output = "sf",
@@ -26,13 +41,13 @@ read_statistical_grid(
   The 7-digit code of a municipality. Alternatively, if a two-digit
   state code or a two-letter uppercase abbreviation of a state is passed
   (e.g. `33` or `"RJ"`), all data of that state are downloaded. Passing
-  `code_muni = "all"` downloads the grid for the whole country.
+  `code_muni = "all"` downloads the addresses of the whole country.
   Municipality codes can be consulted with the
   [`geobr::lookup_muni()`](https://ipea.github.io/geobr/reference/lookup_muni.md)
   function. Unlike in most `geobr` functions, this argument is
-  **required and has no default**: loading the grid for the whole
-  country takes a long time and may exhaust memory, so the choice is
-  left explicitly to the user.
+  **required and has no default**: reading the addresses of the whole
+  country may exhaust memory, so the choice is left explicitly to the
+  user.
 
 - output:
 
@@ -69,17 +84,18 @@ An `"sf" "data.frame"` OR an `ArrowObject`
 
 ``` r
 
-# Read the grid covering a given state at a given year
-grid_rio <- read_statistical_grid(
+# Read all addresses in a given municipality
+add <- read_addresses(
   year = 2022,
-  code_muni = "RJ"
+  code_muni = 3304557
   )
 #> ℹ Using year/date 2022
 
-# Read the grid covering a given municipality at a given year
-grid_ssalvador <- read_statistical_grid(
+# Read all addresses in a given state, without loading them into memory
+add_rj <- read_addresses(
   year = 2022,
-  code_muni = 2927408
+  code_muni = "RJ",
+  output = "duckdb"
   )
 #> ℹ Using year/date 2022
 ```

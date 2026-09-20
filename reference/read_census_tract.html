@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">geobr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,11 +71,15 @@
 
 
 <dt id="arg-code-tract">code_tract<a class="anchor" aria-label="anchor" href="#arg-code-tract"></a></dt>
-<dd><p>The 7-digit code of a Municipality. If the two-digit code
-or a two-letter uppercase abbreviation of a state is passed, (e.g. 33
-or "RJ") the function will load all census tracts of that state. If
-<code>code_tract="all"</code>, the function downloads all census tracts of the
-country.</p></dd>
+<dd><p>The 7-digit code of a municipality. Alternatively, if a
+two-digit state code or a two-letter uppercase abbreviation of a state
+is passed (e.g. <code>33</code> or <code>"RJ"</code>), all census tracts of that state are
+downloaded. Passing <code>code_tract = "all"</code> downloads all census tracts
+of the country. Municipality codes can be consulted with the
+<code><a href="lookup_muni.html">geobr::lookup_muni()</a></code> function. Unlike in most <code>geobr</code> functions,
+this argument is <strong>required and has no default</strong>: loading all census
+tracts of the country takes a long time and may exhaust memory, so the
+choice is left explicitly to the user.</p></dd>
 
 
 <dt id="arg-zone">zone<a class="anchor" aria-label="anchor" href="#arg-zone"></a></dt>
@@ -157,7 +161,7 @@ function is silent.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

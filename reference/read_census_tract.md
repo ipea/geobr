@@ -26,11 +26,16 @@ read_census_tract(
 
 - code_tract:
 
-  The 7-digit code of a Municipality. If the two-digit code or a
-  two-letter uppercase abbreviation of a state is passed, (e.g. 33 or
-  "RJ") the function will load all census tracts of that state. If
-  `code_tract="all"`, the function downloads all census tracts of the
-  country.
+  The 7-digit code of a municipality. Alternatively, if a two-digit
+  state code or a two-letter uppercase abbreviation of a state is passed
+  (e.g. `33` or `"RJ"`), all census tracts of that state are downloaded.
+  Passing `code_tract = "all"` downloads all census tracts of the
+  country. Municipality codes can be consulted with the
+  [`geobr::lookup_muni()`](https://ipea.github.io/geobr/reference/lookup_muni.md)
+  function. Unlike in most `geobr` functions, this argument is
+  **required and has no default**: loading all census tracts of the
+  country takes a long time and may exhaust memory, so the choice is
+  left explicitly to the user.
 
 - zone:
 

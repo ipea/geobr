@@ -3,7 +3,7 @@
 This function downloads either a spatial `sf` object with the location
 of the municipal seats (sede dos municipios) of state capitals, or a
 `data.frame` with the names and codes of state capitals. Data downloaded
-for the latest available year.
+for year 2010.
 
 ## Usage
 

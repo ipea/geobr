@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">geobr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,9 +44,30 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="geobr-development-version">geobr (development version)<a class="anchor" aria-label="anchor" href="#geobr-development-version"></a></h2>
-<p><strong>Bug fixes</strong></p>
-<ul><li>Requires duckdb (&gt;= 1.5.1)</li>
+<h2 class="pkg-version" data-toc-text="2.1.0" id="geobr-v210">geobr v2.1.0<a class="anchor" aria-label="anchor" href="#geobr-v210"></a></h2>
+<p><strong>New features</strong></p>
+<ul><li>New function <code><a href="../reference/read_addresses.html">read_addresses()</a></code>, which reads the geolocated addresses of the National Registry of Addresses for Statistical Purposes (CNEFE), organized by IBGE. Like <code><a href="../reference/read_statistical_grid.html">read_statistical_grid()</a></code> and <code><a href="../reference/read_census_tract.html">read_census_tract()</a></code>, its <code>code_muni</code> argument is required and has no default, because the data covers roughly 111 million addresses. Closes <a href="https://github.com/ipea/geobr/issues/367" class="external-link">367</a>.</li>
+</ul><p><strong>Minor changes</strong></p>
+<ul><li>Updated suggests to use geoarrow (&gt;= 0.4.4),</li>
+<li>Fixed the documentation of <code>code_muni</code> in <code><a href="../reference/read_statistical_grid.html">read_statistical_grid()</a></code>. It was pulled from the shared roxygen template, which states that <code>code_muni = "all"</code> is the default. In this function <code>code_muni</code> is required and has no default, deliberately, because loading the grid for the whole country is slow and may exhaust memory.</li>
+<li>
+<code><a href="../reference/read_census_tract.html">read_census_tract()</a></code> now documents that <code>code_tract</code> is required and has no default, for the same reason. These two functions are the only readers that do not default to downloading the whole country.</li>
+<li>Requires duckdb (&gt;= 1.5.0)</li>
+</ul><p><strong>Bug fixes</strong></p>
+<ul><li>geobr now fallsback to ipea servers whenever users cannot access github servers. Closes <a href="https://github.com/ipea/geobr/issues/447" class="external-link">447</a>
+</li>
+<li>
+<code><a href="../reference/lookup_muni.html">lookup_muni()</a></code>: fixed a SQL error when the fuzzy name match received a name with an apostrophe (e.g. “Santa Barbara d’Oest”). The fuzzy match now returns all candidate matches instead of recycling silently, and closes its DuckDB connection. Dropped the <code>glue</code> dependency.</li>
+<li>
+<code><a href="../reference/cep_to_state.html">cep_to_state()</a></code>: fixed the Minas Gerais CEP range, which was reversed so every MG CEP raised “CEP not found”.</li>
+<li>
+<code><a href="../reference/read_country.html">read_country()</a></code>, <code><a href="../reference/read_region.html">read_region()</a></code>, <code><a href="../reference/read_pop_arrangements.html">read_pop_arrangements()</a></code> and <code><a href="../reference/read_urban_concentrations.html">read_urban_concentrations()</a></code> now return <code>NULL</code> when the metadata download fails, like the other readers, instead of erroring.</li>
+<li>
+<code><a href="../reference/read_health_region.html">read_health_region()</a></code> now honours <code>output = "duckdb"</code> when <code>geometry_level</code> is <code>"micro"</code> or <code>"macro"</code>. These levels aggregate geometries in memory, and the result was returned as an <code>sf</code> whatever <code>output</code> asked for.</li>
+<li>
+<code><a href="../reference/read_capitals.html">read_capitals()</a></code> now passes <code>cache</code> and <code>verbose</code> on to <code><a href="../reference/read_municipal_seat.html">read_municipal_seat()</a></code>. Both arguments were documented but ignored, so <code>cache = FALSE</code> had no effect and <code>verbose = FALSE</code> still printed a message.</li>
+<li>
+<code><a href="../reference/list_geobr.html">list_geobr()</a></code> listed two functions that do not exist (<code>read_favelas</code>, <code>read_quilombola_lands</code>) and omitted <code>read_capitals</code>. The catalogue now matches the exported readers exactly. It also returns <code>NULL</code> when the metadata download fails, and rejects a non-scalar <code>wide</code> instead of silently returning long format.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.0.1" id="geobr-v201">geobr v2.0.1<a class="anchor" aria-label="anchor" href="#geobr-v201"></a></h2><p class="text-muted">CRAN release: 2026-06-23</p>
@@ -142,7 +163,7 @@
 <code><a href="../reference/read_capitals.html">read_capitals()</a></code> to download either a spatial <code>sf</code> object with the location of the municipal seats (sede dos municipios) of state capitals, or a <code>data.frame</code> with the names of codes of state capitals. <a href="https://github.com/ipea/geobr/issues/243" class="external-link">Closes </a><a href="https://github.com/ipea/geobr/issues/243" class="external-link">#243</a>
 </li>
 </ul><p><strong>Minor changes</strong></p>
-<ul><li>Update intro vignette to show how to use geobr together with the new <a href="https://ipeagit.github.io/censobr/index.html" class="external-link"><strong>censobr</strong></a> sister package.</li>
+<ul><li>Update intro vignette to show how to use geobr together with the new <a href="https://ipea.github.io/censobr/index.html" class="external-link"><strong>censobr</strong></a> sister package.</li>
 </ul><p><strong>Bug fixes</strong></p>
 <ul><li>fixed bug from conflict between <code>sf</code> and <code>data.table</code> that was messing with plot extent. <a href="https://github.com/ipea/geobr/issues/284" class="external-link">Closes </a><a href="https://github.com/ipea/geobr/issues/284" class="external-link">#284</a>.</li>
 <li>fixed bug from conflicts between <code>plotly</code> and <code>data.table</code>. <a href="https://github.com/ipea/geobr/issues/279" class="external-link">Closes </a><a href="https://github.com/ipea/geobr/issues/279" class="external-link">#279</a>.</li>
@@ -157,7 +178,7 @@
 </ul><p><strong>Minor changes</strong></p>
 <ul><li>Started using package documentation templates with Roxygen</li>
 <li>Reduced a lot of code redundancy</li>
-<li>Important update tothe <code><a href="../reference/check_connection.html">check_connection()</a></code> function</li>
+<li>Important update tothe <code>check_connection()</code> function</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.6" id="geobr-v166">geobr v1.6.6<a class="anchor" aria-label="anchor" href="#geobr-v166"></a></h2>
@@ -201,7 +222,7 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.1" id="geobr-v161">geobr v1.6.1<a class="anchor" aria-label="anchor" href="#geobr-v161"></a></h2><p class="text-muted">CRAN release: 2021-04-16</p>
 <p><strong>Minor changes</strong></p>
-<ul><li>Improved <code><a href="../reference/check_connection.html">check_connection()</a></code> to fail gracefully. Return message, no error.</li>
+<ul><li>Improved <code>check_connection()</code> to fail gracefully. Return message, no error.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.6.0" id="geobr-v160">geobr v1.6.0<a class="anchor" aria-label="anchor" href="#geobr-v160"></a></h2>
@@ -335,7 +356,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
