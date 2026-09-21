@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import warnings
 from pathlib import Path
@@ -14,6 +15,8 @@ from geobr._filter import (
     _normalize_code,
     _numbers_only
 )
+
+logger = logging.getLogger(__name__)
 
 _CONN: Optional[Any] = None
 _LAST_REGISTERED: dict[tuple[int, str], tuple[str, int]] = {}
@@ -191,8 +194,10 @@ def _setup_connection(conn) -> None:
     ):
         try:
             conn.execute(stmt)
-        except Exception:
-            pass
+        except Exception as exc:
+            # The extensions are optional at connection time; a load failure
+            # surfaces later as a SQL error, so keep the reason reachable.
+            logger.debug("DuckDB %r failed: %s", stmt, exc)
 
 
 def _create_connection():
@@ -215,8 +220,8 @@ def _reset_shared_connection() -> None:
     if _CONN is not None:
         try:
             _CONN.close()
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug("Closing the shared DuckDB connection failed: %s", exc)
     _CONN = None
     _LAST_REGISTERED.clear()
 
@@ -229,13 +234,9 @@ def register_dataset(
 ) -> Any:
     """Register a parquet file as a DuckDB view and return the relation."""
     conn = connection or duckdb_connection()
-    path_str = str(Path(parquet_path).resolve()).replace("'", "''")
-    safe_name = name.replace('"', '""')
-    conn.execute(
-        f'CREATE OR REPLACE VIEW "{safe_name}" AS '
-        f"SELECT * FROM read_parquet('{path_str}')"
-    )
-    return conn.sql(f'SELECT * FROM "{safe_name}"')
+    path_str = str(Path(parquet_path).resolve())
+    conn.read_parquet(path_str).create_view(name, replace=True)
+    return conn.view(name)
 
 
 def _parse_missing_table(exc: Exception) -> Optional[str]:
@@ -365,11 +366,7 @@ def _pick_bare_year(
 
 def _register_alias(geo: str, year: int, connection) -> None:
     suffixed = f"{geo}_{year}"
-    safe_geo = geo.replace('"', '""')
-    safe_suffixed = suffixed.replace('"', '""')
-    connection.execute(
-        f'CREATE OR REPLACE VIEW "{safe_geo}" AS SELECT * FROM "{safe_suffixed}"'
-    )
+    connection.view(suffixed).create_view(geo, replace=True)
 
 
 def _track_registration(connection, geo: str, view_name: str, year: int) -> None:
@@ -472,18 +469,16 @@ def query(
             resolutions += 1
 
 
-def _relation_sql(rel_or_name: Union[str, Any]) -> str:
+def _source_relation(conn, rel_or_name: Union[str, Any]):
     if isinstance(rel_or_name, str):
-        safe = rel_or_name.replace('"', '""')
-        return f'"{safe}"'
-    if hasattr(rel_or_name, "sql"):
-        return f"({rel_or_name.sql()})"
+        return conn.view(rel_or_name)
+    if hasattr(rel_or_name, "sql_query"):
+        return rel_or_name
     raise TypeError("`rel_or_name` must be a view name or DuckDB relation.")
 
 
-def _detect_geometry_column(conn, source: str) -> Optional[str]:
-    rows = conn.sql(f"DESCRIBE SELECT * FROM {source}").fetchall()
-    for name, col_type, *_ in rows:
+def _detect_geometry_column(rel) -> Optional[str]:
+    for name, col_type in zip(rel.columns, rel.types):
         type_upper = str(col_type).upper()
         if "GEOMETRY" in type_upper or name.lower() in ("geometry", "geom"):
             return name
@@ -500,17 +495,14 @@ def to_geopandas(
     from shapely import from_wkb
 
     conn = connection or duckdb_connection()
-    source = _relation_sql(rel_or_name)
-    geom_col = _detect_geometry_column(conn, source)
+    rel = _source_relation(conn, rel_or_name)
+    geom_col = _detect_geometry_column(rel)
     if geom_col is None:
-        df = conn.sql(f"SELECT * FROM {source}").df()
-        return gpd.GeoDataFrame(df)
+        return gpd.GeoDataFrame(rel.df())
 
-    safe_geom = geom_col.replace('"', '""')
-    df = conn.sql(
-        f"SELECT * EXCLUDE ({safe_geom}), "
-        f"ST_AsWKB({safe_geom}) AS __geom_wkb "
-        f"FROM {source}"
+    safe_geom = '"' + geom_col.replace('"', '""') + '"'
+    df = rel.project(
+        f"* EXCLUDE ({safe_geom}), ST_AsWKB({safe_geom}) AS __geom_wkb"
     ).df()
 
     def _to_geom(value):
@@ -534,14 +526,11 @@ def read_filter_parquet_relation(
     view_name: Optional[str] = None,
 ):
     """Return a DuckDB relation over a parquet file."""
+    conn = connection or duckdb_connection()
     if view_name:
-        register_dataset(view_name, path, connection=connection)
-        source = f'"{view_name.replace(chr(34), chr(34) * 2)}"'
+        rel = register_dataset(view_name, path, connection=conn)
     else:
-        path_str = str(Path(path).resolve()).replace("'", "''")
-        source = f"read_parquet('{path_str}')"
-
-    rel = connection.sql(f"SELECT * FROM {source}")
+        rel = conn.read_parquet(str(Path(path).resolve()))
 
     if filter_code == "all" or filter_code is None:
         return rel
@@ -608,8 +597,8 @@ class GeoBrDuckDB:
         if self._conn is not None:
             try:
                 self._conn.close()
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("Closing the DuckDB session failed: %s", exc)
             self._conn = None
 
     @property

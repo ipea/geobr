@@ -1,6 +1,32 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
+# 2.1.1
+
+**Bug fixes**
+
+- Downloads verify TLS certificates again. `_download_file()` passed
+  `verify=False` to `requests`, which the QGIS plugin repository's Bandit scan
+  flagged (B501) and which left every data download open to interception.
+  Behind a proxy that re-signs HTTPS traffic, point `REQUESTS_CA_BUNDLE` at
+  the proxy's certificate instead.
+- `to_geopandas()` accepts a DuckDB relation, as documented. It raised
+  `TypeError` for anything but a view name because it looked for a `.sql()`
+  method that relations do not have.
+- The legacy mirror probe in `url_solver()` has a 60 s timeout and no longer
+  swallows `KeyboardInterrupt` through a bare `except:`.
+
+**Internal**
+
+- The Bandit findings that blocked QGIS plugin 0.4.0 are resolved at the
+  source: string-built `SELECT` / `CREATE VIEW` statements in
+  `_duckdb_backend.py`, `read_health_region()` and `read_municipality()` now
+  go through DuckDB's relational API (`read_parquet().create_view()`,
+  `conn.view()`, `.project()`, `.filter()`, `.aggregate()`), and the
+  try/except blocks that discarded exceptions log them at `DEBUG` level under
+  the `geobr` logger. `bandit -r geobr` reports zero findings.
+
+-------------------------------------------------------
 # 2.1.0
 
 **New features**

@@ -48,8 +48,8 @@ def read_municipality(
 
     if not keep_areas_operacionais and "code_muni" in relation.columns:
         exclude_codes = ", ".join([f"'{c}'" for c in _RS_OPERATIONAL_CODES])
-        relation = conn.sql(
-            f"SELECT * FROM relation WHERE CAST(code_muni AS BIGINT) NOT IN ({exclude_codes})"
+        relation = relation.filter(
+            f"CAST(code_muni AS BIGINT) NOT IN ({exclude_codes})"
         )
 
     return convert_output(relation, output, conn)

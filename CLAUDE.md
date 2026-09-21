@@ -2,7 +2,7 @@
 
 **Project:** geobr — download official spatial data sets of Brazil
 **Maintainer:** Rafael H. M. Pereira (Ipea) · **Repo:** `ipea/geobr` · **Default branch:** `master`
-**Source versions (working tree, 2026-09-18):** R `r-package/` v2.1.0 · Python `python-package/` v2.1.0 · QGIS `qgis-plugin/` v0.4.0
+**Source versions (working tree, 2026-09-20):** R `r-package/` v2.1.0 · Python `python-package/` v2.1.1 · QGIS `qgis-plugin/` v0.4.1
 
 ---
 
@@ -336,8 +336,8 @@ a default is a breaking change for existing users.
   registered into it by name (`{geo}_{year}`). Tests must call `_reset_shared_connection()`; use
   `session()` for isolation.
 - **`_setup_connection()` swallows every exception** when installing/loading `spatial` and `httpfs`
-  (`:134`). If the spatial extension fails to load, the failure surfaces much later as a confusing
-  SQL error rather than at connection time.
+  (logged at `DEBUG` under the `geobr._duckdb_backend` logger since 2.1.1). If the spatial extension
+  fails to load, the failure surfaces much later as a confusing SQL error rather than at connection time.
 - **CRS**: `to_geopandas()` hardcodes `EPSG:4674`; `convert_output()` reads `ST_CRS(geometry)` and
   falls back to `EPSG:4674`.
 - **Known code smells:** `_simplified_attempts()` is defined **twice, identically**
