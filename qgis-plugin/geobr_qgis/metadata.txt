@@ -3,7 +3,7 @@ name=geobr
 qgisMinimumVersion=3.40
 qgisMaximumVersion=4.99
 description=Download official spatial data sets of Brazil as QGIS layers
-about=Easy access to official spatial data sets of Brazil. The plugin offers a wide range of official spatial data sets available at various geographic scales and for various years with harmonized attributes, projection and fixed topology. This includes states, municipalities, census tracts, biomes, indigenous lands, health facilities, schools, favelas and more. All original data sets come from IBGE and other official Brazilian sources and are returned in EPSG:4674 (SIRGAS 2000). This QGIS plugin is built on top of the geobr Python library, which integrates seamlessly with DuckDB and geopandas, and can be used from the Processing Toolbox, chained in Model Builder, run in batch, or called from qgis_process. REQUIRES geobr 2.1.0 or newer, installed into the interpreter QGIS itself uses, not a system Python. On Windows, run: "C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user "geobr>=2.1.0". On Linux and macOS, use the Python that QGIS runs. Restart QGIS afterwards. DuckDB, the engine geobr runs on, is installed for you by the qpip plugin, which QGIS offers to install alongside this one; if you skip qpip, add "duckdb>=1.5.3" to the same pip command.
+about=Easy access to official spatial data sets of Brazil. The plugin offers a wide range of official spatial data sets available at various geographic scales and for various years with harmonized attributes, projection and fixed topology. This includes states, municipalities, census tracts, biomes, indigenous lands, health facilities, schools, favelas and more. All original data sets come from IBGE and other official Brazilian sources and are returned in EPSG:4674 (SIRGAS 2000). This QGIS plugin is built on top of the geobr Python library, which integrates seamlessly with DuckDB and geopandas, and can be used from the Processing Toolbox, chained in Model Builder, run in batch, or called from qgis_process. The geobr library is bundled with the plugin, so there is nothing to pip-install. DuckDB, the engine geobr runs on, is installed for you by the qpip plugin, which QGIS offers to install alongside this one; if you skip qpip, install it into the Python QGIS uses: python -m pip install --user "duckdb>=1.5.3". Everything else geobr needs ships with the official QGIS builds for Windows and macOS; a Linux distribution build of QGIS may lack geopandas or pyarrow, and the plugin says so at startup.
 version=0.4.0
 author=Rafael H. M. Pereira, Ipea
 email=rafa.pereira.br@gmail.com
@@ -16,24 +16,32 @@ experimental=False
 deprecated=False
 hasProcessingProvider=True
 plugin_dependencies=qpip
-external_deps=geobr>=2.1.0
+external_deps=duckdb>=1.5.3
 tags=brazil,ibge,ipea,boundaries,census,municipality,opendata,official data,vector
-changelog=0.4.0 - duckdb through qpip
-    The plugin now declares the qpip plugin as a dependency and ships a
-    requirements.txt asking for duckdb 1.5.3 or newer. Installing geobr from
-    the Plugin Manager offers to install qpip as well, and qpip then installs
-    duckdb into your QGIS profile the first time the plugin loads. QDuckDB
-    uses the same mechanism, so the two plugins share one duckdb.
-    The geobr Python package itself is still a pip install into QGIS's
-    Python, since the rest of its stack already ships with QGIS.
+changelog=0.4.0 - geobr bundled, duckdb through qpip, nothing to pip-install
+    The geobr Python library (2.1.0) now ships inside the plugin, under
+    _vendor/, and the plugin puts it on the Python path when it loads. The
+    manual "pip install geobr" step of earlier releases is gone: install the
+    plugin, accept qpip when the Plugin Manager offers it, done.
+    duckdb, the engine geobr runs on, arrives through the qpip plugin: the
+    plugin declares qpip as a dependency and ships a requirements.txt asking
+    for duckdb 1.5.3 or newer. Installing geobr from the Plugin Manager
+    offers to install qpip as well, and qpip then installs duckdb into your
+    QGIS profile the first time the plugin loads. QDuckDB uses the same
+    mechanism, so the two plugins share one duckdb.
     qpip only runs inside the QGIS desktop app, so the plugin adds qpip's
     dependency folder to the Python path itself; a qpip-installed duckdb
     therefore also works from qgis_process.
-    The startup warning and the run-time error now say which of the two
-    pieces is missing and where each one comes from.
-    Requires geobr 2.1.0 or newer, which drops the rapidfuzz dependency, so
-    pip now adds nothing but geobr itself on top of what QGIS ships. geobr
-    2.1.0 also brings the new Addresses algorithm (CNEFE 2022 geolocated
+    The bundled copy takes precedence over a geobr that was pip-installed
+    into QGIS's Python by an earlier version of these instructions, so the
+    plugin always runs the geobr it was tested with. Upgrading geobr means
+    upgrading the plugin. After upgrading the plugin, restart QGIS: Python
+    keeps the previously imported library for the rest of the session.
+    The startup warning and the run-time error say which piece is missing
+    and where it comes from: the bundle, duckdb via qpip, or - on a Linux
+    distribution build of QGIS that does not ship geopandas or pyarrow - the
+    package to install for the Python QGIS uses.
+    geobr 2.1.0 brings the new Addresses algorithm (CNEFE 2022 geolocated
     addresses, per municipality) and raises an error on an invalid code
     filter instead of returning the whole country; the plugin still checks
     codes up front, which spares the download.

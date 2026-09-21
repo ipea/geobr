@@ -19,38 +19,29 @@ qgis_process run geobr:read_state -- YEAR=2020 CODE_STATE=RJ OUTPUT=/tmp/rj.gpkg
 
 ## Install
 
-**1 — the plugin.** Install *geobr* from *Plugins → Manage and Install Plugins*, or copy
-`geobr_qgis/` into your QGIS profile plugins directory (table below) and enable it there.
+Install *geobr* from *Plugins → Manage and Install Plugins*. There is no Python package to
+install by hand: the geobr library ships inside the plugin (see *Bundled geobr* below).
 
 The plugin declares [qpip](https://github.com/opengisch/qpip) as a **plugin dependency**, so the
 Plugin Manager offers to install it too. Accept: qpip reads this plugin's `requirements.txt` and
 installs **duckdb**, the engine geobr runs on, into your QGIS profile
 (`python/dependencies/<python version>`) the first time the plugin loads. This is the same
-mechanism QDuckDB uses, so the two plugins share one duckdb. If you install by copying files, add
-qpip from the Plugin Manager yourself, or put duckdb in the pip command of step 2.
-
-**2 — the Python package.** The plugin does not vendor geobr; it calls the real one. It requires
-**geobr 2.1.0 or newer**.
+mechanism QDuckDB uses, so the two plugins share one duckdb. If you would rather not use qpip,
+install duckdb into the Python QGIS runs, then restart QGIS:
 
 ```bash
-python -m pip install --user "geobr>=2.1.0"
+python -m pip install --user "duckdb>=1.5.3"
 ```
 
-Run this with *QGIS's* Python, not a system Python. On Windows that is
-`"C:\Program Files\QGIS 3.xx\bin\python-qgis.bat" -m pip install --user "geobr>=2.1.0"`.
+On Windows that Python is `"C:\Program Files\QGIS 3.xx\bin\python-qgis.bat"`.
 
-The floor is a hard one, not a preference. Releases before 2.0.1 pinned `geopandas<=1.1.2` and
-`shapely<=2.1.0`, which QGIS 4.2.1 exceeds, so pip satisfied those ceilings by downgrading QGIS's
-own copies (see *Known limitations*). 2.1.0 is the first release whose only dependency QGIS does
-not ship is duckdb: it dropped `rapidfuzz`, `lxml` and `html5lib`. It also adds `read_addresses`
-and makes an invalid code filter raise instead of returning the whole country.
+Everything else geobr needs — geopandas, shapely, pyarrow, pandas, requests — ships with the
+official QGIS builds for Windows and macOS. A Linux distribution build of QGIS may lack some of
+them; the plugin checks at startup and names the missing package.
 
-QGIS already ships geopandas, shapely, pyarrow, pandas and requests, so in practice pip adds geobr
-itself and nothing else. pip cannot see
-the duckdb that qpip installed, since qpip's directory is not a site-packages, so it installs a
-second copy under `--user`. That is harmless: both are the same wheel, and qpip's copy sits first
-on `sys.path` in the desktop app and, through the plugin's own fallback, in `qgis_process` too.
-Without qpip, that pip copy is simply the one that gets used.
+Installing from a ZIP (*Plugins → Install from ZIP*) or by copying a folder into the plugins
+directory (table below) works the same way, as long as the folder is a **built** one — the
+`geobr_qgis/` in this repository has no `_vendor/` and therefore no geobr; see *Building the ZIP*.
 
 **QGIS 4 uses a different profile root than QGIS 3** (`QGIS4` instead of `QGIS3`), and nothing
 carries over between them — a plugin installed for QGIS 3 is invisible to QGIS 4. Replace
@@ -66,13 +57,44 @@ Requires **QGIS 3.40+**. Verified on **QGIS 3.42.1** (Qt5, Python 3.12.9) and **
 Python 3.12.13) with identical results. The plugin needed no code changes for Qt6 — it uses the
 `qgis.PyQt` compatibility layer and QGIS enums rather than Qt5-specific APIs.
 
-The 3.40 floor is set by the dependency, not by the plugin: geobr requires Python 3.10 or newer, and
-QGIS builds older than 3.40 ship Python 3.9, where `pip install geobr` simply refuses. Declaring an
-earlier minimum would advertise a version on which the plugin can never work.
+The 3.40 floor is set by the dependency, not by the plugin: the bundled geobr is written for
+Python 3.10 or newer, and QGIS builds older than 3.40 ship Python 3.9. Declaring an earlier
+minimum would advertise a version on which the plugin can never work.
 
 Note that `metadata.txt` also sets `qgisMaximumVersion=4.99`. Without an explicit maximum, QGIS
 assumes `<major>.99`, so a plugin declaring a 3.x minimum is silently treated as incompatible with
 QGIS 4 and never even appears in the plugin list.
+
+## Bundled geobr
+
+The plugin carries its own copy of the geobr Python library, under `geobr_qgis/_vendor/geobr/`,
+and puts that directory at the front of `sys.path` when it loads (`add_bundle_path()` in
+`discovery.py`). Each plugin release therefore runs one known geobr version — 0.4.0 bundles
+**geobr 2.1.0** — and upgrading geobr means upgrading the plugin. The run log says which copy was
+loaded (`geobr loaded from …`).
+
+The copy is not a fork. `build_plugin.py` byte-copies `python-package/geobr/` from this repository
+when it builds the ZIP, so the plugin runs exactly the code the Python package's tests and the
+R↔Python parity checks cover. Nothing is committed twice: `_vendor/` exists only in the built
+artifact, and a test compares the staged copy to the source file by file.
+
+Two consequences worth knowing:
+
+- **A geobr you once pip-installed into QGIS's Python is ignored.** Earlier releases of this
+  plugin asked for that install; it can stay or go, the bundle wins either way because the user
+  site-packages sits behind `_vendor/` on `sys.path`. The one exception is another plugin that
+  imported `geobr` before this one loaded — Python then keeps that module, and the run log shows
+  its path.
+- **Restart QGIS after upgrading the plugin.** QGIS's plugin unloader only purges modules that
+  belong to the plugin's own package; the bundled `geobr.*` modules are not among them, so an
+  in-session upgrade keeps running the previous geobr until QGIS restarts.
+
+Why bundle rather than declare? The obvious alternative — listing geobr in the qpip
+`requirements.txt` — does not work: qpip installs with `pip --target`, which makes pip ignore every
+package already present and reinstall geobr's whole dependency tree (geopandas, shapely, pandas,
+numpy, pyarrow) into the profile, in front of QGIS's own copies. duckdb is safe there because it is
+a self-contained wheel; geobr is not. geobr itself is pure Python, ~110 KB, with no compiled code,
+so carrying it costs nothing.
 
 ## How it works
 
@@ -170,9 +192,9 @@ feature count in the log, so an unexpected result is visible either way.
   installing older geopandas and shapely *over* QGIS's bundled copies, for QGIS itself and
   every other plugin; shapely is a compiled GEOS binding, so that was not a harmless
   downgrade. geobr 2.0.1 relaxed them to `geopandas>=1.0.0,<2` and `shapely>=1.7.0,<3`, and
-  against QGIS 4.2.1 all nine of geobr's requirements are now already satisfied, so pip adds
-  geobr alone. This is why the plugin's floor was raised to 2.0.1, and to **2.1.0** once that
-  release also dropped `rapidfuzz`.
+  against QGIS 4.2.1 all of geobr's requirements are already satisfied. This is why plugin
+  0.3.x required geobr 2.0.1; since 0.4.0 the plugin bundles **2.1.0**, the release that also
+  dropped `rapidfuzz`, and pip is no longer involved at all.
 
   *The pandas 3 kernel.* pandas 3 makes strings Arrow-backed, so geobr's regex
   `str.contains()` dispatched to
@@ -205,7 +227,11 @@ feature count in the log, so an unexpected result is visible either way.
   makes pip ignore every package already installed and reinstall all dependencies into the profile
   directory — at the front of `sys.path`. Listing geobr there would shadow QGIS's own geopandas,
   shapely, pandas, numpy and pyarrow with PyPI wheels, the same failure described above for
-  geobr ≤ 2.0.0. So `requirements.txt` carries duckdb alone, and geobr stays a pip install.
+  geobr ≤ 2.0.0. So `requirements.txt` carries duckdb alone, and geobr is bundled instead (see
+  *Bundled geobr*).
+- **The bundled geobr is fixed per plugin release.** A newer geobr on PyPI does not reach the
+  plugin until the plugin is rebuilt and released; a geobr pip-installed into QGIS's Python is
+  ignored. To try a different geobr, build the plugin from a checkout of that version.
 - **Downloads are cached per session.** geobr 2.0.0 stores downloads and metadata in a fresh temp
   directory that it deletes when the Python process exits — the same behavior as the R package.
   Source updates are picked up on the next QGIS start, with no action needed. Within one session
@@ -229,20 +255,39 @@ downloaded. Install it once from a working connection:
 python -c "import duckdb; duckdb.connect().execute('INSTALL spatial')"
 ```
 
+## Building the ZIP
+
+```bash
+python qgis-plugin/build_plugin.py            # -> qgis-plugin/dist/geobr_qgis-<version>.zip
+python qgis-plugin/build_plugin.py --out DIR  # stage and zip elsewhere
+```
+
+The script stages `geobr_qgis/` plus a copy of `python-package/geobr/` (as `_vendor/geobr/`) into
+`dist/geobr_qgis/`, then zips it with `zipfile` and explicit POSIX member names. It refuses any
+member with a backslash, outside `geobr_qgis/`, or generated (`__pycache__`, `.pyc`) — the checks
+the plugin repository applies on upload. `dist/` is gitignored, and so is an in-place
+`geobr_qgis/_vendor/`. The packaging tests run this build into a temp dir on every CI run, so a
+geobr file that stops copying, or a ZIP layout regression, fails there.
+
+To install a development build, run the script and copy `dist/geobr_qgis/` (or *Install from ZIP*
+with the archive) into the profile plugins directory listed under *Install*.
+
 ## Layout
 
 ```
+build_plugin.py       stages python-package/geobr into _vendor/ and writes dist/*.zip (repo-only)
 geobr_qgis/
-├── __init__.py       classFactory, plugin lifecycle, dependency probe, qpip path fallback
-├── discovery.py      reader discovery (ast), docstring rendering, layer naming — imports no qgis
+├── __init__.py       classFactory, plugin lifecycle, dependency probe, bundle + qpip path setup
+├── discovery.py      bundle path, reader discovery (ast), docstring rendering, layer naming — imports no qgis
 ├── provider.py       the Processing provider
 ├── algorithm.py      the one algorithm class that serves every reader
 ├── requirements.txt  what qpip installs: duckdb only
-└── metadata.txt      declares plugin_dependencies=qpip
+├── metadata.txt      declares plugin_dependencies=qpip
+└── _vendor/geobr/    the bundled library — present only in a built plugin, never in the repo
 tests/
 ├── conftest.py
 ├── test_discovery.py   runs without QGIS, against python-package/geobr
-└── test_packaging.py   requirements.txt ↔ pyproject duckdb floor, metadata invariants
+└── test_packaging.py   builds the ZIP into a temp dir and audits it; requirements ↔ pyproject; metadata
 ```
 
 `discovery.py` is deliberately free of any `qgis` import: it is the only part of the plugin coupled

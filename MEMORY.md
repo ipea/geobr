@@ -100,6 +100,14 @@ and the remote, were normalised to `ipea` on 2026-09-02.
 
 ## Settled decisions (do not re-propose)
 
+[LEARN:decision] **The QGIS plugin bundles geobr; users pip-install nothing (v0.4.0, 2026-09-20).**
+`qgis-plugin/build_plugin.py` copies `python-package/geobr/` into `geobr_qgis/_vendor/geobr/` at
+build time only (`dist/` and an in-place `_vendor/` are gitignored) and `discovery.add_bundle_path()`
+puts it at `sys.path[0]`. qpip cannot do this (`pip --target` forces `ignore_installed`), so
+`requirements.txt` stays duckdb-only. 0.4.0 was never published with the pip step, so the version
+number was kept rather than bumped. Verified headless on QGIS 4.2.1, whose Python has no geobr at
+all. Do not re-propose a pip step, a committed `_vendor/`, or listing geobr for qpip.
+
 [LEARN:decision] **QGIS plugin authorship stays as-is (2026-09-02).** `qgis-plugin/geobr_qgis/`
 keeps `author=Rafael H. M. Pereira, Ipea` and `email=rafa.pereira.br@gmail.com`. Raised because the
 plugin credits one person while the Python package lists six authors and the R package two `aut`

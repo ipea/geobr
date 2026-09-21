@@ -142,14 +142,18 @@ Python changes are verified locally with `uv run pytest` (see above) and again b
 
 ### QGIS plugin conventions
 
-- A submission ZIP has exactly one top-level directory, `geobr_qgis/`, and contains the plugin
-  files beneath it. Exclude `__pycache__`, `*.pyc`, `.git`, tests, and repository-only files.
-- ZIP member names must use forward slashes (`geobr_qgis/algorithm.py`). Never build the submission
-  archive with PowerShell `Compress-Archive` on Windows: it can store backslashes such as
-  `geobr_qgis\algorithm.py`, which the QGIS plugin repository rejects as non-conformant.
-- Build the archive with Python's `zipfile` module and explicit POSIX archive names. Before delivery,
-  inspect every `ZipInfo.filename` and fail if it contains `\\`, starts outside `geobr_qgis/`, or
-  names a generated/legacy file.
+- **The plugin bundles geobr.** `python qgis-plugin/build_plugin.py` stages `python-package/geobr/`
+  into `geobr_qgis/_vendor/geobr/` under `qgis-plugin/dist/` and writes `dist/geobr_qgis-<version>.zip`.
+  The copy exists only in the built artifact: `dist/` and an in-place `_vendor/` are gitignored, and
+  `tests/test_packaging.py` compares the staged copy to the source file by file. Users pip-install
+  nothing; duckdb still arrives through the qpip plugin (`requirements.txt`).
+- Always build with that script, never by hand. It writes the archive with Python's `zipfile` and
+  explicit POSIX names, and refuses any member with a backslash, outside `geobr_qgis/`, or generated
+  (`__pycache__`, `*.pyc`). PowerShell `Compress-Archive` can store `geobr_qgis\algorithm.py`, which
+  the QGIS plugin repository rejects.
+- The bundle sits at `sys.path[0]` (`discovery.add_bundle_path()`), so it beats any geobr
+  pip-installed into QGIS's Python; `discovery._package_dir()` still uses `find_spec` so it reports
+  the copy that will actually run.
 
 ---
 

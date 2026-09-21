@@ -19,6 +19,9 @@ PLUGIN_DIR = REPO_ROOT / "qgis-plugin" / "geobr_qgis"
 GEOBR_SOURCE = REPO_ROOT / "python-package" / "geobr"
 
 sys.path.insert(0, str(PLUGIN_DIR))
+# build_plugin.py lives beside geobr_qgis/, not inside it: it is a repo tool,
+# never shipped. The packaging tests import it.
+sys.path.insert(0, str(REPO_ROOT / "qgis-plugin"))
 
 
 @pytest.fixture(scope="session")

@@ -20,6 +20,7 @@ import html
 import importlib.util
 import os
 import re
+import sys
 import textwrap
 from collections import Counter
 from typing import NamedTuple
@@ -202,8 +203,48 @@ def layer_name(geo, kwargs):
     return "_".join(parts)
 
 
+# ---------------------------------------------------------------------------
+# Where geobr comes from
+# ---------------------------------------------------------------------------
+
+#: The geobr library ships inside the plugin. ``build_plugin.py`` copies
+#: ``python-package/geobr/`` to ``_vendor/geobr/`` when it builds the ZIP, so
+#: a repo checkout has no ``_vendor`` and falls back to whatever geobr is
+#: installed in the interpreter (``pip install -e python-package``).
+VENDOR_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_vendor")
+
+#: Modules geobr imports, probed with ``find_spec`` at startup so a missing one
+#: is reported before a run fails. ``geobr`` itself is the bundle (or, in a
+#: checkout, an installed copy); ``duckdb`` comes through the qpip plugin
+#: (``requirements.txt``); the rest ship with official QGIS builds. The tail of
+#: the tuple is geobr's own dependency list and a test holds it equal to
+#: ``python-package/pyproject.toml``.
+DEPENDENCIES = ("geobr", "geopandas", "shapely", "requests", "urllib3", "pyarrow", "duckdb")
+
+
+def add_bundle_path(vendor_dir=VENDOR_DIR):
+    """Put the bundled geobr on ``sys.path`` so ``import geobr`` finds it.
+
+    Inserted at the front: a geobr a user once pip-installed ``--user`` sits
+    ahead of QGIS's own site-packages, and the plugin must run the copy it was
+    tested with, not that one. Idempotent. Returns the directory, or ``None``
+    when there is no bundle (a repo checkout that has not been built).
+    """
+    if not os.path.isfile(os.path.join(vendor_dir, "geobr", "__init__.py")):
+        return None
+    if vendor_dir not in sys.path:
+        sys.path.insert(0, vendor_dir)
+    return vendor_dir
+
+
 def _package_dir():
-    """Locate the installed geobr package without importing it."""
+    """Locate the geobr package ``import geobr`` would load, without importing it.
+
+    After ``add_bundle_path()`` this is the bundle. It is deliberately not a
+    direct look at ``VENDOR_DIR``: if some other plugin imported a different
+    geobr first, ``find_spec`` reports that one, which is the copy that will
+    actually run and therefore the one to derive parameters from.
+    """
     try:
         spec = importlib.util.find_spec("geobr")
     except (ImportError, ValueError):

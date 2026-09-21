@@ -5,7 +5,8 @@
 # Only self-contained wheels belong here. qpip installs with `pip --target`,
 # which ignores the packages QGIS already bundles, so listing geobr itself
 # would drag geopandas, shapely, pandas, numpy and pyarrow in over QGIS's own
-# copies. geobr stays a plain `pip install` into QGIS's Python (see README).
+# copies. geobr is therefore not installed at all: build_plugin.py copies it
+# into the plugin (_vendor/geobr), see README.
 #
 # The floor is geobr's own (python-package/pyproject.toml) and is checked by
 # tests/test_packaging.py. QDuckDB pins duckdb==1.5.4, which satisfies it, so

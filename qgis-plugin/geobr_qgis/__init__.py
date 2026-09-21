@@ -1,9 +1,10 @@
 """geobr for QGIS - official spatial data sets of Brazil as Processing algorithms.
 
-The plugin folder is named ``geobr_qgis`` rather than ``geobr`` on purpose: QGIS
-prepends the plugins directory to ``sys.path`` and imports the folder as a
-top-level module, so a folder named ``geobr`` would shadow the geobr library
-itself and neither would load.
+The geobr Python library ships inside the plugin, under ``_vendor/geobr``, and
+is put on ``sys.path`` when the plugin loads. The plugin folder is named
+``geobr_qgis`` rather than ``geobr`` on purpose: QGIS prepends the plugins
+directory to ``sys.path`` and imports the folder as a top-level module, so a
+folder named ``geobr`` would shadow the library and neither would load.
 """
 
 import importlib.util
@@ -12,13 +13,8 @@ import sys
 
 from qgis.core import Qgis, QgsApplication, QgsMessageLog
 
-from .algorithm import PIP_COMMAND, PIP_COMMAND_DUCKDB
-
-#: Modules geobr needs that QGIS does not ship. QGIS already provides
-#: geopandas, shapely, pyarrow, pandas and requests. The two come from
-#: different places: ``geobr`` is a pip install into QGIS's Python, ``duckdb``
-#: is listed in ``requirements.txt`` for the qpip plugin to install.
-DEPENDENCIES = ("geobr", "duckdb")
+from .algorithm import PIP_COMMAND_DUCKDB
+from .discovery import DEPENDENCIES, add_bundle_path
 
 
 def qpip_site_packages():
@@ -57,12 +53,23 @@ def missing_message(missing):
     """One instruction per missing piece, since each comes from a different place."""
     parts = []
     if "geobr" in missing:
-        parts.append(f"the geobr Python package (install with:  {PIP_COMMAND} )")
+        parts.append(
+            "its bundled geobr library, which is absent (reinstall the plugin "
+            "from the Plugin Manager; in a repo checkout, run build_plugin.py "
+            "and install the result)"
+        )
     if "duckdb" in missing:
         parts.append(
             "duckdb, which the qpip plugin installs from geobr's requirements.txt "
             "(install and enable qpip from the Plugin Manager, or run:  "
             f"{PIP_COMMAND_DUCKDB} )"
+        )
+    others = [m for m in missing if m not in ("geobr", "duckdb")]
+    if others:
+        parts.append(
+            f"{', '.join(others)}, which official QGIS builds ship but this "
+            "Python lacks (install for the Python QGIS uses:  python -m pip "
+            f"install --user {' '.join(others)} )"
         )
     return "geobr needs " + " and ".join(parts) + " - then restart QGIS."
 
@@ -76,7 +83,8 @@ def missing_dependencies():
     """Names of required modules QGIS cannot see.
 
     Uses ``find_spec`` so nothing is imported: this runs during QGIS startup,
-    and importing geobr's stack there would cost seconds.
+    and importing geobr's stack there would cost seconds. Runs after
+    ``add_bundle_path()``, so ``geobr`` resolves to the bundle.
     """
     missing = []
     for module in DEPENDENCIES:
@@ -94,6 +102,10 @@ class GeobrPlugin:
     def __init__(self, iface):
         self.iface = iface
         self.provider = None
+        # The bundle goes first so it beats any geobr pip-installed into
+        # QGIS's Python; qpip's directory holds duckdb only, so their order
+        # relative to each other does not matter.
+        add_bundle_path()
         add_qpip_path()
 
     def initProcessing(self):

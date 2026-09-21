@@ -56,4 +56,6 @@ python-package/.coverage
 
 # QGIS plugin build artifact (the repo must not contain zipped files)
 qgis-plugin/dist/
+# staged only by qgis-plugin/build_plugin.py; never commit a copy of python-package/geobr
+qgis-plugin/geobr_qgis/_vendor/
 quality_reports/

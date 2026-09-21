@@ -35,8 +35,6 @@ from .discovery import (
     validate_codes,
 )
 
-PIP_COMMAND = 'python -m pip install --user "geobr>=2.1.0"'
-
 # duckdb normally arrives through the qpip plugin (see requirements.txt); this
 # is the by-hand alternative. The floor is geobr's own, checked by
 # tests/test_packaging.py against python-package/pyproject.toml.
@@ -154,21 +152,32 @@ def years_on_offer():
 
 
 def import_failure(exc) -> str:
-    """Explain a failed ``import geobr`` in terms of what to install.
+    """Explain a failed ``import geobr`` in terms of what to do.
 
-    geobr imports duckdb at module scope, so a missing duckdb surfaces as an
-    ImportError from ``import geobr`` - and its fix is a different one.
+    geobr imports its stack at module scope, so a missing duckdb (or, on a
+    Linux distro build of QGIS, a missing geopandas) surfaces as an ImportError
+    from ``import geobr``. ``exc.name`` says which module; ``geobr`` or
+    ``geobr.*`` means the bundle itself is absent or damaged.
     """
-    if "duckdb" in str(exc).lower():
+    module = (getattr(exc, "name", None) or "").split(".")[0]
+    if module == "duckdb":
         return (
-            "geobr is installed, but DuckDB, which it runs on, is not available "
-            "to QGIS.\nThe qpip plugin installs it from geobr's requirements.txt: "
+            "DuckDB, which geobr runs on, is not available to QGIS.\n"
+            "The qpip plugin installs it from geobr's requirements.txt: "
             "install and enable qpip from the Plugin Manager, then restart QGIS. "
             f"Or install it by hand:\n    {PIP_COMMAND_DUCKDB}\n\n({exc})"
         )
+    if module in ("", "geobr"):
+        return (
+            "The geobr library bundled with this plugin could not be imported.\n"
+            "Reinstall the plugin from the Plugin Manager, then restart QGIS.\n\n"
+            f"({exc})"
+        )
     return (
-        "The 'geobr' Python package is not available to QGIS.\n"
-        f"Install it, then restart QGIS:\n    {PIP_COMMAND}\n\n({exc})"
+        f"The Python package '{module}', which geobr needs, is not available to "
+        "QGIS. Official QGIS builds ship it; on a Linux distribution build, "
+        "install it for the Python QGIS uses, then restart QGIS:\n"
+        f"    python -m pip install --user {module}\n\n({exc})"
     )
 
 
@@ -392,6 +401,9 @@ class GeobrAlgorithm(QgsProcessingAlgorithm):
             import geobr
         except ImportError as exc:
             raise QgsProcessingException(import_failure(exc)) from exc
+        # Which copy ran is the first thing a bug report needs: the bundle
+        # under the plugin, or a geobr some other plugin imported before us.
+        feedback.pushInfo(f"geobr loaded from {os.path.dirname(geobr.__file__)}")
 
         kwargs = self._collect(parameters, context)
         declared = {arg for arg, _ in self._spec.params}

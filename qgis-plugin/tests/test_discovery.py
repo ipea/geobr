@@ -12,6 +12,7 @@ so a geobr change fails this job.
 """
 
 import re
+import sys
 
 import pytest
 
@@ -98,6 +99,33 @@ def test_exclusions(by_name):
 def test_missing_package_is_survivable():
     """A bad path yields no readers rather than an exception at QGIS startup."""
     assert discovery.discover_readers(package_dir="/nonexistent/geobr") == []
+
+
+def test_bundle_path_is_front_inserted_once(tmp_path, monkeypatch):
+    """The bundled geobr must beat a pip-installed one, and never stack up."""
+    monkeypatch.setattr(sys, "path", list(sys.path))
+    vendor = tmp_path / "_vendor"
+    (vendor / "geobr").mkdir(parents=True)
+    (vendor / "geobr" / "__init__.py").write_text("", encoding="utf-8")
+
+    assert discovery.add_bundle_path(str(vendor)) == str(vendor)
+    assert sys.path[0] == str(vendor)
+    assert discovery.add_bundle_path(str(vendor)) == str(vendor)
+    assert sys.path.count(str(vendor)) == 1
+
+
+def test_no_bundle_leaves_sys_path_alone(tmp_path, monkeypatch):
+    """A repo checkout has no _vendor/; that is a None, not an error."""
+    monkeypatch.setattr(sys, "path", list(sys.path))
+    before = list(sys.path)
+    assert discovery.add_bundle_path(str(tmp_path / "_vendor")) is None
+    assert sys.path == before
+
+
+def test_dependencies_start_with_geobr():
+    """The probe list is the bundle first, then geobr's own requirements."""
+    assert discovery.DEPENDENCIES[0] == "geobr"
+    assert "duckdb" in discovery.DEPENDENCIES
 
 
 # -- code filter validation -------------------------------------------------
