@@ -53,7 +53,7 @@ jobs:
         shell: bash
         working-directory: python-package
         run: |
-          uv run --with pytest-cov pytest -n 2 --cov=geobr --cov-report=xml --durations=10 -s ./tests -m "not network"
+          uv run --with pytest-cov pytest -n 4 --cov=geobr --cov-report=xml --durations=10 -s ./tests -m "not network"
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
