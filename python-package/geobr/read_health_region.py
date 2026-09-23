@@ -82,40 +82,22 @@ def read_health_region(
 
     group_cols = [c for c in all_cols if not c.startswith(drop_prefixes)]
 
-    group_cols_str = ", ".join(group_cols)
+    cols = ", ".join('"' + c.replace('"', '""') + '"' for c in group_cols)
 
-    # Aggregate results and remove holes
-    query = f"""
-        WITH aggregated AS (
-            -- perform the standard union aggregation
-            SELECT
-                {group_cols_str},
-                ST_Union_Agg(geometry) AS geom
-            FROM relation
-            GROUP BY {group_cols_str}
-        ),
-        unwrapped_polygons AS (
-            -- flatten multipolygons into separate rows of simple polygons
-            SELECT
-                {group_cols_str},
-                (UNNEST(ST_Dump(geom))).geom AS single_geom
-            FROM aggregated
-        ),
-        holes_removed AS (
-            -- remove holes from the simple polygons using the outer ring
-            SELECT
-                {group_cols_str},
-                ST_MakePolygon(ST_ExteriorRing(single_geom)) AS clean_geom
-            FROM unwrapped_polygons
-        )
-        -- recollect the cleaned parts back into the final shapes
-        SELECT
-            {group_cols_str},
-            ST_Union_Agg(clean_geom) AS geometry
-        FROM holes_removed
-        GROUP BY {group_cols_str};
-        """
-
-    relation = conn.sql(query)
+    # Aggregate results and remove holes: union the municipalities, flatten
+    # the multipolygons into simple polygons, keep only each outer ring, and
+    # recollect the cleaned parts into the final shapes.
+    aggregated = relation.aggregate(
+        f"{cols}, ST_Union_Agg(geometry) AS geom", cols
+    )
+    unwrapped_polygons = aggregated.project(
+        f"{cols}, (UNNEST(ST_Dump(geom))).geom AS single_geom"
+    )
+    holes_removed = unwrapped_polygons.project(
+        f"{cols}, ST_MakePolygon(ST_ExteriorRing(single_geom)) AS clean_geom"
+    )
+    relation = holes_removed.aggregate(
+        f"{cols}, ST_Union_Agg(clean_geom) AS geometry", cols
+    )
 
     return convert_output(relation, output, conn)

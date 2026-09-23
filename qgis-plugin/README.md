@@ -69,8 +69,8 @@ QGIS 4 and never even appears in the plugin list.
 
 The plugin carries its own copy of the geobr Python library, under `geobr_qgis/_vendor/geobr/`,
 and puts that directory at the front of `sys.path` when it loads (`add_bundle_path()` in
-`discovery.py`). Each plugin release therefore runs one known geobr version — 0.4.0 bundles
-**geobr 2.1.0** — and upgrading geobr means upgrading the plugin. The run log says which copy was
+`discovery.py`). Each plugin release therefore runs one known geobr version — 0.4.1 bundles
+**geobr 2.1.1** — and upgrading geobr means upgrading the plugin. The run log says which copy was
 loaded (`geobr loaded from …`).
 
 The copy is not a fork. `build_plugin.py` byte-copies `python-package/geobr/` from this repository

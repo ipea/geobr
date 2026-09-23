@@ -168,7 +168,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/6b/b6/82c7e601d6d3c3278
 
 [[package]]
 name = "geobr"
-version = "2.1.0"
+version = "2.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "duckdb" },

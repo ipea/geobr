@@ -4,7 +4,7 @@ qgisMinimumVersion=3.40
 qgisMaximumVersion=4.99
 description=Download official spatial data sets of Brazil as QGIS layers
 about=Easy access to official spatial data sets of Brazil. The plugin offers a wide range of official spatial data sets available at various geographic scales and for various years with harmonized attributes, projection and fixed topology. This includes states, municipalities, census tracts, biomes, indigenous lands, health facilities, schools, favelas and more. All original data sets come from IBGE and other official Brazilian sources and are returned in EPSG:4674 (SIRGAS 2000). This QGIS plugin is built on top of the geobr Python library, which integrates seamlessly with DuckDB and geopandas, and can be used from the Processing Toolbox, chained in Model Builder, run in batch, or called from qgis_process. The geobr library is bundled with the plugin, so there is nothing to pip-install. DuckDB, the engine geobr runs on, is installed for you by the qpip plugin, which QGIS offers to install alongside this one; if you skip qpip, install it into the Python QGIS uses: python -m pip install --user "duckdb>=1.5.3". Everything else geobr needs ships with the official QGIS builds for Windows and macOS; a Linux distribution build of QGIS may lack geopandas or pyarrow, and the plugin says so at startup.
-version=0.4.0
+version=0.4.1
 author=Rafael H. M. Pereira, Ipea
 email=rafa.pereira.br@gmail.com
 repository=https://github.com/ipea/geobr
@@ -18,7 +18,15 @@ hasProcessingProvider=True
 plugin_dependencies=qpip
 external_deps=duckdb>=1.5.3
 tags=brazil,ibge,ipea,boundaries,census,municipality,opendata,official data,vector
-changelog=0.4.0 - geobr bundled, duckdb through qpip, nothing to pip-install
+changelog=0.4.1 - Security scan fixes in the bundled geobr
+    The QGIS plugin repository's Bandit scan blocked 0.4.0 over 16 findings
+    in the bundled geobr library. This release bundles geobr 2.1.1, which
+    resolves all of them: the one genuine issue (data downloads no longer
+    skip TLS certificate verification), a missing request timeout, and the
+    string-built SQL and silent except blocks the scanner flags, rewritten
+    with DuckDB's relational API and debug logging. No change in the data,
+    the algorithms, or their parameters.
+    0.4.0 - geobr bundled, duckdb through qpip, nothing to pip-install
     The geobr Python library (2.1.0) now ships inside the plugin, under
     _vendor/, and the plugin puts it on the Python path when it loads. The
     manual "pip install geobr" step of earlier releases is gone: install the

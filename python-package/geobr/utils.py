@@ -7,6 +7,7 @@ import tempfile
 
 import geopandas as gpd
 import pandas as pd
+import logging
 import requests
 import unicodedata
 from io import StringIO
@@ -23,6 +24,8 @@ GEOBR_PREP_DATA_BASE = (
 )
 IPEA_FALLBACK_BASE = "https://www.ipea.gov.br/geobr/data_v2.0.0"
 
+logger = logging.getLogger(__name__)
+
 
 def _get_unique_values(_df, column):
 
@@ -37,10 +40,11 @@ def url_solver(url):
     for url in urls:
 
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=60)
             if response.status_code == 200:
                 return response
-        except:
+        except requests.RequestException as exc:
+            logger.debug("Request to %s failed: %s", url, exc)
             continue
 
     raise ConnectionError(
@@ -305,7 +309,7 @@ def _download_file(urls, dest: Path, show_progress: bool = False) -> bool:
     """Try URLs in order; write to dest. Return True on success."""
     for url in urls:
         try:
-            response = requests.get(url, stream=True, timeout=500, verify=False)
+            response = requests.get(url, stream=True, timeout=500)
             if response.status_code != 200:
                 continue
             total = int(response.headers.get("content-length", 0))
@@ -333,7 +337,8 @@ def _download_file(urls, dest: Path, show_progress: bool = False) -> bool:
                             f.write(chunk)
             if dest.exists() and dest.stat().st_size > 0:
                 return True
-        except Exception:
+        except Exception as exc:
+            logger.debug("Download from %s failed: %s", url, exc)
             continue
     return False
 

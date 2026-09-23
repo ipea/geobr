@@ -47,7 +47,7 @@ jobs:
       - name: Run tests
         shell: bash
         working-directory: python-package
-        run: uv run pytest -n 2 --durations=10 -s ./tests -m "not network"
+        run: uv run pytest -n 4 --durations=10 -s ./tests -m "not network"
 
       - name: Build package
         shell: bash
