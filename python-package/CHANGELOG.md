@@ -1,6 +1,21 @@
 # log history of geobr package development in Python
 
 -------------------------------------------------------
+# 2.1.2 (unreleased)
+
+**New features**
+
+- `lookup_muni(code_muni=...)` accepts the 6-digit municipality code, without
+  the IBGE check digit, as used by DATASUS systems (SIM, SIH, SINASC). The
+  6-digit prefix is unique across the 5,565 municipalities of 2010. Historical
+  years use synthetic codes whose prefixes repeat (41 collisions in 1872), so a
+  6-digit code that matches more than one row raises an error asking for the
+  7-digit code instead of returning several municipalities. Integral floats
+  such as `3304557.0` are still accepted, and malformed codes raise the usual
+  "valid municipality code" error instead of a bare `int()` `ValueError`.
+  Closes #444 for the Python package.
+
+-------------------------------------------------------
 # 2.1.1
 
 **Bug fixes**

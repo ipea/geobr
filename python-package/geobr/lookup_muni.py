@@ -50,7 +50,8 @@ def lookup_muni(
     name_muni : str, optional
         Municipality name to look up.
     code_muni : str or int, optional
-        Municipality code to look up.
+        Municipality code to look up. Accepts the 7-digit IBGE code or the
+        6-digit code without the check digit, as used by DATASUS.
     verbose : bool
         Print informational messages.
 
@@ -79,8 +80,23 @@ def lookup_muni(
         return df
 
     if code_muni is not None:
-        code = int(code_muni)
-        out = df[df["code_muni"] == code]
+        if isinstance(code_muni, float) and code_muni.is_integer():
+            code_muni = int(code_muni)
+        code = str(code_muni).strip()
+        if not code.isdigit() or len(code) not in (6, 7):
+            raise ValueError(f"Please insert a valid municipality code: {code_muni}")
+        codes = df["code_muni"].astype("int64")
+        if len(code) == 6:
+            # 6-digit codes (used by DATASUS) omit the IBGE check digit.
+            codes = codes // 10
+        out = df[codes == int(code)]
+        if len(code) == 6 and len(out) > 1:
+            # Historical years use synthetic codes without a check digit, so
+            # the 6-digit prefix is not unique there.
+            raise ValueError(
+                f"The 6-digit code {code} matches {len(out)} municipalities in "
+                f"{year}. Please use the 7-digit code."
+            )
         if len(out) == 0:
             raise ValueError(f"Please insert a valid municipality code: {code_muni}")
         if verbose:
