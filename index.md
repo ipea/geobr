@@ -241,7 +241,7 @@ contributions to the community, including for example:
 
 ------------------------------------------------------------------------
 
-# Credits ![ipea](https://github.com/ipea/geobr/blob/master/r-package/man/figures/ipea_logo.png?raw=true)
+# Credits
 
 Original shapefiles are created by official government institutions. The
 **geobr** package is developed by a team at the Institute for Applied

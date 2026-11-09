@@ -330,7 +330,7 @@ esg <- hs |>
 head(esg)
 #> # A tibble: 6 × 4
 #>   code_muni     rede  total cobertura
-#>       <dbl>    <dbl>  <dbl>     <dbl>
+#>       <int>    <dbl>  <dbl>     <dbl>
 #> 1   1100015     0     7443.   0      
 #> 2   1100023   182.   27654.   0.00660
 #> 3   1100031     0     1979.   0      

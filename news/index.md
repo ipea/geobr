@@ -2,6 +2,8 @@
 
 ## geobr v2.1.0
 
+CRAN release: 2026-09-20
+
 **New features**
 
 - New function
