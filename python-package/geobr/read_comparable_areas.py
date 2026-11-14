@@ -79,7 +79,11 @@ def read_comparable_areas(
 
     metadata = select_metadata("amc", year=start_year, simplified=simplified)
 
-    metadata = metadata.query(f'download_path.str.contains("{start_year}_{end_year}")')
+    # Boolean mask instead of a string-built DataFrame.query(). On pandas < 1.4
+    # with numexpr installed, query() could not evaluate the `.str` accessor
+    # (#294).
+    period = f"{start_year}_{end_year}"
+    metadata = metadata[metadata["download_path"].str.contains(period, regex=False)]
 
     gdf = download_gpkg(metadata)
 

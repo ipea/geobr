@@ -129,7 +129,7 @@ def select_year(metadata, year):
             f'{_get_unique_values(metadata, "year")}'
         )
 
-    return metadata.query(f"year == {year}")
+    return metadata[metadata["year"] == year]
 
 
 def select_simplified(metadata, simplified):
@@ -284,7 +284,7 @@ def select_metadata(geo, simplified=None, year=False):
     # Get metadata with data addresses
     metadata = download_metadata()
 
-    if len(metadata.query(f'geo == "{geo}"')) == 0:
+    if not (metadata["geo"] == geo).any():
         raise Exception(
             f"The `geo` argument {geo} does not exist."
             "Please, use one of the following:"
@@ -292,7 +292,7 @@ def select_metadata(geo, simplified=None, year=False):
         )
 
     # Select geo
-    metadata = metadata.query(f'geo == "{geo}"')
+    metadata = metadata[metadata["geo"] == geo]
 
     if simplified is not None:
         # Select data type
